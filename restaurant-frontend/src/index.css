@@ -1,0 +1,7 @@
+@import "tailwindcss";
+
+.offer_bg {
+  background: url("./assets/images/offer.png") no-repeat;
+  background-position: center bottom;
+  background-size: cover;
+}
