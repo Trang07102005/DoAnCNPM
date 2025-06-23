@@ -11,7 +11,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany; // Để dùng OneToMany
 import jakarta.persistence.Table; // <-- Quan trọng
 import jakarta.persistence.FetchType;
-import com.restaurant.restaurant_backend.model.RestaurantTable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

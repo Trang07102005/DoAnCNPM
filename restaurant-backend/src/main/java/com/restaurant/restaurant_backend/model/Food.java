@@ -9,9 +9,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table; // <-- Đảm bảo dòng import này đúng và không có dòng Table nào khác
 import jakarta.persistence.FetchType;
-import lombok.AllArgsConstructor; // Nếu dùng Lombok
 import lombok.Data;              // Nếu dùng Lombok
-import lombok.NoArgsConstructor;   // Nếu dùng Lombok
+
 
 import java.math.BigDecimal; // Dùng BigDecimal cho tiền tệ
 

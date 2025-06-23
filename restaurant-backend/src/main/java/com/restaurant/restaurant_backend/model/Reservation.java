@@ -9,7 +9,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.FetchType;
-import com.restaurant.restaurant_backend.model.RestaurantTable;
+
 
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;

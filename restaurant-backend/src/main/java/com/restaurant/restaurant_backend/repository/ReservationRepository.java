@@ -9,7 +9,12 @@ import java.util.List;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Integer> {
+
     List<Reservation> findByReservationTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
+
     List<Reservation> findByStatus(String status);
-     List<Reservation> findByRestaurantTable_TableId(Integer tableId); 
+
+    List<Reservation> findByRestaurantTable_TableId(Integer tableId);
+
+    boolean existsByRestaurantTable_TableIdAndReservationTime(Integer tableId, LocalDateTime reservationTime); // ✅ Bổ sung đầy đủ
 }

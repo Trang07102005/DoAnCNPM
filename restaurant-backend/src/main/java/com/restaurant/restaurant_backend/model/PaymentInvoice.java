@@ -1,13 +1,7 @@
 package com.restaurant.restaurant_backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import lombok.Builder;
-import jakarta.persistence.ManyToOne;
-
-
+import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -34,6 +28,7 @@ public class PaymentInvoice {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal paidAmount;
 
+    @Builder.Default
     @Column(nullable = false)
     private LocalDateTime paidAt = LocalDateTime.now();
 
@@ -43,4 +38,15 @@ public class PaymentInvoice {
 
     @Column(length = 255)
     private String note;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    @Column(nullable = false, length = 20)
+    private InvoiceStatus status = InvoiceStatus.DRAFT;
+
+    
+    public static enum InvoiceStatus {
+        DRAFT,
+        FINALIZED
+    }
 }
