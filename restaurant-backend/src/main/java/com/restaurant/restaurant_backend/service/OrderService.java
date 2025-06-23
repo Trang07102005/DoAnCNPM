@@ -2,66 +2,82 @@ package com.restaurant.restaurant_backend.service;
 
 import com.restaurant.restaurant_backend.model.Order;
 import com.restaurant.restaurant_backend.repository.OrderRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class OrderService {
 
-    @Autowired
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
+    // Lấy tất cả đơn hàng
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
 
-    public Optional<Order> getOrderById(Integer orderId) {
-        return orderRepository.findById(orderId);
+    // Lấy đơn theo ID
+    public Order getOrderById(Integer id) {
+        return orderRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với ID: " + id));
     }
 
-    public Order createOrder(Order order) {
-        return orderRepository.save(order);
+    // Tìm theo bàn
+    public List<Order> getOrdersByTableId(Integer tableId) {
+        return orderRepository.findByRestaurantTable_TableId(tableId);
     }
 
-    public Order updateOrder(Integer orderId, Order updatedOrder) {
-        updatedOrder.setOrderId(orderId); // Đảm bảo không đổi ID
-        return orderRepository.save(updatedOrder);
-    }
-
-    // ❌ XÓA VĨNH VIỄN (nên hạn chế)
-    public void deleteOrder(Integer orderId) {
-        orderRepository.deleteById(orderId);
-    }
-
-    // ✅ XÓA MỀM: Đổi trạng thái thành "Đã hủy"
-    public Order cancelOrder(Integer orderId) {
-        Optional<Order> orderOpt = orderRepository.findById(orderId);
-        if (orderOpt.isPresent()) {
-            Order order = orderOpt.get();
-            order.setStatus("Đã hủy");
-            return orderRepository.save(order);
-        } else {
-            throw new RuntimeException("Order not found with ID: " + orderId);
-        }
-    }
-
+    // Tìm theo trạng thái
     public List<Order> getOrdersByStatus(String status) {
         return orderRepository.findByStatus(status);
     }
 
-    public List<Order> getOrdersByOrderTimeBetween(LocalDateTime startTime, LocalDateTime endTime) {
+    // Tìm theo khoảng thời gian
+    public List<Order> getOrdersBetween(LocalDateTime startTime, LocalDateTime endTime) {
         return orderRepository.findByOrderTimeBetween(startTime, endTime);
     }
 
-    public List<Order> getOrdersByCreatedByUserId(Integer userId) {
+    // Tìm theo người tạo
+    public List<Order> getOrdersByUserId(Integer userId) {
         return orderRepository.findByCreatedBy_UserId(userId);
     }
 
-    public List<Order> getOrdersByRestaurantTableTableId(Integer tableId) {
-        return orderRepository.findByRestaurantTable_TableId(tableId);
+    // Tạo đơn hàng mới
+    public Order createOrder(Order order) {
+        order.setOrderId(null);
+        order.setOrderTime(LocalDateTime.now());
+        order.setStatus("Chờ xác nhận");
+        return orderRepository.save(order);
+    }
+
+    // Cập nhật đơn hàng — Chỉ khi đang chờ xác nhận
+    public Order updateOrder(Integer id, Order updated) {
+        Order existing = getOrderById(id);
+
+        if (!"Chờ xác nhận".equalsIgnoreCase(existing.getStatus())) {
+            throw new RuntimeException("Chỉ được chỉnh sửa đơn hàng đang ở trạng thái 'Chờ xác nhận'. Đơn hiện tại đang ở trạng thái: " + existing.getStatus());
+        }
+
+        // Cho phép chỉnh sửa các thông tin này:
+        existing.setRestaurantTable(updated.getRestaurantTable());
+        existing.setTotal(updated.getTotal());
+        existing.setOrderDetails(updated.getOrderDetails());
+        // Không cho sửa: createdBy, orderTime, status ở đây
+
+        return orderRepository.save(existing);
+    }
+
+    // Xoá đơn hàng
+    public void deleteOrder(Integer id) {
+        Order existing = getOrderById(id);
+
+        if (!"Chờ xác nhận".equalsIgnoreCase(existing.getStatus())) {
+            throw new RuntimeException("Chỉ được xoá đơn hàng khi ở trạng thái 'Chờ xác nhận'. Đơn hiện tại đang ở trạng thái: " + existing.getStatus());
+        }
+
+        orderRepository.deleteById(id);
     }
 }

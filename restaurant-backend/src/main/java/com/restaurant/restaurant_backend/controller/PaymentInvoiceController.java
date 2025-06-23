@@ -3,6 +3,7 @@ package com.restaurant.restaurant_backend.controller;
 import com.restaurant.restaurant_backend.model.PaymentInvoice;
 import com.restaurant.restaurant_backend.service.PaymentInvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,40 +16,44 @@ public class PaymentInvoiceController {
     private final PaymentInvoiceService paymentInvoiceService;
 
     @GetMapping
-    public List<PaymentInvoice> getAll() {
-        return paymentInvoiceService.getAllInvoices();
+    public ResponseEntity<List<PaymentInvoice>> getAll() {
+        return ResponseEntity.ok(paymentInvoiceService.getAllInvoices());
     }
 
     @GetMapping("/{id}")
-    public PaymentInvoice getById(@PathVariable Integer id) {
-        return paymentInvoiceService.getInvoiceById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn!"));
+    public ResponseEntity<PaymentInvoice> getById(@PathVariable Integer id) {
+        return ResponseEntity.ok(paymentInvoiceService.getInvoiceById(id));
     }
 
     @PostMapping
-    public PaymentInvoice create(@RequestBody PaymentInvoice invoice) {
-        return paymentInvoiceService.createInvoice(invoice);
+    public ResponseEntity<PaymentInvoice> create(@RequestBody PaymentInvoice invoice) {
+        PaymentInvoice created = paymentInvoiceService.createInvoice(invoice);
+        return ResponseEntity.status(201).body(created);
     }
 
     @PutMapping("/{id}")
-    public PaymentInvoice update(@PathVariable Integer id, @RequestBody PaymentInvoice updatedInvoice) {
-        return paymentInvoiceService.updateInvoice(id, updatedInvoice);
+    public ResponseEntity<PaymentInvoice> update(@PathVariable Integer id, @RequestBody PaymentInvoice updatedInvoice) {
+        PaymentInvoice updated = paymentInvoiceService.updateInvoice(id, updatedInvoice);
+        return ResponseEntity.ok(updated);
     }
 
     @PutMapping("/{id}/change-payment-method")
-    public PaymentInvoice changePaymentMethod(
+    public ResponseEntity<PaymentInvoice> changePaymentMethod(
             @PathVariable Integer id,
             @RequestParam Integer paymentMethodId) {
-        return paymentInvoiceService.changePaymentMethod(id, paymentMethodId);
+        PaymentInvoice updated = paymentInvoiceService.changePaymentMethod(id, paymentMethodId);
+        return ResponseEntity.ok(updated);
     }
 
     @PutMapping("/{id}/finalize")
-    public PaymentInvoice finalizeInvoice(@PathVariable Integer id) {
-        return paymentInvoiceService.finalizeInvoice(id);
+    public ResponseEntity<PaymentInvoice> finalizeInvoice(@PathVariable Integer id) {
+        PaymentInvoice finalized = paymentInvoiceService.finalizeInvoice(id);
+        return ResponseEntity.ok(finalized);
     }
 
     @DeleteMapping("/{id}")
-    public void delete(@PathVariable Integer id) {
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
         paymentInvoiceService.deleteInvoice(id);
+        return ResponseEntity.noContent().build();
     }
 }

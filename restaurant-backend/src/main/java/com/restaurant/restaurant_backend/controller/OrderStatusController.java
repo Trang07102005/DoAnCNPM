@@ -2,64 +2,84 @@ package com.restaurant.restaurant_backend.controller;
 
 import com.restaurant.restaurant_backend.model.OrderStatus;
 import com.restaurant.restaurant_backend.service.OrderStatusService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/order-statuses")
+@RequiredArgsConstructor
 public class OrderStatusController {
 
-    @Autowired
-    private OrderStatusService orderStatusService;
+    private final OrderStatusService orderStatusService;
 
-    // ✅ Lấy tất cả
+    // GET: Lấy tất cả trạng thái món ăn
     @GetMapping
     public List<OrderStatus> getAllOrderStatuses() {
         return orderStatusService.getAllOrderStatuses();
     }
 
-    // ✅ Lấy theo ID
+    // GET: Lấy theo ID
     @GetMapping("/{id}")
-    public Optional<OrderStatus> getOrderStatusById(@PathVariable Integer id) {
-        return orderStatusService.getOrderStatusById(id);
+    public ResponseEntity<?> getOrderStatusById(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(orderStatusService.getOrderStatusById(id));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lỗi: " + ex.getMessage());
+        }
     }
 
-    // ✅ Lấy theo OrderID
+    // GET: Lấy theo Order ID
     @GetMapping("/order/{orderId}")
-    public List<OrderStatus> getOrderStatusesByOrderId(@PathVariable Integer orderId) {
-        return orderStatusService.getOrderStatusesByOrderId(orderId);
+    public ResponseEntity<List<OrderStatus>> getOrderStatusesByOrderId(@PathVariable Integer orderId) {
+        return ResponseEntity.ok(orderStatusService.getOrderStatusesByOrderId(orderId));
     }
 
-    // ✅ Lấy theo FoodID
+    // GET: Lấy theo Food ID
     @GetMapping("/food/{foodId}")
-    public List<OrderStatus> getOrderStatusesByFoodId(@PathVariable Integer foodId) {
-        return orderStatusService.getOrderStatusesByFoodId(foodId);
+    public ResponseEntity<List<OrderStatus>> getOrderStatusesByFoodId(@PathVariable Integer foodId) {
+        return ResponseEntity.ok(orderStatusService.getOrderStatusesByFoodId(foodId));
     }
 
-    // ✅ Lấy theo Status
+    // GET: Lấy theo Status
     @GetMapping("/status/{status}")
-    public List<OrderStatus> getOrderStatusesByStatus(@PathVariable String status) {
-        return orderStatusService.getOrderStatusesByStatus(status);
+    public ResponseEntity<List<OrderStatus>> getOrderStatusesByStatus(@PathVariable String status) {
+        return ResponseEntity.ok(orderStatusService.getOrderStatusesByStatus(status));
     }
 
-    // ✅ Tạo mới
+    // POST: Tạo mới
     @PostMapping
-    public OrderStatus createOrderStatus(@RequestBody OrderStatus orderStatus) {
-        return orderStatusService.createOrderStatus(orderStatus);
+    public ResponseEntity<?> createOrderStatus(@RequestBody OrderStatus orderStatus) {
+        try {
+            OrderStatus created = orderStatusService.createOrderStatus(orderStatus);
+            return new ResponseEntity<>(created, HttpStatus.CREATED);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi: " + ex.getMessage());
+        }
     }
 
-    // ✅ Cập nhật
+    // PUT: Cập nhật
     @PutMapping("/{id}")
-    public OrderStatus updateOrderStatus(@PathVariable Integer id, @RequestBody OrderStatus updatedStatus) {
-        return orderStatusService.updateOrderStatus(id, updatedStatus);
+    public ResponseEntity<?> updateOrderStatus(@PathVariable Integer id, @RequestBody OrderStatus orderStatus) {
+        try {
+            OrderStatus updated = orderStatusService.updateOrderStatus(id, orderStatus);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi: " + ex.getMessage());
+        }
     }
 
-    // ✅ Xoá
+    // DELETE: Xoá
     @DeleteMapping("/{id}")
-    public void deleteOrderStatus(@PathVariable Integer id) {
-        orderStatusService.deleteOrderStatus(id);
+    public ResponseEntity<?> deleteOrderStatus(@PathVariable Integer id) {
+        try {
+            orderStatusService.deleteOrderStatus(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi: " + ex.getMessage());
+        }
     }
 }

@@ -2,64 +2,117 @@ package com.restaurant.restaurant_backend.controller;
 
 import com.restaurant.restaurant_backend.model.Food;
 import com.restaurant.restaurant_backend.service.FoodService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/foods")
+@RequiredArgsConstructor
 public class FoodController {
 
-    @Autowired
-    private FoodService foodService;
+    private final FoodService foodService;
 
-    // ✅ Lấy tất cả
+    /**
+     * GET /api/foods
+     * Lấy tất cả món ăn.
+     */
     @GetMapping
     public List<Food> getAllFoods() {
         return foodService.getAllFoods();
     }
 
-    // ✅ Lấy theo ID
+    /**
+     * GET /api/foods/{id}
+     * Lấy món ăn theo ID.
+     */
     @GetMapping("/{id}")
-    public Optional<Food> getFoodById(@PathVariable Integer id) {
-        return foodService.getFoodById(id);
+    public ResponseEntity<?> getFoodById(@PathVariable Integer id) {
+        try {
+            Food food = foodService.getFoodById(id);
+            return ResponseEntity.ok(food);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
     }
 
-    // ✅ Lấy theo trạng thái
+    /**
+     * GET /api/foods/status/{status}
+     * Lấy món ăn theo trạng thái.
+     */
     @GetMapping("/status/{status}")
-    public List<Food> getFoodsByStatus(@PathVariable String status) {
-        return foodService.getFoodsByStatus(status);
+    public ResponseEntity<List<Food>> getFoodsByStatus(@PathVariable String status) {
+        List<Food> foods = foodService.getFoodsByStatus(status);
+        return ResponseEntity.ok(foods);
     }
 
-    // ✅ Lấy theo CategoryID
+    /**
+     * GET /api/foods/category/{categoryId}
+     * Lấy món ăn theo Category ID.
+     */
     @GetMapping("/category/{categoryId}")
-    public List<Food> getFoodsByCategoryId(@PathVariable Integer categoryId) {
-        return foodService.getFoodsByCategoryId(categoryId);
+    public ResponseEntity<List<Food>> getFoodsByCategoryId(@PathVariable Integer categoryId) {
+        return ResponseEntity.ok(foodService.getFoodsByCategoryId(categoryId));
     }
 
-    // ✅ Tìm kiếm theo tên
+    /**
+     * GET /api/foods/search?keyword=...
+     * Tìm món ăn theo tên.
+     */
     @GetMapping("/search")
-    public List<Food> searchFoodsByName(@RequestParam String name) {
-        return foodService.searchFoodsByName(name);
+    public ResponseEntity<List<Food>> searchFoodsByName(@RequestParam String keyword) {
+        List<Food> foods = foodService.searchFoodsByName(keyword);
+        return ResponseEntity.ok(foods);
     }
 
-    // ✅ Tạo mới
+    /**
+     * GET /api/foods/count/{categoryId}
+     * Đếm số món ăn theo danh mục.
+     */
+    @GetMapping("/count/{categoryId}")
+    public ResponseEntity<Long> countFoodsByCategoryId(@PathVariable Integer categoryId) {
+        long count = foodService.countFoodsByCategoryId(categoryId);
+        return ResponseEntity.ok(count);
+    }
+
+    /**
+     * POST /api/foods
+     * Tạo mới món ăn.
+     */
     @PostMapping
-    public Food createFood(@RequestBody Food food) {
-        return foodService.createFood(food);
+    public ResponseEntity<Food> createFood(@RequestBody Food food) {
+        Food createdFood = foodService.createFood(food);
+        return new ResponseEntity<>(createdFood, HttpStatus.CREATED);
     }
 
-    // ✅ Cập nhật
+    /**
+     * PUT /api/foods/{id}
+     * Cập nhật món ăn.
+     */
     @PutMapping("/{id}")
-    public Food updateFood(@PathVariable Integer id, @RequestBody Food updatedFood) {
-        return foodService.updateFood(id, updatedFood);
+    public ResponseEntity<?> updateFood(@PathVariable Integer id, @RequestBody Food food) {
+        try {
+            Food updatedFood = foodService.updateFood(id, food);
+            return ResponseEntity.ok(updatedFood);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
     }
 
-    // ✅ Xoá
+    /**
+     * DELETE /api/foods/{id}
+     * Xoá món ăn.
+     */
     @DeleteMapping("/{id}")
-    public void deleteFood(@PathVariable Integer id) {
-        foodService.deleteFood(id);
+    public ResponseEntity<?> deleteFood(@PathVariable Integer id) {
+        try {
+            foodService.deleteFood(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+        }
     }
 }

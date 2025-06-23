@@ -1,9 +1,11 @@
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\FoodCategoryRepository.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\IngredientService.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\RecipeRepository.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\InventoryTransactionRepository.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\RestaurantTable.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\ReservationRepository.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\PaymentMethodRepository.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\TopSellingFoodController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\PaymentInvoiceRepository.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\OrderStatusController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\RecipeDetailController.java
@@ -17,7 +19,10 @@ C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-mai
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\RestaurantBackendApplication.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\PaymentMethodService.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\OrderDetailRepository.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\InventoryController.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\dto\InventoryDTO.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\OrderStatusService.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\TopSellingFoodService.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\RecipeDetailRepository.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\OrderRepository.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\PaymentInvoice.java
@@ -30,6 +35,7 @@ C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-mai
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\Food.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\PaymentMethod.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\FoodCategory.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\InventoryTransactionController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\RecipeDetailService.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\OrderDetailController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\UserRepository.java
@@ -38,6 +44,7 @@ C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-mai
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\Order.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\UserService.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\FoodController.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\InventoryService.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\TopSellingFood.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\OrderDetailService.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\RecipeDetail.java
@@ -46,6 +53,7 @@ C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-mai
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\FoodRepository.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\RestaurantTableRepository.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\FoodService.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\InventoryTransactionService.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\FoodCategoryController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\ReservationController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\Ingredient.java
@@ -53,9 +61,12 @@ C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-mai
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\OrderStatus.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\Inventory.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\RestaurantTableService.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\IngredientController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\RecipeController.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\RevenueReportController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\Recipe.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\UserController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\repository\TopSellingFoodRepository.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\RevenueReportService.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\service\FoodCategoryService.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\CNPM_QuanLyNhaHang-main\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\RevenueReport.java

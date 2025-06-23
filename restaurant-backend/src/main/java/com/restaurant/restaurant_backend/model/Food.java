@@ -17,6 +17,7 @@ import java.math.BigDecimal; // Dùng BigDecimal cho tiền tệ
 @Entity
 @Table(name = "food")
 @Data
+
 public class Food {
 
     @Id

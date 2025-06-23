@@ -17,4 +17,7 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     // Ví dụ:
     // Optional<Users> findByUsername(String username);
     // List<Users> findByRole(String role);
+    boolean existsByUsername(String username);
+boolean existsByEmail(String email);
+
 }

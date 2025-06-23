@@ -8,8 +8,9 @@ import com.restaurant.restaurant_backend.repository.PaymentMethodRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -18,36 +19,58 @@ public class PaymentInvoiceService {
     private final PaymentInvoiceRepository paymentInvoiceRepository;
     private final PaymentMethodRepository paymentMethodRepository;
 
+    // Lấy tất cả hóa đơn
     public List<PaymentInvoice> getAllInvoices() {
         return paymentInvoiceRepository.findAll();
     }
 
-    public Optional<PaymentInvoice> getInvoiceById(Integer id) {
-        return paymentInvoiceRepository.findById(id);
+    // Lấy theo ID
+    public PaymentInvoice getInvoiceById(Integer id) {
+        return paymentInvoiceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn!"));
     }
 
+    // Tạo mới
     public PaymentInvoice createInvoice(PaymentInvoice invoice) {
+        if (invoice.getPaidAmount() == null || invoice.getPaidAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("Số tiền thanh toán phải lớn hơn hoặc bằng 0!");
+        }
+
+        invoice.setInvoiceID(null);
         invoice.setStatus(InvoiceStatus.DRAFT);
+
+        if (invoice.getPaidAt() == null) {
+            invoice.setPaidAt(LocalDateTime.now());
+        }
+
         return paymentInvoiceRepository.save(invoice);
     }
 
-    public PaymentInvoice updateInvoice(Integer id, PaymentInvoice updatedInvoice) {
-        return paymentInvoiceRepository.findById(id).map(invoice -> {
-            if (invoice.getStatus() == InvoiceStatus.FINALIZED) {
-                throw new UnsupportedOperationException("Hóa đơn đã lưu không được phép chỉnh sửa!");
-            }
-            invoice.setPaidAmount(updatedInvoice.getPaidAmount());
-            invoice.setNote(updatedInvoice.getNote());
-            return paymentInvoiceRepository.save(invoice);
-        }).orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn!"));
-    }
-
-    public PaymentInvoice changePaymentMethod(Integer invoiceId, Integer newPaymentMethodId) {
-        PaymentInvoice invoice = paymentInvoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn!"));
+    // Cập nhật: chỉ khi DRAFT
+    public PaymentInvoice updateInvoice(Integer id, PaymentInvoice updated) {
+        PaymentInvoice invoice = getInvoiceById(id);
 
         if (invoice.getStatus() == InvoiceStatus.FINALIZED) {
-            throw new UnsupportedOperationException("Hóa đơn đã lưu không được phép đổi phương thức thanh toán!");
+            throw new UnsupportedOperationException("Hóa đơn đã chốt, không được chỉnh sửa!");
+        }
+
+        if (updated.getPaidAmount() == null || updated.getPaidAmount().compareTo(BigDecimal.ZERO) < 0) {
+            throw new RuntimeException("Số tiền thanh toán phải lớn hơn hoặc bằng 0!");
+        }
+
+        invoice.setPaidAmount(updated.getPaidAmount());
+        invoice.setNote(updated.getNote());
+        invoice.setPaidAt(updated.getPaidAt() != null ? updated.getPaidAt() : LocalDateTime.now());
+
+        return paymentInvoiceRepository.save(invoice);
+    }
+
+    // Đổi phương thức thanh toán: chỉ khi DRAFT
+    public PaymentInvoice changePaymentMethod(Integer invoiceId, Integer newPaymentMethodId) {
+        PaymentInvoice invoice = getInvoiceById(invoiceId);
+
+        if (invoice.getStatus() == InvoiceStatus.FINALIZED) {
+            throw new UnsupportedOperationException("Hóa đơn đã chốt, không được đổi phương thức thanh toán!");
         }
 
         PaymentMethod newPaymentMethod = paymentMethodRepository.findById(newPaymentMethodId)
@@ -58,23 +81,27 @@ public class PaymentInvoiceService {
         return paymentInvoiceRepository.save(invoice);
     }
 
+    // Chốt hóa đơn
     public PaymentInvoice finalizeInvoice(Integer id) {
-        return paymentInvoiceRepository.findById(id).map(invoice -> {
-            if (invoice.getStatus() == InvoiceStatus.FINALIZED) {
-                throw new UnsupportedOperationException("Hóa đơn đã được lưu trước đó!");
-            }
-            invoice.setStatus(InvoiceStatus.FINALIZED);
-            return paymentInvoiceRepository.save(invoice);
-        }).orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn!"));
+        PaymentInvoice invoice = getInvoiceById(id);
+
+        if (invoice.getStatus() == InvoiceStatus.FINALIZED) {
+            throw new UnsupportedOperationException("Hóa đơn đã được chốt trước đó!");
+        }
+
+        invoice.setStatus(InvoiceStatus.FINALIZED);
+
+        return paymentInvoiceRepository.save(invoice);
     }
 
+    // Xoá: chỉ khi DRAFT
     public void deleteInvoice(Integer id) {
-        PaymentInvoice invoice = paymentInvoiceRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn!"));
+        PaymentInvoice invoice = getInvoiceById(id);
+
         if (invoice.getStatus() == InvoiceStatus.FINALIZED) {
-            throw new UnsupportedOperationException("Hóa đơn đã lưu không được phép xóa!");
+            throw new UnsupportedOperationException("Hóa đơn đã chốt, không được xóa!");
         }
+
         paymentInvoiceRepository.delete(invoice);
     }
-
 }

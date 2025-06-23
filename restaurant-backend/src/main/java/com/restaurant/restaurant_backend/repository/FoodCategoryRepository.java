@@ -6,6 +6,4 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FoodCategoryRepository extends JpaRepository<FoodCategory, Integer> {
-    // Các phương thức CRUD sẽ được cung cấp tự động
-     long countByCategory_CategoryId(Integer categoryId);
 }

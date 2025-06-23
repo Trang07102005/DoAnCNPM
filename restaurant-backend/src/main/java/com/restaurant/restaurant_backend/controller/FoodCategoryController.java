@@ -2,46 +2,63 @@ package com.restaurant.restaurant_backend.controller;
 
 import com.restaurant.restaurant_backend.model.FoodCategory;
 import com.restaurant.restaurant_backend.service.FoodCategoryService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/categories")
+@RequiredArgsConstructor
 public class FoodCategoryController {
 
-    @Autowired
-    private FoodCategoryService foodCategoryService;
+    private final FoodCategoryService foodCategoryService;
 
-    // ✅ Lấy tất cả
+    // GET all
     @GetMapping
     public List<FoodCategory> getAllCategories() {
         return foodCategoryService.getAllCategories();
     }
 
-    // ✅ Lấy theo ID
+    // GET by ID
     @GetMapping("/{id}")
-    public Optional<FoodCategory> getCategoryById(@PathVariable Integer id) {
-        return foodCategoryService.getCategoryById(id);
+    public ResponseEntity<?> getCategoryById(@PathVariable Integer id) {
+        try {
+            FoodCategory category = foodCategoryService.getCategoryById(id);
+            return ResponseEntity.ok(category);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lỗi: " + ex.getMessage());
+        }
     }
 
-    // ✅ Tạo mới
+    // POST new
     @PostMapping
-    public FoodCategory createCategory(@RequestBody FoodCategory category) {
-        return foodCategoryService.createCategory(category);
+    public ResponseEntity<FoodCategory> createCategory(@RequestBody FoodCategory category) {
+        FoodCategory created = foodCategoryService.createCategory(category);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
 
-    // ✅ Cập nhật
+    // PUT update
     @PutMapping("/{id}")
-    public FoodCategory updateCategory(@PathVariable Integer id, @RequestBody FoodCategory updatedCategory) {
-        return foodCategoryService.updateCategory(id, updatedCategory);
+    public ResponseEntity<?> updateCategory(@PathVariable Integer id, @RequestBody FoodCategory category) {
+        try {
+            FoodCategory updated = foodCategoryService.updateCategory(id, category);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lỗi: " + ex.getMessage());
+        }
     }
 
-    // ✅ Xóa: tự động check ràng buộc
+    // DELETE
     @DeleteMapping("/{id}")
-    public void deleteCategory(@PathVariable Integer id) {
-        foodCategoryService.deleteCategory(id);
+    public ResponseEntity<?> deleteCategory(@PathVariable Integer id) {
+        try {
+            foodCategoryService.deleteCategory(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Không thể xoá danh mục: " + ex.getMessage());
+        }
     }
 }

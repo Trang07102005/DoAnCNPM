@@ -2,65 +2,74 @@ package com.restaurant.restaurant_backend.service;
 
 import com.restaurant.restaurant_backend.model.Food;
 import com.restaurant.restaurant_backend.repository.FoodRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+
 
 @Service
+@RequiredArgsConstructor
 public class FoodService {
 
-    @Autowired
-    private FoodRepository foodRepository;
+    private final FoodRepository foodRepository;
 
-    // ✅ Lấy tất cả món ăn
+    // Lấy tất cả món ăn
     public List<Food> getAllFoods() {
         return foodRepository.findAll();
     }
 
-    // ✅ Lấy theo ID
-    public Optional<Food> getFoodById(Integer id) {
-        return foodRepository.findById(id);
+    // Lấy món ăn theo ID
+    public Food getFoodById(Integer id) {
+        return foodRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Food not found with ID: " + id));
     }
 
-    // ✅ Lấy theo trạng thái
+    // Lấy món ăn theo trạng thái
     public List<Food> getFoodsByStatus(String status) {
         return foodRepository.findByStatus(status);
     }
 
-    // ✅ Lấy theo CategoryID
+    // Lấy món ăn theo Category ID
     public List<Food> getFoodsByCategoryId(Integer categoryId) {
         return foodRepository.findByCategory_CategoryId(categoryId);
     }
 
-    // ✅ Tìm theo tên (search)
-    public List<Food> searchFoodsByName(String foodName) {
-        return foodRepository.findByFoodNameContainingIgnoreCase(foodName);
+    // Tìm kiếm theo tên
+    public List<Food> searchFoodsByName(String keyword) {
+        return foodRepository.findByFoodNameContainingIgnoreCase(keyword);
     }
 
-    // ✅ Tạo mới
+    // Đếm số món ăn theo Category ID
+    public long countFoodsByCategoryId(Integer categoryId) {
+        return foodRepository.countByCategory_CategoryId(categoryId);
+    }
+
+    // Tạo mới món ăn
     public Food createFood(Food food) {
-        validateStatus(food.getStatus());
+        food.setFoodId(null); // Đảm bảo ID = null để JPA auto generate
         return foodRepository.save(food);
     }
 
-    // ✅ Cập nhật
+    // Cập nhật món ăn
     public Food updateFood(Integer id, Food updatedFood) {
-        validateStatus(updatedFood.getStatus());
-        updatedFood.setFoodId(id);
-        return foodRepository.save(updatedFood);
+        Food existingFood = foodRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Food not found with ID: " + id));
+
+        existingFood.setFoodName(updatedFood.getFoodName());
+        existingFood.setPrice(updatedFood.getPrice());
+        existingFood.setImageUrl(updatedFood.getImageUrl());
+        existingFood.setStatus(updatedFood.getStatus());
+        existingFood.setCategory(updatedFood.getCategory());
+
+        return foodRepository.save(existingFood);
     }
 
-    // ✅ Xoá
+    // Xoá món ăn theo ID
     public void deleteFood(Integer id) {
-        foodRepository.deleteById(id);
-    }
-
-    // ✅ Validate status
-    private void validateStatus(String status) {
-        if (!(status.equals("Đang bán") || status.equals("Tạm ngưng") || status.equals("Ngưng bán"))) {
-            throw new IllegalArgumentException("Status must be 'Đang bán', 'Tạm ngưng', or 'Ngưng bán'");
+        if (!foodRepository.existsById(id)) {
+            throw new RuntimeException("Food not found with ID: " + id);
         }
+        foodRepository.deleteById(id);
     }
 }

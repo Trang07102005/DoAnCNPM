@@ -2,77 +2,90 @@ package com.restaurant.restaurant_backend.controller;
 
 import com.restaurant.restaurant_backend.model.Order;
 import com.restaurant.restaurant_backend.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/orders")
+@RequiredArgsConstructor
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
+    private final OrderService orderService;
 
-    // ✅ Lấy tất cả đơn hàng
+    // GET all
     @GetMapping
     public List<Order> getAllOrders() {
         return orderService.getAllOrders();
     }
 
-    // ✅ Lấy đơn hàng theo ID
-    @GetMapping("/{orderId}")
-    public Optional<Order> getOrderById(@PathVariable Integer orderId) {
-        return orderService.getOrderById(orderId);
+    // GET by ID
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOrderById(@PathVariable Integer id) {
+        try {
+            return ResponseEntity.ok(orderService.getOrderById(id));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Lỗi: " + ex.getMessage());
+        }
     }
 
-    // ✅ Tạo mới đơn hàng
-    @PostMapping
-    public Order createOrder(@RequestBody Order order) {
-        return orderService.createOrder(order);
-    }
-
-    // ✅ Cập nhật đơn hàng
-    @PutMapping("/{orderId}")
-    public Order updateOrder(@PathVariable Integer orderId, @RequestBody Order updatedOrder) {
-        return orderService.updateOrder(orderId, updatedOrder);
-    }
-
-    // ❌ XÓA VĨNH VIỄN (khuyến cáo không dùng, chỉ để test)
-    @DeleteMapping("/{orderId}")
-    public void deleteOrder(@PathVariable Integer orderId) {
-        orderService.deleteOrder(orderId);
-    }
-
-    // ✅ XÓA MỀM (HUỶ ĐƠN HÀNG) -> An toàn hơn
-    @PutMapping("/{orderId}/cancel")
-    public Order cancelOrder(@PathVariable Integer orderId) {
-        return orderService.cancelOrder(orderId);
-    }
-
-    // ✅ Lọc theo trạng thái
-    @GetMapping("/status/{status}")
-    public List<Order> getOrdersByStatus(@PathVariable String status) {
-        return orderService.getOrdersByStatus(status);
-    }
-
-    // ✅ Lọc theo thời gian
-    @GetMapping("/time")
-    public List<Order> getOrdersByTime(@RequestParam LocalDateTime startTime, @RequestParam LocalDateTime endTime) {
-        return orderService.getOrdersByOrderTimeBetween(startTime, endTime);
-    }
-
-    // ✅ Lọc theo người tạo
-    @GetMapping("/createdBy/{userId}")
-    public List<Order> getOrdersByCreatedByUserId(@PathVariable Integer userId) {
-        return orderService.getOrdersByCreatedByUserId(userId);
-    }
-
-    // ✅ Lọc theo bàn
+    // GET by Table ID
     @GetMapping("/table/{tableId}")
-    public List<Order> getOrdersByTable(@PathVariable Integer tableId) {
-        return orderService.getOrdersByRestaurantTableTableId(tableId);
+    public ResponseEntity<List<Order>> getOrdersByTableId(@PathVariable Integer tableId) {
+        return ResponseEntity.ok(orderService.getOrdersByTableId(tableId));
+    }
+
+    // GET by Status
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<Order>> getOrdersByStatus(@PathVariable String status) {
+        return ResponseEntity.ok(orderService.getOrdersByStatus(status));
+    }
+
+    // GET by Time range
+    @GetMapping("/time")
+    public ResponseEntity<List<Order>> getOrdersBetween(
+            @RequestParam LocalDateTime start,
+            @RequestParam LocalDateTime end
+    ) {
+        return ResponseEntity.ok(orderService.getOrdersBetween(start, end));
+    }
+
+    // GET by User ID
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Order>> getOrdersByUserId(@PathVariable Integer userId) {
+        return ResponseEntity.ok(orderService.getOrdersByUserId(userId));
+    }
+
+    // POST create
+    @PostMapping
+    public ResponseEntity<Order> createOrder(@RequestBody Order order) {
+        Order created = orderService.createOrder(order);
+        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    }
+
+    // PUT update
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateOrder(@PathVariable Integer id, @RequestBody Order order) {
+        try {
+            Order updated = orderService.updateOrder(id, order);
+            return ResponseEntity.ok(updated);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi: " + ex.getMessage());
+        }
+    }
+
+    // DELETE
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteOrder(@PathVariable Integer id) {
+        try {
+            orderService.deleteOrder(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Lỗi: " + ex.getMessage());
+        }
     }
 }
