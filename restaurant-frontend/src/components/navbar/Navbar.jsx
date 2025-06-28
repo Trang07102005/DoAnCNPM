@@ -51,9 +51,9 @@ const Navbar = () => {
                         <FontAwesomeIcon icon={faMagnifyingGlass} className='w-3.5 h-3.5'/>
                         <input type="text" placeholder='Tìm kiếm món ăn..' className="flex-1 bg-transparent outline-none text-base text-neutral-800 font-normal placeholder:text-neutral-400/80" />
                     </div>
-                    <button className="bg-yellow-600 px-6 py-1 rounded-full border border-yellow-600 text-sm text-neutral-50 font-medium hover:bg-yellow-600/5 hover:text-yellow-600 ease-in-out duration-300">
-                        Đặt bàn ngay
-                    </button>
+                    <Link to={"/login"} className="bg-yellow-600 px-6 py-1 rounded-full border border-yellow-600 text-sm text-neutral-50 font-medium hover:bg-yellow-600/5 hover:text-yellow-600 ease-in-out duration-300">
+                        ĐĂNG NHẬP
+                    </Link>
                 </div>
 
             </div>
