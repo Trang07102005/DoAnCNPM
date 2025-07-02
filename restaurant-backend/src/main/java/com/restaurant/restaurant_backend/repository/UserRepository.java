@@ -1,6 +1,9 @@
 package com.restaurant.restaurant_backend.repository;
 
 import com.restaurant.restaurant_backend.model.Users; // Import Entity Users
+
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -18,6 +21,8 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     // Optional<Users> findByUsername(String username);
     // List<Users> findByRole(String role);
     boolean existsByUsername(String username);
-boolean existsByEmail(String email);
+    boolean existsByEmail(String email);
+    Optional<Users> findByEmail(String email);
+    Optional<Users> findByUsername(String username);
 
 }

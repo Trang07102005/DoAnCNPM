@@ -28,12 +28,12 @@ public class Users {
     private String email;
 
     @Column(name = "Role", nullable = false)
-    private String role; // "Admin", "Thu ngân", "Phục vụ", v.v.
+    private String role; 
 
-    @Column(name = "CreatedAt", updatable = false) // updatable = false để không tự động cập nhật khi record thay đổi
+    @Column(name = "created_at", updatable = false) // updatable = false để không tự động cập nhật khi record thay đổi
     private LocalDateTime createdAt;
 
-    @Column(name = "UpdatedAt")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     // Constructors
