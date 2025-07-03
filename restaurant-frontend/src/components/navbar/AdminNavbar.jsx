@@ -6,8 +6,8 @@ import {
     faMagnifyingGlass,
     faTableColumns,
     faRightFromBracket,
+    faUser,
   } from "@fortawesome/free-solid-svg-icons";
-  import { faRocketchat } from "@fortawesome/free-brands-svg-icons";
   import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
   import React, { useState } from "react";
   import { useNavigate } from "react-router-dom";
@@ -28,7 +28,7 @@ import RoleManagement from "../../pages/Admin/RoleManagement";
       },
       {
         title: "Quản Lý Tài Khoản",
-        icon: <FontAwesomeIcon icon={faRocketchat} />,
+        icon: <FontAwesomeIcon icon={faUser} />,
         key: "user",
       },
       {
@@ -110,7 +110,7 @@ import RoleManagement from "../../pages/Admin/RoleManagement";
             >
               <FontAwesomeIcon icon={faRightFromBracket} className="text-lg" />
               <span className={`${!open && "hidden"} transition-all duration-300`}>
-                Log out
+                Đăng Xuất
               </span>
             </button>
           </div>

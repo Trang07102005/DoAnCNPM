@@ -1,5 +1,5 @@
 // Các import như cũ
-import { faRocketchat } from "@fortawesome/free-brands-svg-icons";
+
 import {
     faArrowLeft,
     faArrowRight,
@@ -20,7 +20,7 @@ import {
   
   const ManagerNavbar = ({ onLogout }) => {
 
-const [expandedMenu, setExpandedMenu] = useState(null);
+    const [expandedMenu, setExpandedMenu] = useState(null);
     const [selectedPage, setSelectedPage] = useState("dashboard");
     const navigate = useNavigate();
     const [open, setOpen] = useState(true);
@@ -76,6 +76,15 @@ const [expandedMenu, setExpandedMenu] = useState(null);
     ],
   },
   {
+    key: "time",
+    title: "Quản Lý Ca Làm",
+    icon: <FontAwesomeIcon icon={faChartSimple} />,
+    children: [
+      { key: "revenue-expense-report", title: "Báo Cáo Doanh Thu Và Chi Phí" },
+      { key: "profit-report", title: "Báo Cáo Lợi Nhuận" },
+    ],
+  },
+  {
     key: "statistics",
     title: "Báo Cáo Thống Kê",
     icon: <FontAwesomeIcon icon={faChartSimple} />,
@@ -105,7 +114,13 @@ const [expandedMenu, setExpandedMenu] = useState(null);
             className={`absolute cursor-pointer -right-4 top-9 w-8 h-8 p-0.5 bg-zinc-50 border-zinc-50 border-2 rounded-full text-xl flex items-center justify-center ${
               !open && "rotate-180"
             } transition-all ease-in-out duration-300`}
-            onClick={() => setOpen(!open)}
+            onClick={() => {
+              setOpen((prev) => {
+                const next = !prev;
+                if (!next) setExpandedMenu(null); // 🔒 đóng submenu khi sidebar thu gọn
+                return next;
+              });
+            }}
           >
             {open ? (
               <FontAwesomeIcon icon={faArrowRight} />
@@ -117,7 +132,7 @@ const [expandedMenu, setExpandedMenu] = useState(null);
           {/* Logo */}
           <div className="flex gap-x-4 items-center">
             <img
-              src="https://cdn.pixabay.com/photo/2017/02/18/19/20/logo-2078018_640.png"
+              src="https://cdn-icons-png.flaticon.com/512/1317/1317331.png"
               alt="logo"
               className={`w-10 h-10 rounded-full object-cover cursor-pointer transition-all duration-300 ${
                 open && "rotate-[360deg]"
@@ -134,26 +149,27 @@ const [expandedMenu, setExpandedMenu] = useState(null);
   
           {/* Menu */}
           <ul className="pt-6 space-y-0.5">
-  {Menus.map((Menu, index) => (
-    <div key={index}>
-      <li
-        className={`flex items-center gap-3 rounded-md py-3 px-4 cursor-pointer text-zinc-50 hover:bg-zinc-800/50 transition-all duration-300 ${
-          selectedPage === Menu.key ? "bg-zinc-800/40" : ""
-        }`}
-        onClick={() => {
-          if (Menu.children) {
-            setExpandedMenu(expandedMenu === Menu.key ? null : Menu.key);
-          } else {
-            setSelectedPage(Menu.key);
-            setExpandedMenu(null); // đóng dropdown khác
-          }
-        }}
-      >
-        <span className="text-lg">{Menu.icon}</span>
-        <span className={`${!open && "hidden"} transition-all`}>
-          {Menu.title}
-        </span>
-        {Menu.children && (
+    {Menus.map((Menu, index) => (
+    <div div key={index}>
+        <li
+          className={`flex items-center gap-3 rounded-md py-3 px-4 cursor-pointer text-zinc-50 hover:bg-zinc-800/50 transition-all duration-300 ${
+            selectedPage === Menu.key ? "bg-zinc-800/40" : ""
+          }`}
+          onClick={() => {
+            if (Menu.children) {
+                  setOpen(true); // 🟢 Mở sidebar nếu có submenu
+                  setExpandedMenu(expandedMenu === Menu.key ? null : Menu.key);
+              } else {
+                  setSelectedPage(Menu.key);
+                  setExpandedMenu(null); // đóng dropdown khác
+              }
+          }}
+        >
+          <span className="text-lg">{Menu.icon}</span>
+          <span className={`${!open && "hidden"} transition-all`}>
+            {Menu.title}
+          </span>
+          {Menu.children && (
           <span className="ml-auto">{expandedMenu === Menu.key ? "▾" : "▸"}</span>
         )}
       </li>
@@ -186,7 +202,7 @@ const [expandedMenu, setExpandedMenu] = useState(null);
             >
               <FontAwesomeIcon icon={faRightFromBracket} className="text-lg" />
               <span className={`${!open && "hidden"} transition-all duration-300 `}>
-                Log out
+                Đăng Xuất
               </span>
             </button>
           </div>
@@ -209,11 +225,11 @@ const [expandedMenu, setExpandedMenu] = useState(null);
   
             <div className="flex items-center gap-x-8">
                 <div className="text-black text-lg font-medium">
-                    Welcome, {localStorage.getItem("username")}
+                Welcome, <span className="text-blue-500 font-bold">{localStorage.getItem("username")}</span>
                 </div>
 
                 <img
-                    src="https://cdn-icons-png.flaticon.com/512/6166/6166155.png"
+                    src="https://cdn-icons-png.flaticon.com/512/4205/4205906.png"
                     alt="profile"
                     className="w-11 h-11 rounded-full object-cover cursor-pointer"
                 />
@@ -238,6 +254,7 @@ const [expandedMenu, setExpandedMenu] = useState(null);
           {selectedPage === "stock-tracking" && <h1>Theo Dõi Tồn Kho</h1>}
           {selectedPage === "revenue-expense-report" && <h1>DT & Chi Phí</h1>}
           {selectedPage === "profit-report" && <h1>Lợi Nhuận</h1>}
+          {selectedPage === "time" && <h1>Ca Làm Việc</h1>}
           </div>
         </div>
       </div>

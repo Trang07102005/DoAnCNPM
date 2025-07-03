@@ -7,7 +7,7 @@ const Hero = () => {
             <div className="flex-1 w-full flex items-center justify-between gap-x-8 gap-y-4 md:py-0 py-4 flex-wrap">
                 <div className="md:w-[45%] w-full space-y-8">
                     <div className="space-y-4">
-                        <h6 className="text yellow-200/70 text-base font-normal bg-neutral-900/40 w-fit px-3 py-0.5 rounded-lg">
+                        <h6 className="text-yellow-200/70 text-base font-normal bg-neutral-900/40 w-fit px-3 py-0.5 rounded-lg">
                             AN TOÀN & CHẤT LƯỢNG
                         </h6>
                         <h1 className="text-neutral-50 font-black md:text text-5xl leading-tight">
