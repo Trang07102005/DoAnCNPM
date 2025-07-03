@@ -89,7 +89,7 @@ const [expandedMenu, setExpandedMenu] = useState(null);
                 !open && "scale-0"
               }`}
             >
-              Admin Dashboard
+              Cashier Dashboard
             </h1>
           </div>
   
@@ -140,13 +140,13 @@ const [expandedMenu, setExpandedMenu] = useState(null);
 </ul>
   
           {/* Log out */}
-          <div className="absolute bottom-6 left-0 w-full px-4">
+          <div className="absolute bottom-6 left-0 w-full px-4 ">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-x-3 text-zinc-50 hover:bg-zinc-800/50 transition-all py-3 px-4 rounded-md"
+              className="w-full flex items-center gap-x-3 text-zinc-50 hover:bg-zinc-800/50 transition-all py-3 px-4 rounded-md "
             >
               <FontAwesomeIcon icon={faRightFromBracket} className="text-lg" />
-              <span className={`${!open && "hidden"} transition-all duration-300`}>
+              <span className={`${!open && "hidden"} transition-all duration-300 `}>
                 Log out
               </span>
             </button>

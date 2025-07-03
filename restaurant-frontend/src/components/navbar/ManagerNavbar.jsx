@@ -1,42 +1,90 @@
 // Các import như cũ
+import { faRocketchat } from "@fortawesome/free-brands-svg-icons";
 import {
     faArrowLeft,
     faArrowRight,
-    faGear,
+    faBowlFood,
+    faChartSimple,
     faMagnifyingGlass,
-    faTableColumns,
+    faMoneyBill,
     faRightFromBracket,
+    faTableColumns,
+    faToiletPaperSlash,
+    faUser,
+    faUtensils,
   } from "@fortawesome/free-solid-svg-icons";
-  import { faRocketchat } from "@fortawesome/free-brands-svg-icons";
   import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
   import React, { useState } from "react";
   import { useNavigate } from "react-router-dom";
-  import UserManagement from "../../pages/Admin/UserManagement";
-  import AdminDashboard from "../../pages/Admin/AdminDashboard";
-import RoleManagement from "../../pages/Admin/RoleManagement";
+
   
   const ManagerNavbar = ({ onLogout }) => {
+
+const [expandedMenu, setExpandedMenu] = useState(null);
     const [selectedPage, setSelectedPage] = useState("dashboard");
     const navigate = useNavigate();
     const [open, setOpen] = useState(true);
   
-    const Menus = [
-      {
-        title: "Dashboard",
-        icon: <FontAwesomeIcon icon={faTableColumns} />,
-        key: "dashboard",
-      },
-      {
-        title: "Quản Lý Tài Khoản",
-        icon: <FontAwesomeIcon icon={faRocketchat} />,
-        key: "user",
-      },
-      {
-        title: "Quản Lý Phân Quyền",
-        icon: <FontAwesomeIcon icon={faGear} />,
-        key: "role",
-      },
-    ];
+   const Menus = [
+  {
+    key: "dashboard",
+    title: "Dashboard",
+    icon: <FontAwesomeIcon icon={faTableColumns} />,
+  },
+  {
+    key: "employee-management",
+    title: "Quản Lý Nhân Viên",
+    icon: <FontAwesomeIcon icon={faUser} />,
+    children: [
+      { key: "bill-management", title: "Quản Lý Hóa Đơn" },
+      { key: "booking-management", title: "Quản Lý Đặt Bàn" },
+    ],
+  },
+  {
+    key: "expense-management",
+    title: "Quản Lý Chi Tiêu",
+    icon: <FontAwesomeIcon icon={faMoneyBill} />,
+    children: [
+      { key: "staff-cost", title: "Chi Phí Nhân Sự" },
+      { key: "ingredient-cost", title: "Chi Phí Nguyên Liệu" },
+      { key: "budget", title: "Quản Lý Ngân Sách" },
+    ],
+  },
+  {
+    key: "food-management",
+    title: "Quản Lý Món Ăn",
+    icon: <FontAwesomeIcon icon={faUtensils} />,
+    children: [
+      { key: "revenue-report", title: "Báo Cáo Doanh Thu" },
+      { key: "customer-report", title: "Báo Cáo Số Lượng Khách" },
+      { key: "best-seller", title: "Báo Cáo Món Bán Chạy" },
+    ],
+  },
+  {
+    key: "invoice-management",
+    title: "Quản Lý Hóa Đơn",
+    icon: <FontAwesomeIcon icon={faToiletPaperSlash} />,
+  },
+  {
+    key: "ingredient-management",
+    title: "Quản Lý Nguyên Liệu",
+    icon: <FontAwesomeIcon icon={faBowlFood} /> ,
+    children: [
+      { key: "ingredient-info", title: "Xem Thông Tin NL" },
+      { key: "inventory-report", title: "Báo Cáo Xuất Nhập Tồn Kho" },
+      { key: "stock-tracking", title: "Theo Dõi Tồn Kho" },
+    ],
+  },
+  {
+    key: "statistics",
+    title: "Báo Cáo Thống Kê",
+    icon: <FontAwesomeIcon icon={faChartSimple} />,
+    children: [
+      { key: "revenue-expense-report", title: "Báo Cáo Doanh Thu Và Chi Phí" },
+      { key: "profit-report", title: "Báo Cáo Lợi Nhuận" },
+    ],
+  },
+];
   
     const handleLogout = () => {
       localStorage.clear();
@@ -80,36 +128,64 @@ import RoleManagement from "../../pages/Admin/RoleManagement";
                 !open && "scale-0"
               }`}
             >
-              Admin Dashboard
+              Manager Dashboard
             </h1>
           </div>
   
           {/* Menu */}
           <ul className="pt-6 space-y-0.5">
-            {Menus.map((Menu, index) => (
-              <li
-                key={index}
-                className={`flex items-center gap-3 rounded-md py-3 px-4 cursor-pointer text-zinc-50 hover:bg-zinc-800/50 transition-all duration-300 ${
-                  selectedPage === Menu.key ? "bg-zinc-800/40" : ""
-                }`}
-                onClick={() => setSelectedPage(Menu.key)}
-              >
-                <span className="text-lg">{Menu.icon}</span>
-                <span className={`${!open && "hidden"} transition-all`}>
-                  {Menu.title}
-                </span>
-              </li>
-            ))}
-          </ul>
+  {Menus.map((Menu, index) => (
+    <div key={index}>
+      <li
+        className={`flex items-center gap-3 rounded-md py-3 px-4 cursor-pointer text-zinc-50 hover:bg-zinc-800/50 transition-all duration-300 ${
+          selectedPage === Menu.key ? "bg-zinc-800/40" : ""
+        }`}
+        onClick={() => {
+          if (Menu.children) {
+            setExpandedMenu(expandedMenu === Menu.key ? null : Menu.key);
+          } else {
+            setSelectedPage(Menu.key);
+            setExpandedMenu(null); // đóng dropdown khác
+          }
+        }}
+      >
+        <span className="text-lg">{Menu.icon}</span>
+        <span className={`${!open && "hidden"} transition-all`}>
+          {Menu.title}
+        </span>
+        {Menu.children && (
+          <span className="ml-auto">{expandedMenu === Menu.key ? "▾" : "▸"}</span>
+        )}
+      </li>
+
+      {/* Submenu */}
+      {Menu.children && expandedMenu === Menu.key && (
+        <ul className="ml-8 space-y-1">
+          {Menu.children.map((child, i) => (
+            <li
+              key={i}
+              className={`py-2 px-3 rounded-md cursor-pointer text-zinc-300 hover:bg-zinc-700/40 transition-all ${
+                selectedPage === child.key ? "bg-zinc-800/30 text-white" : ""
+              }`}
+              onClick={() => setSelectedPage(child.key)}
+            >
+              {child.title}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  ))}
+</ul>
   
           {/* Log out */}
-          <div className="absolute bottom-6 left-0 w-full px-4">
+          <div className="absolute bottom-6 left-0 w-full px-4 ">
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-x-3 text-zinc-50 hover:bg-zinc-800/50 transition-all py-3 px-4 rounded-md"
+              className="w-full flex items-center gap-x-3 text-zinc-50 hover:bg-zinc-800/50 transition-all py-3 px-4 rounded-md "
             >
               <FontAwesomeIcon icon={faRightFromBracket} className="text-lg" />
-              <span className={`${!open && "hidden"} transition-all duration-300`}>
+              <span className={`${!open && "hidden"} transition-all duration-300 `}>
                 Log out
               </span>
             </button>
@@ -137,7 +213,7 @@ import RoleManagement from "../../pages/Admin/RoleManagement";
                 </div>
 
                 <img
-                    src="https://static.vecteezy.com/system/resources/thumbnails/009/636/683/small_2x/admin-3d-illustration-icon-png.png"
+                    src="https://cdn-icons-png.flaticon.com/512/6166/6166155.png"
                     alt="profile"
                     className="w-11 h-11 rounded-full object-cover cursor-pointer"
                 />
@@ -147,9 +223,21 @@ import RoleManagement from "../../pages/Admin/RoleManagement";
   
           {/* Page content */}
           <div className="w-full px-12">
-            {selectedPage === "dashboard" && <AdminDashboard />}
-            {selectedPage === "user" && <UserManagement />}
-            {selectedPage === "role" && <RoleManagement />}
+          {selectedPage === "dashboard" && <h1>Trang Dashboard</h1>}
+          {selectedPage === "bill-management" && <h1>Quản Lý Hóa Đơn</h1>}
+          {selectedPage === "booking-management" && <h1>Quản Lý Đặt Bàn</h1>}
+          {selectedPage === "staff-cost" && <h1>Chi Phí Nhân Sự</h1>}
+          {selectedPage === "ingredient-cost" && <h1>Chi Phí Nguyên Liệu</h1>}
+          {selectedPage === "budget" && <h1>Ngân Sách</h1>}
+          {selectedPage === "revenue-report" && <h1>Báo Cáo Doanh Thu</h1>}
+          {selectedPage === "customer-report" && <h1>Số Lượng Khách</h1>}
+          {selectedPage === "best-seller" && <h1>Món Bán Chạy</h1>}
+          {selectedPage === "invoice-management" && <h1>Hóa Đơn</h1>}
+          {selectedPage === "ingredient-info" && <h1>Thông Tin Nguyên Liệu</h1>}
+          {selectedPage === "inventory-report" && <h1>Xuất Nhập Tồn</h1>}
+          {selectedPage === "stock-tracking" && <h1>Theo Dõi Tồn Kho</h1>}
+          {selectedPage === "revenue-expense-report" && <h1>DT & Chi Phí</h1>}
+          {selectedPage === "profit-report" && <h1>Lợi Nhuận</h1>}
           </div>
         </div>
       </div>

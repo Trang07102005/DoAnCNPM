@@ -80,7 +80,7 @@ import RoleManagement from "../../pages/Admin/RoleManagement";
                 !open && "scale-0"
               }`}
             >
-              Admin Dashboard
+              Chef Dashboard
             </h1>
           </div>
   

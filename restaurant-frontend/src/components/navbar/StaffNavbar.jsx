@@ -80,7 +80,7 @@ import RoleManagement from "../../pages/Admin/RoleManagement";
                 !open && "scale-0"
               }`}
             >
-              Admin Dashboard
+              Staff Dashboard
             </h1>
           </div>
   
@@ -103,7 +103,7 @@ import RoleManagement from "../../pages/Admin/RoleManagement";
           </ul>
   
           {/* Log out */}
-          <div className="absolute bottom-6 left-0 w-full px-4">
+          <div className="absolute bottom-6 left-0 w-full px-4 hover:bg-red-500">
             <button
               onClick={handleLogout}
               className="w-full flex items-center gap-x-3 text-zinc-50 hover:bg-zinc-800/50 transition-all py-3 px-4 rounded-md"
