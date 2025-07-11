@@ -11,4 +11,6 @@ import java.util.List;
 public interface RestaurantTableRepository extends JpaRepository<RestaurantTable, Integer> {
     List<RestaurantTable> findByStatus(String status); // Tìm bàn theo trạng thái
     Optional<RestaurantTable> findByTableName(String tableName); // Tìm bàn theo tên bàn
+    
 }
+

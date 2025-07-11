@@ -14,16 +14,15 @@ import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "foodcategory") // Đảm bảo tên bảng khớp với DB
-@Data // Nếu dùng Lombok
-@NoArgsConstructor // Nếu dùng Lombok
-@AllArgsConstructor // Nếu dùng Lombok
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class FoodCategory {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "CategoryID")
+    @Column(name = "categoryid")
     private Integer categoryId;
 
-    @Column(name = "CategoryName", nullable = false)
+    @Column(name = "category_name", nullable = false)
     private String categoryName;
 }

@@ -84,7 +84,8 @@ public class AuthController {
                     jwtToken,
                     user.getUsername(),
                     user.getEmail(),
-                    user.getRole().getName() // lấy tên role
+                    user.getRole().getName(), // lấy tên role
+                    user.getUserId()
             ));
         } catch (BadCredentialsException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Sai email hoặc mật khẩu");

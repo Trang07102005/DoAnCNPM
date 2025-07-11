@@ -16,6 +16,7 @@ import StaffNavbar from "./components/navbar/StaffNavbar";
 import CashierNavbar from "./components/navbar/CashierNavbar";
 import ManagerNavbar from "./components/navbar/ManagerNavbar";
 import ChefNavbar from "./components/navbar/ChefNavbar";
+import KitchenDashboard from "./pages/Chef/KitchenDashboard";
 
 
 import { ToastContainer } from "react-toastify";        
@@ -53,6 +54,9 @@ function App() {
       <div className="w-full min-h-screen bg-neutral-100/50 text-neutral-500 flex flex-col">
         {getNavbar()}
         <Routes>
+          <Route path="/chef/kitchen" element={
+          <ProtectedRoute element={<KitchenDashboard />} allowedRoles={["Chef"]} />
+        } />
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Home />} />
           <Route path="/login" element={<Login onLogin={(r) => setRole(r)} />} />
@@ -75,6 +79,7 @@ function App() {
             <ProtectedRoute element={<ChefDashboard />} allowedRoles={["Chef"]} />
           } />
         </Routes>
+
         {(!role || role === "Customer") && <Footer />}
         <ToastContainer
           position="top-right"

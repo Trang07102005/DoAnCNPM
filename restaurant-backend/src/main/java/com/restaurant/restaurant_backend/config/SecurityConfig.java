@@ -41,6 +41,16 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
                 .requestMatchers("/api/auth/**").permitAll()          // Cho phép truy cập không cần token
+                .requestMatchers("/api/food/**", "/api/foods/**").permitAll()
+                .requestMatchers("/api/food").permitAll()
+                .requestMatchers("/api/food-categories/**").permitAll()
+                .requestMatchers("/api/tables").permitAll()
+                .requestMatchers("/api/orders/**", "/api/orders").permitAll()
+                .requestMatchers("/api/pending").permitAll()
+                .requestMatchers("/api/tables/**").permitAll()
+                .requestMatchers("/api/with-status").permitAll()
+                .requestMatchers("/api/order-status/**").permitAll()
+                .requestMatchers("api/reservations", "/api/reservations/**").permitAll()
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
 )           

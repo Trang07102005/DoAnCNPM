@@ -27,13 +27,13 @@ const Login = ({ onLogin }) => {
         password: cleanInput(password)
       });
 
-      const { token, role, username, email: userEmail } = res.data;
+      const { token, role, username, email: userEmail, userId } = res.data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
       localStorage.setItem("username", username);
       localStorage.setItem("email", userEmail);
-
+      localStorage.setItem("userId", userId);
       onLogin?.(role);
       toast.success("Đăng nhập thành công!");
 

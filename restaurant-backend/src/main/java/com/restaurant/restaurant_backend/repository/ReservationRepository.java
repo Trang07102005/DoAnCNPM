@@ -16,5 +16,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Intege
 
     List<Reservation> findByRestaurantTable_TableId(Integer tableId);
 
-    boolean existsByRestaurantTable_TableIdAndReservationTime(Integer tableId, LocalDateTime reservationTime); // ✅ Bổ sung đầy đủ
+    boolean existsByRestaurantTable_TableId(Integer tableId);
+
+    // ✅ Kiểm tra trùng theo khoảng thời gian
+    boolean existsByRestaurantTable_TableIdAndReservationTimeBetween(
+            Integer tableId, LocalDateTime start, LocalDateTime end);
+    List<Reservation> findByRestaurantTable_TableIdAndReservationTimeBetween(
+    Integer tableId, LocalDateTime start, LocalDateTime end
+);
+
 }

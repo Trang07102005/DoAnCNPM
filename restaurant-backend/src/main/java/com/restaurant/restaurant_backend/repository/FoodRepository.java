@@ -8,10 +8,9 @@ import java.util.List;
 
 @Repository
 public interface FoodRepository extends JpaRepository<Food, Integer> {
-    // Có thể thêm các phương thức tùy chỉnh:
-    List<Food> findByStatus(String status); // Tìm món ăn theo trạng thái
-    List<Food> findByCategory_CategoryId(Integer categoryId); // Tìm món ăn theo Category ID
-    List<Food> findByFoodNameContainingIgnoreCase(String foodName); // Tìm món ăn theo tên (không phân biệt hoa thường)
-     long countByCategory_CategoryId(Integer categoryId);
-    
+    List<Food> findByStatus(String status);
+    List<Food> findByCategory_CategoryId(Integer categoryId);
+    List<Food> findByFoodNameContainingIgnoreCase(String foodName);
+    long countByCategory_CategoryId(Integer categoryId);
+    boolean existsByCategory_CategoryId(Integer categoryId); // Sửa typo
 }

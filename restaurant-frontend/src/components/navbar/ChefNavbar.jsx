@@ -13,6 +13,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import KitchenDashboard from "../../pages/Chef/KitchenDashboard";
 
 
 const ChefNavbar = ({ onLogout }) => {
@@ -206,7 +207,7 @@ const ChefNavbar = ({ onLogout }) => {
           </h1>
 
           {selectedPage === "dashboard" && <div>Nội dung dashboard...</div>}
-          {selectedPage === "dish-orders" && <div>Nội dung danh sách món đặt...</div>}
+          {selectedPage === "dish-orders" && <KitchenDashboard/>}
           {selectedPage === "ingredients" && <div>Nội dung nguyên liệu...</div>}
           {selectedPage === "ingredient-report" && <div>Nội dung báo cáo xuất nhập tồn...</div>}
           {selectedPage === "dish-list-report" && <div>Nội dung báo cáo món...</div>}

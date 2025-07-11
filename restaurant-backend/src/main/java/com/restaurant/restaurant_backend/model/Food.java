@@ -1,46 +1,36 @@
 package com.restaurant.restaurant_backend.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table; // <-- Đảm bảo dòng import này đúng và không có dòng Table nào khác
-import jakarta.persistence.FetchType;
-import lombok.Data;              // Nếu dùng Lombok
-
-
-import java.math.BigDecimal; // Dùng BigDecimal cho tiền tệ
+import jakarta.persistence.*;
+import lombok.Data;
+import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "food")
 @Data
-
 public class Food {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "FoodID")
+    @Column(name = "foodid")
     private Integer foodId;
 
-    @Column(name = "FoodName", nullable = false)
+    @Column(name = "food_name", nullable = false)
     private String foodName;
 
-    @Column(name = "Price", nullable = false)
-    private BigDecimal price; // Sử dụng BigDecimal cho giá tiền
+    @Column(name = "price", nullable = false)
+    private BigDecimal price;
 
-    @Column(name = "ImageUrl")
+    @Column(name = "image_url")
     private String imageUrl;
 
-    @Column(name = "Status")
+    @Column(name = "status")
     private String status; // "Đang bán", "Tạm ngưng", "Ngưng bán"
 
-    // Mối quan hệ Many-to-One với FoodCategory (Nhiều món ăn thuộc về Một danh mục)
-    @ManyToOne(fetch = FetchType.LAZY) // LAZY tải category khi cần, EAGER tải ngay
-    @JoinColumn(name = "CategoryID", nullable = false) // Tên cột Foreign Key trong bảng Food
-    private FoodCategory category; // Đối tượng FoodCategory mà món ăn này thuộc về
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoryid", nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    private FoodCategory category;
 
     // Constructors
     public Food() {}
@@ -52,19 +42,4 @@ public class Food {
         this.status = status;
         this.category = category;
     }
-
-    // Getters and Setters
-    public Integer getFoodId() { return foodId; }
-    public void setFoodId(Integer foodId) { this.foodId = foodId; }
-    public String getFoodName() { return foodName; }
-    public void setFoodName(String foodName) { this.foodName = foodName; }
-    public BigDecimal getPrice() { return price; }
-    public void setPrice(BigDecimal price) { this.price = price; }
-    public String getImageUrl() { return imageUrl; }
-    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public FoodCategory getCategory() { return category; }
-    public void setCategory(FoodCategory category) { this.category = category; }
-    
 }

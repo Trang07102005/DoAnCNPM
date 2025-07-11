@@ -1,23 +1,17 @@
 package com.restaurant.restaurant_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.*;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table; 
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.util.List;
 
 @Entity
-@Table(name = "`restauranttable`") // Rất quan trọng: Sử dụng dấu backtick để ánh xạ đúng với tên bảng có từ khóa SQL
+@Table(name = "`restauranttable`")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RestaurantTable  { // Tên lớp không cần dấu backtick
+public class RestaurantTable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,5 +22,13 @@ public class RestaurantTable  { // Tên lớp không cần dấu backtick
     private String tableName;
 
     @Column(name = "Status")
-    private String status; // 'Trống', 'Đã đặt', 'Đang phục vụ'
+    private String status;
+
+    @OneToMany(mappedBy = "restaurantTable", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore  // 🔑 Tránh vòng lặp khi trả về JSON
+    private List<Reservation> reservations;
+
+    @OneToMany(mappedBy = "restaurantTable", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Order> orders;
 }

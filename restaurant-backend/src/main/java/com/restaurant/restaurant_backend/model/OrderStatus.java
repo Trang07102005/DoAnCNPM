@@ -27,13 +27,14 @@ public class OrderStatus {
     @Column(name = "OrderStatusID")
     private Integer orderStatusId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER) // 🔄 LAZY → EAGER
     @JoinColumn(name = "OrderID")
-    private Order order; // Liên kết với Entity Order
+    private Order order;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER) // 🔄 LAZY → EAGER
     @JoinColumn(name = "FoodID")
     private Food food;
+
 
     @Column(name = "Status")
     private String status; // 'Chưa chế biến', 'Đang chế biến', 'Hoàn thành'

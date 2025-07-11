@@ -24,9 +24,16 @@ protected void doFilterInternal(HttpServletRequest request,
                                 FilterChain filterChain)
         throws ServletException, IOException {
 
-    // ✅ Bỏ qua filter nếu là request đăng nhập / đăng ký
+    // ✅ Bỏ qua các API không cần xác thực
     String path = request.getRequestURI();
-    if (path.startsWith("/api/auth")) {
+    if (path.startsWith("/api/auth") ||
+        path.startsWith("/api/orders") ||
+        path.startsWith("/api/food") ||
+        path.startsWith("/api/tables") ||
+        path.startsWith("/api/order-status") ||
+        path.startsWith("/api/reservations") ||
+        path.startsWith("/api/with-status")
+    ) {
         filterChain.doFilter(request, response);
         return;
     }

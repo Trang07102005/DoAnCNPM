@@ -12,7 +12,8 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
+import StaffOrderFlow from "../../pages/Staff/StaffOrderFlow";
+import StaffDashboard from "../../pages/Staff/StaffDashboard";
 
 const StaffNavbar = ({ onLogout }) => {
 
@@ -39,6 +40,7 @@ const StaffNavbar = ({ onLogout }) => {
     children: [
       { key: "table-report", title: "Báo Cáo Bàn Đặt" },
       { key: "best-seller-report", title: "Báo Cáo Món Bán Chạy" },
+      { key: "best-seller-report", title: "áđâsđá" },
     ],
   },
 ];
@@ -201,8 +203,8 @@ const StaffNavbar = ({ onLogout }) => {
           </h1>
 
             {/* Nội dung page cụ thể */}
-            {selectedPage === "dashboard" && <div>Nội dung dashboard...</div>}
-            {selectedPage === "order-management" && <div>Nội dung quản lý order...</div>}
+            {selectedPage === "dashboard" && <StaffDashboard/>}
+            {selectedPage === "order-management" && <StaffOrderFlow/>}
             {selectedPage === "table-report" && <div>Nội dung báo cáo bàn đặt...</div>}
             {selectedPage === "best-seller-report" && <div>Nội dung món bán chạy...</div>}
           </div>

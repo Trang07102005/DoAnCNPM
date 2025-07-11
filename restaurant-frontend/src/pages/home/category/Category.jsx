@@ -1,59 +1,54 @@
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { faPizzaSlice } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import React from 'react';
-import { Link } from 'react-router-dom';
 
 const Category = () => {
-    return (
-        <div className='w-full lg:px-28 md:px-16 sm:px-7 px-4 py-6 space-y-4'>
-            {/* Top Section */}
-            <div className="w-full flex items-center justify-between">
-                <h5 className="text-xl text-neutral-700 font-semibold">
-                    Danh Mục Nổi Bật
-                </h5>
+  const [categoryData, setCategoryData] = useState([]);
 
-                <Link to = {"/"} className='text-sm text-neutral-500 font-medium hover:text-yellow-500 ease-in-out duration-300'>
-                    Xem Tất Cả
-                </Link>
-            </div>
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
-            {/*  */}
-            <div className="grid md:grid-cols-8 sm:grid-cols-4 grid-cols-3 md:gap-x-6 md:gap-y-6 sm-gap-x-4 sm:gap-y-4 gap-x-3 gap-y-3.5 items-center">
-                <Link to = {"/"} className='w-full bg-neutral-300/60 flex items-center justify-center gap-x-2.5 px-3.5 py-3 rounded-full hover:bg-neutral-400/50 focus:bg-zinc-400/50 ease-in-out duration-300'>
-                    <FontAwesomeIcon icon={faPizzaSlice} className='w-5 h-5 text-yellow-600'/>
-                    <h6 className="md:text-base text-sm text-neutral-600 font-medium">Pizza</h6>
-                </Link>
-                <Link to = {"/"} className='w-full bg-neutral-300/60 flex items-center justify-center gap-x-2.5 px-3.5 py-3 rounded-full hover:bg-neutral-400/50 focus:bg-zinc-400/50 ease-in-out duration-300'>
-                    <FontAwesomeIcon icon={faPizzaSlice} className='w-5 h-5 text-yellow-600'/>
-                    <h6 className="md:text-base text-sm text-neutral-600 font-medium">Pizza</h6>
-                </Link>
-                <Link to = {"/"} className='w-full bg-neutral-300/60 flex items-center justify-center gap-x-2.5 px-3.5 py-3 rounded-full hover:bg-neutral-400/50 focus:bg-zinc-400/50 ease-in-out duration-300'>
-                    <FontAwesomeIcon icon={faPizzaSlice} className='w-5 h-5 text-yellow-600'/>
-                    <h6 className="md:text-base text-sm text-neutral-600 font-medium">Pizza</h6>
-                </Link>
-                <Link to = {"/"} className='w-full bg-neutral-300/60 flex items-center justify-center gap-x-2.5 px-3.5 py-3 rounded-full hover:bg-neutral-400/50 focus:bg-zinc-400/50 ease-in-out duration-300'>
-                    <FontAwesomeIcon icon={faPizzaSlice} className='w-5 h-5 text-yellow-600'/>
-                    <h6 className="md:text-base text-sm text-neutral-600 font-medium">Pizza</h6>
-                </Link>
-                <Link to = {"/"} className='w-full bg-neutral-300/60 flex items-center justify-center gap-x-2.5 px-3.5 py-3 rounded-full hover:bg-neutral-400/50 focus:bg-zinc-400/50 ease-in-out duration-300'>
-                    <FontAwesomeIcon icon={faPizzaSlice} className='w-5 h-5 text-yellow-600'/>
-                    <h6 className="md:text-base text-sm text-neutral-600 font-medium">Pizza</h6>
-                </Link>
-                <Link to = {"/"} className='w-full bg-neutral-300/60 flex items-center justify-center gap-x-2.5 px-3.5 py-3 rounded-full hover:bg-neutral-400/50 focus:bg-zinc-400/50 ease-in-out duration-300'>
-                    <FontAwesomeIcon icon={faPizzaSlice} className='w-5 h-5 text-yellow-600'/>
-                    <h6 className="md:text-base text-sm text-neutral-600 font-medium">Pizza</h6>
-                </Link>
-                <Link to = {"/"} className='w-full bg-neutral-300/60 flex items-center justify-center gap-x-2.5 px-3.5 py-3 rounded-full hover:bg-neutral-400/50 focus:bg-zinc-400/50 ease-in-out duration-300'>
-                    <FontAwesomeIcon icon={faPizzaSlice} className='w-5 h-5 text-yellow-600'/>
-                    <h6 className="md:text-base text-sm text-neutral-600 font-medium">Pizza</h6>
-                </Link>
-                <Link to = {"/"} className='w-full bg-neutral-300/60 flex items-center justify-center gap-x-2.5 px-3.5 py-3 rounded-full hover:bg-neutral-400/50 focus:bg-zinc-400/50 ease-in-out duration-300'>
-                    <FontAwesomeIcon icon={faPizzaSlice} className='w-5 h-5 text-yellow-600'/>
-                    <h6 className="md:text-base text-sm text-neutral-600 font-medium">Pizza</h6>
-                </Link>
-            </div>
-        </div>
-    );
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get("http://localhost:8080/api/food-categories");
+      setCategoryData(res.data);
+    } catch (err) {
+      console.error("Lỗi khi tải danh sách danh mục:", err);
+    }
+  };
+
+  return (
+    <div className='w-full lg:px-28 md:px-16 sm:px-7 px-4 py-6 space-y-4'>
+      {/* Top Section */}
+      <div className="w-full flex items-center justify-between">
+        <h5 className="text-xl text-neutral-700 font-semibold">
+          Danh Mục Nổi Bật
+        </h5>
+        <Link to="/" className='text-sm text-neutral-500 font-medium hover:text-yellow-500 ease-in-out duration-300'>
+          Xem Tất Cả
+        </Link>
+      </div>
+
+      {/* Danh sách danh mục */}
+      <div className="grid md:grid-cols-8 sm:grid-cols-4 grid-cols-3 gap-4">
+        {categoryData.map((cat) => (
+          <Link
+            to="/"
+            key={cat.categoryId}
+            className="bg-neutral-400/10 hover:bg-neutral-400/20 border border-neutral-400/20 w-full px-2 pt-2 pb-3 rounded-xl space-y-2.5 ease-in-out duration-300 flex items-center justify-center gap-x-2.5"
+          >
+            
+            <h6 className="text-base text-neutral-700 font-medium">
+              {cat.categoryName}
+            </h6>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default Category;

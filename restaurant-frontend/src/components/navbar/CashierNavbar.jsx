@@ -12,6 +12,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ManageBookings from "../../pages/Cashier/Booking/ManageBookings";
 
 
 const CashierNavbar = ({ onLogout }) => {
@@ -208,7 +209,7 @@ const CashierNavbar = ({ onLogout }) => {
 
   {selectedPage === "dashboard" && <div>Trang dashboard nội dung...</div>}
   {selectedPage === "manage-invoices" && <div>Quản lý hóa đơn nội dung...</div>}
-  {selectedPage === "manage-bookings" && <div>Quản lý đặt bàn nội dung...</div>}
+  {selectedPage === "manage-bookings" && <ManageBookings/>}
   {selectedPage === "revenue-report" && <div>Báo cáo doanh thu nội dung...</div>}
   {selectedPage === "customer-report" && <div>Báo cáo số lượng khách nội dung...</div>}
   {selectedPage === "best-seller" && <div>Báo cáo món bán chạy nội dung...</div>}
