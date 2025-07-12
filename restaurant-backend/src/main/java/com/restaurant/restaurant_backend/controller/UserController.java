@@ -72,6 +72,11 @@ public class UserController {
         userRepository.deleteById(id);
     }
 
+    @GetMapping("/chefs")
+    public List<Users> getChefs() {
+        return userRepository.findByRole_Name("chef");
+    }
+
 
 
 }

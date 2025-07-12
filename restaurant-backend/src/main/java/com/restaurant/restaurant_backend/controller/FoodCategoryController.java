@@ -75,6 +75,7 @@ public class FoodCategoryController {
         }
 
         category.setCategoryName(categoryDetails.getCategoryName().trim());
+        category.setImageUrl(categoryDetails.getImageUrl());
         FoodCategory updatedCategory = foodCategoryRepository.save(category);
         return ResponseEntity.ok(updatedCategory);
     }

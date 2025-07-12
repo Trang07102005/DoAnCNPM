@@ -25,4 +25,7 @@ public class FoodCategory {
 
     @Column(name = "category_name", nullable = false)
     private String categoryName;
+
+    @Column(name = "image_url")
+    private String imageUrl;
 }

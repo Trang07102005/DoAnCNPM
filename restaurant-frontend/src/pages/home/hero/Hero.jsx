@@ -1,32 +1,83 @@
 import React from 'react';
-import Slider from './slider/Slider';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, EffectFade } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/effect-fade';
+
+import Navbar from '../../../components/navbar/Navbar';
+
+const slides = [
+  {
+    image: 'https://assets.epicurious.com/photos/5a3002b504847a34b821cb4a/16:9/w_2580,c_limit/seared-scallops-with-brown-butter-and-lemon-pan-sauce-recipe-BA-121217.jpg',
+    subtitle: 'PHỤC VỤ TỪ NĂM 1995',
+    title: 'Trải Nghiệm Tuyệt Vời',
+    desc: 'Hương vị hoàn hảo trong từng món ăn – ẩm thực tinh tế mang phong cách hiện đại.'
+  },
+  {
+    image: 'https://media.riverford.co.uk/images/dish/meat-main-2500x1822-3d3d16dd8a3763dfb7c399c9cb4b8e23.jpg',
+    subtitle: 'KHÁM PHÁ HƯƠNG VỊ',
+    title: 'Ẩm Thực Đỉnh Cao',
+    desc: 'Tận hưởng món ngon đặc sắc từ đầu bếp hàng đầu thế giới, được chế biến với tâm huyết.'
+  },
+  {
+    image: 'https://cdn.sanity.io/images/fr9flhkd/main/fddab1cc5c2abf477430e76dde2d290622b46aa5-1800x1000.jpg?fm=webp&q=75&w=1280',
+    subtitle: 'MENU PHONG PHÚ',
+    title: 'Mỗi Món Là Một Câu Chuyện',
+    desc: 'Chọn lựa từ hàng chục món ăn độc đáo được chọn lọc kỹ lưỡng để làm hài lòng vị giác của bạn.'
+  }
+];
 
 const Hero = () => {
-    return (
-        <div className='w-full md:h-[calc(100vh-8ch)] h-auto bg-gradient-to-tr from-yellow-700 via-amber-800 to-red-700 flex items-center justify-between mt-[8ch] lg:px-28 md:px-16 sm:px-7 px-4'>
-            <div className="flex-1 w-full flex items-center justify-between gap-x-8 gap-y-4 md:py-0 py-4 flex-wrap">
-                <div className="md:w-[45%] w-full space-y-8">
-                    <div className="space-y-4">
-                        <h6 className="text-yellow-200/70 text-base font-normal bg-neutral-900/40 w-fit px-3 py-0.5 rounded-lg">
-                            AN TOÀN & CHẤT LƯỢNG
-                        </h6>
-                        <h1 className="text-neutral-50 font-black md:text text-5xl leading-tight">
-                            Món Ăn Độc Đáo Khắp Thế Giới
-                        </h1>
-                        <p className="md:text-base text-sm text-neutral-300 font-normal">
-                            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Rerum provident blanditiis quia dolorem et magni recusandae sed laudantium exercitationem possimus, porro ullam obcaecati, soluta alias! Expedita tempora nihil explicabo labore.
-                        </p>
-                    </div>
-                    <button className="w-fit px-8 py-2 text-lg font-medium text-neutral-900 bg-neutral-100 hover:text-neutral-100 hover:bg-neutral-100/10 border-2 border-neutral-100 hover:border-neutral-100 rounded-xl ease-in-out duration-300">
-                        Đặt Bàn Ngay !
-                    </button>
-                </div>
-                <div className="md:w-[50%] w-full space-y-4">
-                    <Slider />
-                </div>
-            </div>
-        </div>
-    );
+  return (
+    <div className="relative w-full h-screen overflow-hidden">
+      {/* Navbar nằm nổi bên trên */}
+      <div className="absolute top-0 left-0 w-full z-30">
+        <Navbar insideHero={true} />
+      </div>
+
+      {/* Swiper - Background slider */}
+      <Swiper
+        modules={[Autoplay, EffectFade]}
+        effect="fade"
+        autoplay={{ delay: 5000, disableOnInteraction: false }}
+        loop={true}
+        className="w-full h-full"
+      >
+        {slides.map((slide, index) => (
+            <SwiperSlide key={index}>
+  <div className="w-full h-full relative">
+    
+    {/* Background có hiệu ứng zoom */}
+    <div
+      className="absolute inset-0 bg-cover bg-center z-0 scale-125 animate-[zoom-out_10s_ease-out_forwards]"
+      style={{ backgroundImage: `url(${slide.image})` }}
+    ></div>
+
+    {/* Overlay */}
+    <div className="absolute inset-0 bg-black/60 z-10"></div>
+
+    {/* Nội dung không bị zoom */}
+    <div className="relative z-20 w-full h-full flex flex-col justify-center items-center text-center px-4">
+      <p className="text-yellow-500 tracking-widest text-sm md:text-base mb-2">
+        {slide.subtitle}
+      </p>
+      <h1
+        className="text-white text-4xl md:text-6xl font-[Fraunces] font-semibold leading-tight mb-4"
+        style={{ fontFamily: "'Fraunces', serif" }}
+      >
+        {slide.title}
+      </h1>
+      <p className="text-white/80 text-sm md:text-lg max-w-2xl">
+        {slide.desc}
+      </p>
+    </div>
+    
+  </div>
+</SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
+  );
 };
 
 export default Hero;

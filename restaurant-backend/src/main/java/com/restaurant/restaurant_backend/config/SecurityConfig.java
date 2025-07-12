@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()          // Cho phép truy cập không cần token
                 .requestMatchers("/api/food/**", "/api/foods/**").permitAll()
                 .requestMatchers("/api/food").permitAll()
+                .requestMatchers("/api/chef").permitAll()
                 .requestMatchers("/api/food-categories/**").permitAll()
                 .requestMatchers("/api/tables").permitAll()
                 .requestMatchers("/api/orders/**", "/api/orders").permitAll()
