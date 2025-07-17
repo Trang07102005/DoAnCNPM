@@ -30,7 +30,7 @@ public class OrderDetail {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "OrderID")
-    private Order order; // Liên kết với Entity Order
+    private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FoodID")
@@ -41,4 +41,12 @@ public class OrderDetail {
 
     @Column(name = "Price", nullable = false)
     private BigDecimal price;
+
+    // ✅ Constructor không có ID (custom)
+    public OrderDetail(Order order, Food food, Integer quantity, BigDecimal price) {
+        this.order = order;
+        this.food = food;
+        this.quantity = quantity;
+        this.price = price;
+    }
 }

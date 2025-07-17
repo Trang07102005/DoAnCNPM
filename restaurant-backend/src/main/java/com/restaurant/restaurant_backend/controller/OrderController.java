@@ -24,31 +24,31 @@ public class OrderController {
     private final OrderDetailRepository orderDetailRepository;
     private final OrderStatusRepository orderStatusRepository;
 
-    // ✅ Lấy tất cả order
+    // ✅ Lấy tất cả đơn hàng
     @GetMapping
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
     }
 
-    // ✅ Lấy order theo bàn
+    // ✅ Lấy đơn theo bàn
     @GetMapping("/by-table/{tableId}")
     public List<Order> getOrdersByTable(@PathVariable Integer tableId) {
         return orderRepository.findByRestaurantTable_TableId(tableId);
     }
 
-    // ✅ Lấy order theo trạng thái
+    // ✅ Lấy đơn theo trạng thái
     @GetMapping("/by-status/{status}")
     public List<Order> getOrdersByStatus(@PathVariable String status) {
         return orderRepository.findByStatus(status);
     }
 
-    // ✅ Lấy order theo người tạo
+    // ✅ Lấy đơn theo người tạo
     @GetMapping("/by-user/{userId}")
     public List<Order> getOrdersByUser(@PathVariable Integer userId) {
         return orderRepository.findByCreatedBy_UserId(userId);
     }
 
-    // ✅ Lấy order theo khoảng thời gian
+    // ✅ Lấy đơn theo khoảng thời gian
     @GetMapping("/by-time")
     public List<Order> getOrdersByTime(
             @RequestParam String start,
@@ -58,7 +58,14 @@ public class OrderController {
         return orderRepository.findByOrderTimeBetween(startTime, endTime);
     }
 
-        @PostMapping
+    // ✅ Lấy đơn chưa thanh toán (cho bước thanh toán)
+    @GetMapping("/unpaid")
+    public List<Order> getUnpaidOrders() {
+        return orderRepository.findByStatusIn(List.of("Đang xử lý", "Đã hoàn thành"));
+    }
+
+    // ✅ Tạo đơn hàng mới
+    @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest req) {
         if (req.getTableId() == null || req.getCreatedById() == null || req.getOrderDetails() == null || req.getOrderDetails().isEmpty()) {
             return ResponseEntity.badRequest().body("Thiếu thông tin bắt buộc");
@@ -81,7 +88,7 @@ public class OrderController {
         order = orderRepository.save(order);
 
         BigDecimal total = BigDecimal.ZERO;
-        int addedCount = 0; // ✅ Đếm số món hợp lệ
+        int addedCount = 0;
 
         for (OrderDetailRequest detailReq : req.getOrderDetails()) {
             Food food = foodRepository.findById(detailReq.getFoodId()).orElse(null);
@@ -90,11 +97,7 @@ public class OrderController {
                 continue;
             }
 
-            OrderDetail detail = new OrderDetail();
-            detail.setOrder(order);
-            detail.setFood(food);
-            detail.setQuantity(detailReq.getQuantity());
-            detail.setPrice(detailReq.getPrice());
+            OrderDetail detail = new OrderDetail(order, food, detailReq.getQuantity(), detailReq.getPrice());
             orderDetailRepository.save(detail);
 
             OrderStatus status = new OrderStatus();
@@ -109,7 +112,7 @@ public class OrderController {
         }
 
         if (addedCount == 0) {
-            orderRepository.delete(order); // Xoá order rỗng
+            orderRepository.delete(order);
             return ResponseEntity.badRequest().body("Không có món ăn hợp lệ trong đơn hàng.");
         }
 
@@ -122,8 +125,7 @@ public class OrderController {
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
-
-    // ✅ Cập nhật trạng thái order
+    // ✅ Cập nhật trạng thái đơn hàng
     @PutMapping("/{orderId}/status")
     public ResponseEntity<?> updateOrderStatus(@PathVariable Integer orderId, @RequestParam String status) {
         Order order = orderRepository.findById(orderId).orElse(null);
@@ -134,7 +136,6 @@ public class OrderController {
         order.setStatus(status);
         orderRepository.save(order);
 
-        // Nếu hoàn thành hoặc hủy -> đổi trạng thái bàn
         if ("Đã thanh toán".equals(status) || "Đã hủy".equals(status)) {
             RestaurantTable table = order.getRestaurantTable();
             table.setStatus("Trống");
@@ -144,7 +145,7 @@ public class OrderController {
         return ResponseEntity.ok("Cập nhật trạng thái đơn hàng thành công");
     }
 
-    // ✅ Xóa order (tuỳ mục đích)
+    // ✅ Xoá đơn hàng
     @DeleteMapping("/{orderId}")
     public ResponseEntity<?> deleteOrder(@PathVariable Integer orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
@@ -152,11 +153,9 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy đơn hàng");
         }
 
-        // Xóa chi tiết đơn hàng + trạng thái món
         orderDetailRepository.deleteAll(order.getOrderDetails());
         orderStatusRepository.deleteAll(order.getOrderStatuses());
 
-        // Đổi trạng thái bàn nếu cần
         RestaurantTable table = order.getRestaurantTable();
         if (table != null && "Đang phục vụ".equals(table.getStatus())) {
             table.setStatus("Trống");
@@ -164,6 +163,7 @@ public class OrderController {
         }
 
         orderRepository.delete(order);
-        return ResponseEntity.ok("Xóa đơn hàng thành công");
+        return ResponseEntity.ok("Xoá đơn hàng thành công");
     }
+    
 }

@@ -9,7 +9,8 @@ const CategoryManagement = () => {
   const [categoryName, setCategoryName] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editingCategoryId, setEditingCategoryId] = useState(null);
-
+  const [imageUrl, setImageUrl] = useState("");
+  
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -32,25 +33,38 @@ const CategoryManagement = () => {
       toast.warn("Tên danh mục không được để trống!");
       return;
     }
+  
+    if (!imageUrl.trim()) {
+      toast.warn("Vui lòng nhập URL hình ảnh!");
+      return;
+    }
+  
     const token = localStorage.getItem("token");
+    const payload = {
+      categoryName: categoryName.trim(),
+      imageUrl: imageUrl.trim()
+    };
+  
     try {
       if (isEditing) {
         await axios.put(
           `http://localhost:8080/api/food-categories/${editingCategoryId}`,
-          { categoryName: categoryName.trim() },
+          payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         toast.success("Cập nhật danh mục thành công!");
       } else {
         await axios.post(
           "http://localhost:8080/api/food-categories",
-          { categoryName: categoryName.trim() },
+          payload,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         toast.success("Thêm danh mục thành công!");
       }
-
+  
+      // Reset form sau khi lưu
       setCategoryName("");
+      setImageUrl(""); // 👈 reset imageUrl
       setShowModal(false);
       setIsEditing(false);
       setEditingCategoryId(null);
@@ -72,6 +86,7 @@ const CategoryManagement = () => {
       }
     }
   };
+  
 
   const handleDelete = async (categoryId) => {
     if (!window.confirm("Bạn có chắc chắn muốn xóa danh mục này?")) return;
@@ -120,82 +135,108 @@ const CategoryManagement = () => {
       <h2 className="text-3xl font-semibold text-gray-800 border-b pb-3">Danh Sách Danh Mục</h2>
 
       <div className="overflow-x-auto">
-        <table className="min-w-full bg-white border border-gray-200 rounded-md shadow-sm">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="py-3 px-5 text-left">STT</th>
-              <th className="py-3 px-5 text-left">Tên danh mục</th>
-              <th className="py-3 px-5 text-center">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {categories.map((cat, index) => (
-              <tr key={cat.categoryId} className="even:bg-gray-50 hover:bg-gray-100">
-                <td className="py-3 px-5">{index + 1}</td>
-                <td className="py-3 px-5">{cat.categoryName}</td>
-                <td className="py-3 px-5 text-center space-x-2">
-                  <button
-                    onClick={() => handleEdit(cat)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md"
-                  >
-                    Sửa
-                  </button>
-                  <button
-                    onClick={() => handleDelete(cat.categoryId)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md"
-                  >
-                    Xóa
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <table className="min-w-full bg-white border border-gray-200 rounded-md shadow-sm">
+  <thead className="bg-gray-50">
+    <tr>
+      <th className="py-3 px-5 text-left">STT</th>
+      <th className="py-3 px-5 text-left">Tên danh mục</th>
+      <th className="py-3 px-5 text-left">Hình ảnh</th> {/* 👈 Cột mới */}
+      <th className="py-3 px-5 text-center">Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    {categories.map((cat, index) => (
+      <tr key={cat.categoryId} className="even:bg-gray-50 hover:bg-gray-100">
+        <td className="py-3 px-5">{index + 1}</td>
+        <td className="py-3 px-5">{cat.categoryName}</td>
+        <td className="py-3 px-5">
+          {cat.imageUrl ? (
+            <img
+              src={cat.imageUrl}
+              alt={cat.categoryName}
+              className="w-16 h-16 object-cover rounded shadow-sm border"
+            />
+          ) : (
+            <span className="text-gray-400 italic">Chưa có ảnh</span>
+          )}
+        </td>
+        <td className="py-3 px-5 text-center space-x-2">
+          <button
+            onClick={() => handleEdit(cat)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded-md"
+          >
+            Sửa
+          </button>
+          <button
+            onClick={() => handleDelete(cat.categoryId)}
+            className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md"
+          >
+            Xóa
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
       </div>
 
       <AnimatePresence>
-        {showModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+  {showModal && (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="bg-white p-6 rounded-md shadow-md w-full max-w-md"
+      >
+        <h3 className="text-xl font-semibold mb-4">
+          {isEditing ? "Sửa Danh Mục" : "Thêm Danh Mục Mới"}
+        </h3>
+
+        {/* Input Tên danh mục */}
+        <input
+          type="text"
+          value={categoryName}
+          onChange={(e) => setCategoryName(e.target.value)}
+          placeholder="Tên danh mục"
+          className="w-full border rounded-md px-4 py-2 mb-4"
+        />
+
+        {/* Input Link hình ảnh */}
+        <input
+          type="text"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+          placeholder="Link hình ảnh (imageUrl)"
+          className="w-full border rounded-md px-4 py-2 mb-4"
+        />
+
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={handleCloseModal}
+            className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md"
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="bg-white p-6 rounded-md shadow-md w-full max-w-md"
-            >
-              <h3 className="text-xl font-semibold mb-4">
-                {isEditing ? "Sửa Danh Mục" : "Thêm Danh Mục Mới"}
-              </h3>
-              <input
-                type="text"
-                value={categoryName}
-                onChange={(e) => setCategoryName(e.target.value)}
-                placeholder="Tên danh mục"
-                className="w-full border rounded-md px-4 py-2 mb-4"
-              />
-              <div className="flex justify-end space-x-3">
-                <button
-                  onClick={handleCloseModal}
-                  className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md"
-                >
-                  Đóng
-                </button>
-                <button
-                  onClick={handleSaveCategory}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
-                >
-                  {isEditing ? "Cập nhật" : "Tạo"}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            Đóng
+          </button>
+          <button
+            onClick={handleSaveCategory}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
+          >
+            {isEditing ? "Cập nhật" : "Tạo"}
+          </button>
+        </div>
+      </motion.div>
+    </motion.div>
+  )}
+</AnimatePresence>
+
     </div>
   );
 };

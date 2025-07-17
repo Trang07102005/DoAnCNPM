@@ -13,4 +13,6 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     List<Order> findByStatus(String status);
     List<Order> findByOrderTimeBetween(LocalDateTime startTime, LocalDateTime endTime);
     List<Order> findByCreatedBy_UserId(Integer userId); // Tìm đơn hàng theo người tạo (User ID)
+    List<Order> findByStatusIn(List<String> statuses);
+
 }

@@ -17,10 +17,15 @@ import CashierNavbar from "./components/navbar/CashierNavbar";
 import ManagerNavbar from "./components/navbar/ManagerNavbar";
 import ChefNavbar from "./components/navbar/ChefNavbar";
 import KitchenDashboard from "./pages/Chef/KitchenDashboard";
-
+import OrderList from './pages/Cashier/Invoice/OrderList';
+import OrderDetailPage from './pages/Cashier/Invoice/OrderDetailPage';
 
 import { ToastContainer } from "react-toastify";        
 import "react-toastify/dist/ReactToastify.css";
+import FoodMenu from "./pages/Menus/FoodMenu";
+import Gallery from "./pages/Gallery/Gallery";
+import OurChef from "./pages/OurChef/OurChef";
+import Contact from "./pages/Contact/Contact";
 function App() {
   const [role, setRole] = useState(localStorage.getItem("role") || "");
   const handleLogout = () => {
@@ -58,10 +63,14 @@ function App() {
           <ProtectedRoute element={<KitchenDashboard />} allowedRoles={["Chef"]} />
         } />
           <Route path="/" element={<Home />} />
-          <Route path="/menu" element={<Home />} />
+          <Route path="/foodmenu" element={<FoodMenu />} />
+          <Route path="/thuvien" element={<Gallery />} />
+          <Route path="/daubep" element={<OurChef />} />
+          <Route path="/lienlac" element={<Contact />} />
           <Route path="/login" element={<Login onLogin={(r) => setRole(r)} />} />
           <Route path="/register" element={<Register />} />
-
+          <Route path="/orders" element={<OrderList />} />
+          <Route path="/orders/:orderId" element={<OrderDetailPage />} />   
           {/* Protected routes */}
           <Route path="/admin/dashboard" element={
             <ProtectedRoute element={<AdminDashboard />} allowedRoles={["Admin"]} />

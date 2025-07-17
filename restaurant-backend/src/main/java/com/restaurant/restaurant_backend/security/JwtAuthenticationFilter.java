@@ -27,7 +27,6 @@ protected void doFilterInternal(HttpServletRequest request,
     // ✅ Bỏ qua các API không cần xác thực
     String path = request.getRequestURI();
     if (path.startsWith("/api/auth") ||
-        path.startsWith("/api/orders") ||
         path.startsWith("/api/food") ||
         path.startsWith("/api/tables") ||
         path.startsWith("/api/order-status") ||

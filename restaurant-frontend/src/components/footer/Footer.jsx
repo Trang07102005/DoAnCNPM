@@ -1,133 +1,80 @@
 import React from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Link } from 'react-router-dom';
-import { faFacebook, faInstagram,  faXTwitter, faYoutube } from '@fortawesome/free-brands-svg-icons';
-import { faMapPin } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
 const Footer = () => {
-    return (
-        <footer className='w-full bg-neutral-700 lg:px-28 md:px-16 sm:px-7 px-4 py-10 mt-[3ch]'>
-            <div className="grid md:grid-cols-6 sm:grid-cols-4 grid-cols-1 gap-14">
-               
-                <div className="col-span-2 space-y-7">
-                    <div className="space-y-3">
-                        <Link to = {"/"} className='text-4xl text-neutral-800 font-bold'>
-                            <span className='text-yellow-500'>VIET</span>TAURANT
-                        </Link>
-                        <p className="text-base text-neutral-400 font-normal line-clamp-3">
-                             ipsum dolor, sit amet consectetur adipisicing elit. Adipisci porro qui velit neque, voluptate autem sunt deleniti facere ullam assumenda ut tenetur totam eligendi cum at molestias facilis eius sit?
-                        </p>
-                    </div>
-                    <div className="flex items-center gap-x-3">
-                        <Link to= {"/"} className='w-11 h-11 rounded-lg bg-neutral-100/20 flex items-center justify-center text-xl text-neutral-200 group ease-in-out duration-300'>  
-                            <FontAwesomeIcon icon={faInstagram} className='w-6 h-8 group-hover:text-yellow-500 ease-in-out duration-300'/>
-                        </Link>
-                        <Link to= {"/"} className='w-11 h-11 rounded-lg bg-neutral-100/20 flex items-center justify-center text-xl text-neutral-200 group ease-in-out duration-300'>  
-                            <FontAwesomeIcon icon={faFacebook} className='w-6 h-8 group-hover:text-yellow-500 ease-in-out duration-300'/>
-                        </Link>
-                        <Link to= {"/"} className='w-11 h-11 rounded-lg bg-neutral-100/20 flex items-center justify-center text-xl text-neutral-200 group ease-in-out duration-300'>  
-                            <FontAwesomeIcon icon={faYoutube} className='w-6 h-8 group-hover:text-yellow-500 ease-in-out duration-300'/>
-                        </Link>
-                        <Link to= {"/"} className='w-11 h-11 rounded-lg bg-neutral-100/20 flex items-center justify-center text-xl text-neutral-200 group ease-in-out duration-300'>  
-                            <FontAwesomeIcon icon={faXTwitter} className='w-6 h-8 group-hover:text-yellow-500 ease-in-out duration-300'/>
-                        </Link>
-                    </div>
-                </div>
+  return (
+    <footer className="w-full bg-[#0f2a24] text-white py-16 px-4 lg:px-28 md:px-16 sm:px-8 ">
+      {/* Đường viền ngắn ở giữa */}
+  <div className="w-[1000px] h-px bg-gray-300 mx-auto mb-20" />
+      {/* Phần giữa */}
+      <div className="flex flex-col items-center space-y-12">
+        {/* Ảnh 2 bên + info */}
+        <div className="flex flex-col lg:flex-row items-center justify-between w-full gap-10">
+          {/* Ảnh trái */}
+          <div className="w-[200px] h-[260px] rounded-[80px] overflow-hidden border border-yellow-500">
+            <img
+              src="https://kalanidhithemes.com/live-preview/landing-page/restoria/all-demo/Restoria-Defoult-2/images/resource/footer-img-1.jpg" // Thay bằng đường dẫn ảnh trái bạn upload
+              alt="Restaurant Inside"
+              className="w-full h-full object-cover"
+            />
+          </div>
 
-                <div className="col-span-1 space-y-7">
-                    <h2 className="text-xl text-neutral-100 font-medium">
-                        LINK NGẮN GỌN
-                    </h2>
-                    <div className="space-y-3 flex flex-col">
-                        <Link to = {"/"} className='text-base text-neutral-400 hover:text-yellow-500 font-normal ease-in-out duration-300'> 
-                            Giới Thiệu
-                        </Link>
-                        <Link to = {"/"} className='text-base text-neutral-400 hover:text-yellow-500 font-normal ease-in-out duration-300'> 
-                            Món ăn nổi bật
-                        </Link>
-                        <Link to = {"/"} className='text-base text-neutral-400 hover:text-yellow-500 font-normal ease-in-out duration-300'> 
-                            Thư viện
-                        </Link>
-                        <Link to = {"/"} className='text-base text-neutral-400 hover:text-yellow-500 font-normal ease-in-out duration-300'> 
-                            Liên hệ
-                        </Link>
-                    </div>
-                </div>
+          {/* Nội dung giữa */}
+          <div className="text-center max-w-xl space-y-3">
+            <h1 className="text-3xl font-bold text-white">
+              <span className="text-yellow-500">VIET</span>TAURANT
+            </h1>
+            <p className="text-sm text-neutral-300">
+              VIETAURANT, 824 Sư Vạn Hạnh, TP. Hồ Chí Minh
+              <br />
+              Hàng Ngày - 8.00 am đến 10.00 pm
+              <br />
+              booking@gmail.com
+              <br />
+              Yêu Cầu Booking : +84-123-456 789
+            </p>
+          </div>
 
-                <div className="col-span-1 space-y-7">
-                    <h2 className="text-xl text-neutral-100 font-medium">
-                        MÓN ĂN NỔI BẬT
-                    </h2>
-                    <div className="space-y-3 flex flex-col">
-                        <Link to = {"/"} className='text-base text-neutral-400 hover:text-yellow-500 font-normal ease-in-out duration-300'> 
-                            GÀ NƯỚNG NGŨ VỊ
-                        </Link>
-                        <Link to = {"/"} className='text-base text-neutral-400 hover:text-yellow-500 font-normal ease-in-out duration-300'> 
-                            FRESH BURGER
-                        </Link>
-                        <Link to = {"/"} className='text-base text-neutral-400 hover:text-yellow-500 font-normal ease-in-out duration-300'> 
-                            PIZZA HAWAII
-                        </Link>
-                        <Link to = {"/"} className='text-base text-neutral-400 hover:text-yellow-500 font-normal ease-in-out duration-300'> 
-                            MÓN ĂN ĐỊA PHƯƠNG
-                        </Link>
-                    </div>
-                </div>
+          {/* Ảnh phải */}
+          <div className="w-[200px] h-[260px] rounded-[80px] overflow-hidden border border-yellow-500">
+            <img
+              src="https://kalanidhithemes.com/live-preview/landing-page/restoria/all-demo/Restoria-Defoult-2/images/resource/footer-img-2.jpg" // Thay bằng đường dẫn ảnh phải bạn upload
+              alt="Dish"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
 
-                <div className="col-span-2 space-y-7">
-                    <h2 className="text-xl text-neutral-100 font-medium">
-                        GIỮ LIÊN LẠC VỚI CHÚNG TÔI
-                    </h2>
-                    <div className="space-y-5">
-                        <div className="space-y-1">
-                            <h6 className="text-lg text-neutral-300 font-medium">
-                                ĐỊA CHỈ NHÀ HÀNG
-                            </h6>
-                            <div className="flex items-center gap-x-2">
-                                <div className="w-5 h-8 rounded-lg bg-yellow-600/40 text-neutral-300 flex items-center justify-center">
-                                    <FontAwesomeIcon icon={faMapPin} />
-                                </div>
-                                <p className="text-base text-neutral-400 font-normal flex-1">
-                                    828 Sư Vạn Hạnh, Phường 13, Quận 10, thành phố Hồ Chí Minh
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="space-y-5">
-                        <div className="space-y-1">
-                            <h6 className="text-lg text-neutral-300 font-medium">
-                                HOTLINE
-                            </h6>
-                            <div className="flex items-center gap-x-2">
-                                <div className="w-5 h-8 rounded-lg bg-yellow-600/40 text-neutral-300 flex items-center justify-center">
-                                    <FontAwesomeIcon icon={faMapPin} />
-                                </div>
-                                <p className="text-base text-neutral-400 font-normal flex-1">
-                                    0123 456 789
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="space-y-5">
-                        <div className="space-y-1">
-                            <h6 className="text-lg text-neutral-300 font-medium">
-                                EMAIL
-                            </h6>
-                            <div className="flex items-center gap-x-2">
-                                <div className="w-5 h-8 rounded-lg bg-yellow-600/40 text-neutral-300 flex items-center justify-center">
-                                    <FontAwesomeIcon icon={faMapPin} />
-                                </div>
-                                <p className="text-base text-neutral-400 font-normal flex-1">
-                                    restaurant@gmail.com
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
+        {/* Newsletter */}
+        <div className="text-center mt-12">
+          <h2 className="text-2xl font-semibold text-white mb-2">GỬI EMAIL</h2>
+          <p className="text-neutral-400 mb-6">
+            ĐĂNG KÝ VỚI CHÚNG TÔI & NHẬN 25% DISCOUNT. NHẬN THÔNG BÁO MỚI NHẤT
+          </p>
+          <form className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div className="relative w-full sm:w-96">
+              <FontAwesomeIcon
+                icon={faEnvelope}
+                className="absolute left-3 top-3.5 text-neutral-400"
+              />
+              <input
+                type="email"
+                placeholder="Nhập Email"
+                className="w-full py-2 pl-10 pr-4 rounded-md bg-transparent border border-neutral-500 text-white placeholder:text-neutral-400 focus:outline-none focus:border-yellow-500 transition"
+              />
             </div>
-        </footer>
-    );
+            <button
+              type="submit"
+              className="bg-[#E6B15F] text-black font-semibold px-10 py-2  hover:bg-yellow-400 transition"
+            >
+              ĐĂNG KÝ
+            </button>
+          </form>
+        </div>
+      </div>
+    </footer>
+  );
 };
 
 export default Footer;

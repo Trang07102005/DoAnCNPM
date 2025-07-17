@@ -1,7 +1,19 @@
 @import "tailwindcss";
-
+@import url('https://fonts.googleapis.com/css2?family=Urbanist&display=swap');
 .offer_bg {
   background: url("./assets/images/offer.png") no-repeat;
   background-position: center bottom;
   background-size: cover;
+}
+/* index.css hoặc ./src/index.css */
+body {
+  font-family: 'Urbanist', sans-serif;
+}
+@keyframes zoom-out {
+  0% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
