@@ -13,15 +13,20 @@ import jakarta.persistence.FetchType;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 
-@Entity
-@Table(name = "orderdetail")
-@Data
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "orderdetail")
 public class OrderDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,8 +34,9 @@ public class OrderDetail {
     private Integer orderDetailId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "OrderID")
-    private Order order; // Liên kết với Entity Order
+@JoinColumn(name = "OrderID")
+@JsonBackReference
+private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FoodID")
@@ -41,4 +47,13 @@ public class OrderDetail {
 
     @Column(name = "Price", nullable = false)
     private BigDecimal price;
+
+    @Override
+public String toString() {
+    return "OrderDetail{" +
+           "orderDetailId=" + orderDetailId +
+           ", quantity=" + quantity +
+           ", price=" + price +
+           '}';
+}
 }

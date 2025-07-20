@@ -6,12 +6,10 @@ import com.restaurant.restaurant_backend.repository.RoleRepository;
 import com.restaurant.restaurant_backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -77,6 +75,6 @@ public class UserController {
         return userRepository.findByRole_Name("chef");
     }
 
-
+    
 
 }

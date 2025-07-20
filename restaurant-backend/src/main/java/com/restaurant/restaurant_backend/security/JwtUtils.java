@@ -1,14 +1,16 @@
 package com.restaurant.restaurant_backend.security;
 
-
 import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
+import java.util.function.Function;
 
 @Component
 public class JwtUtils {
@@ -20,10 +22,17 @@ public class JwtUtils {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = parseClaims(token);
+        return claimsResolver.apply(claims);
+    }
+
     public String generateToken(UserDetails userDetails) {
         return Jwts.builder()
                 .setSubject(userDetails.getUsername()) // email
-                .claim("role", userDetails.getAuthorities().iterator().next().getAuthority()) // 🟡 thêm dòng này
+                .claim("roles", userDetails.getAuthorities().stream()
+                        .map(auth -> auth.getAuthority())
+                        .toList())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
@@ -31,7 +40,11 @@ public class JwtUtils {
     }
 
     public String extractUsername(String token) {
-        return parseClaims(token).getSubject();
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    public List<String> extractRoles(String token) {
+        return extractClaim(token, claims -> claims.get("roles", List.class));
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {

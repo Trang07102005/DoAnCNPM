@@ -92,24 +92,37 @@ public class RestaurantTableController {
     return tableRepository.findByStatus("Trống");
     }
     // ✅ API: Lấy danh sách bàn và cập nhật trạng thái động theo thời gian thực
-@GetMapping("/with-status")
-public List<RestaurantTable> getTablesWithRealTimeStatus() {
-    List<RestaurantTable> tables = tableRepository.findAll();
-    LocalDateTime now = LocalDateTime.now();
-
-    for (RestaurantTable table : tables) {
-        boolean hasActiveReservation = reservationRepository
-            .findByRestaurantTable_TableIdAndReservationTimeBetween(
-                table.getTableId(),
-                now.minusMinutes(59),
-                now.plusMinutes(59)
-            ).stream()
-            .anyMatch(r -> "Đã đặt".equals(r.getStatus()));
-
-        table.setStatus(hasActiveReservation ? "Đã đặt" : "Trống");
+    @GetMapping("/with-status")
+    public List<RestaurantTable> getTablesWithRealTimeStatus() {
+        List<RestaurantTable> tables = tableRepository.findAll();
+        LocalDateTime now = LocalDateTime.now();
+    
+        for (RestaurantTable table : tables) {
+            // Nếu bàn đang phục vụ thì giữ nguyên trạng thái
+            if ("Đang phục vụ".equalsIgnoreCase(table.getStatus())) {
+                continue;
+            }
+    
+            boolean hasActiveReservation = reservationRepository
+                .findByRestaurantTable_TableIdAndReservationTimeBetween(
+                    table.getTableId(),
+                    now.minusMinutes(59),
+                    now.plusMinutes(59)
+                ).stream()
+                .anyMatch(r -> "Đã đặt".equals(r.getStatus()));
+    
+            // Nếu không đang phục vụ, thì cập nhật theo tình trạng đặt
+            table.setStatus(hasActiveReservation ? "Đã đặt" : "Trống");
+        }
+    
+        return tables;
     }
 
-    return tables;
+    @GetMapping("/serving")
+public ResponseEntity<List<RestaurantTable>> getTablesBeingServed() {
+    List<RestaurantTable> servingTables = tableRepository.findByStatus("Đang phục vụ");
+    return ResponseEntity.ok(servingTables);
 }
+    
 
 }

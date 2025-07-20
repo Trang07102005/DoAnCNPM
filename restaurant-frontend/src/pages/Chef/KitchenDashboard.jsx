@@ -9,6 +9,7 @@ const KitchenDashboard = () => {
       const res = await axios.get("http://localhost:8080/api/order-status/pending");
       setDishes(res.data);
     } catch (err) {
+      console.log(err);
       alert("Lỗi khi tải món cần chế biến");
     }
   };
@@ -18,6 +19,7 @@ const KitchenDashboard = () => {
       await axios.put(`http://localhost:8080/api/order-status/${id}?status=${status}`);
       fetchDishes();
     } catch (err) {
+      console.log(err);
       alert("Lỗi cập nhật trạng thái");
     }
   };

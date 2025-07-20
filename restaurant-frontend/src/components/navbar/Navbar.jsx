@@ -31,7 +31,7 @@ const Navbar = () => {
     { href: "/foodmenu", name: "Menu" },
     { href: "/thuvien", name: "Thư Viện" },
     { href: "/daubep", name: "Đầu Bếp" },
-    { href: "/lienlac", name: "Liên Hệ" },
+    { href: "/lienhe", name: "Liên Hệ" },
   ];
 
   const handleClose = () => setOpen(false);

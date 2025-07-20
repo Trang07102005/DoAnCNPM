@@ -8,7 +8,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "`restauranttable`")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class RestaurantTable {
@@ -25,10 +26,20 @@ public class RestaurantTable {
     private String status;
 
     @OneToMany(mappedBy = "restaurantTable", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore  // 🔑 Tránh vòng lặp khi trả về JSON
+    @JsonIgnore  // Tránh vòng lặp JSON
     private List<Reservation> reservations;
 
     @OneToMany(mappedBy = "restaurantTable", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+    @JsonIgnore  // Tránh vòng lặp JSON
     private List<Order> orders;
+
+    // ✅ Viết lại toString() tránh lỗi StackOverflow
+    @Override
+    public String toString() {
+        return "RestaurantTable{" +
+                "tableId=" + tableId +
+                ", tableName='" + tableName + '\'' +
+                ", status='" + status + '\'' +
+                '}';
+    }
 }

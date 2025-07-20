@@ -1,11 +1,14 @@
 package com.restaurant.restaurant_backend.controller;
 
 import com.restaurant.restaurant_backend.dto.CreateOrderRequest;
+import com.restaurant.restaurant_backend.dto.OrderDTO;
+import com.restaurant.restaurant_backend.dto.OrderDetailDTO;
 import com.restaurant.restaurant_backend.dto.OrderDetailRequest;
 import com.restaurant.restaurant_backend.model.*;
 import com.restaurant.restaurant_backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -25,30 +28,40 @@ public class OrderController {
     private final OrderStatusRepository orderStatusRepository;
 
     // ✅ Lấy tất cả order
+    @PreAuthorize("hasAuthority('ROLE_STAFF')")
     @GetMapping
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
-    }
+public ResponseEntity<List<OrderDTO>> getAllOrders() {
+    List<Order> orders = orderRepository.findAll();
+    List<OrderDTO> dtos = orders.stream().map(this::convertToDTO).toList();
+    return ResponseEntity.ok(dtos);
+}
 
     // ✅ Lấy order theo bàn
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     @GetMapping("/by-table/{tableId}")
-    public List<Order> getOrdersByTable(@PathVariable Integer tableId) {
-        return orderRepository.findByRestaurantTable_TableId(tableId);
-    }
+public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tableId) {
+    List<Order> orders = orderRepository.findByRestaurantTable_TableId(tableId);
+    List<OrderDTO> dtos = orders.stream().map(this::convertToDTO).toList();
+    return ResponseEntity.ok(dtos);
+}
 
     // ✅ Lấy order theo trạng thái
-    @GetMapping("/by-status/{status}")
-    public List<Order> getOrdersByStatus(@PathVariable String status) {
-        return orderRepository.findByStatus(status);
+    @PreAuthorize("hasAuthority('ROLE_STAFF')")
+    public ResponseEntity<List<OrderDTO>> getOrdersByStatus(@PathVariable String status) {
+        List<Order> orders = orderRepository.findByStatus(status);
+        List<OrderDTO> dtos = orders.stream().map(this::convertToDTO).toList();
+        return ResponseEntity.ok(dtos);
     }
 
     // ✅ Lấy order theo người tạo
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     @GetMapping("/by-user/{userId}")
     public List<Order> getOrdersByUser(@PathVariable Integer userId) {
         return orderRepository.findByCreatedBy_UserId(userId);
     }
 
     // ✅ Lấy order theo khoảng thời gian
+    @PreAuthorize("hasAuthority('ROLE_STAFF')")
     @GetMapping("/by-time")
     public List<Order> getOrdersByTime(
             @RequestParam String start,
@@ -58,6 +71,8 @@ public class OrderController {
         return orderRepository.findByOrderTimeBetween(startTime, endTime);
     }
 
+
+        @PreAuthorize("hasAuthority('ROLE_STAFF')")
         @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest req) {
         if (req.getTableId() == null || req.getCreatedById() == null || req.getOrderDetails() == null || req.getOrderDetails().isEmpty()) {
@@ -124,6 +139,7 @@ public class OrderController {
 
 
     // ✅ Cập nhật trạng thái order
+    @PreAuthorize("hasAuthority('ROLE_STAFF')")
     @PutMapping("/{orderId}/status")
     public ResponseEntity<?> updateOrderStatus(@PathVariable Integer orderId, @RequestParam String status) {
         Order order = orderRepository.findById(orderId).orElse(null);
@@ -145,6 +161,7 @@ public class OrderController {
     }
 
     // ✅ Xóa order (tuỳ mục đích)
+    @PreAuthorize("hasAuthority('ROLE_STAFF')")
     @DeleteMapping("/{orderId}")
     public ResponseEntity<?> deleteOrder(@PathVariable Integer orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
@@ -166,4 +183,29 @@ public class OrderController {
         orderRepository.delete(order);
         return ResponseEntity.ok("Xóa đơn hàng thành công");
     }
+
+    private OrderDTO convertToDTO(Order order) {
+    OrderDTO dto = new OrderDTO();
+    dto.setOrderId(order.getOrderId());
+    dto.setStatus(order.getStatus());
+    dto.setOrderTime(order.getOrderTime());
+    dto.setTotal(order.getTotal());
+
+    if (order.getRestaurantTable() != null) {
+        dto.setTableId(order.getRestaurantTable().getTableId());
+    }
+
+    List<OrderDetailDTO> detailDTOs = order.getOrderDetails().stream().map(detail -> {
+        OrderDetailDTO d = new OrderDetailDTO();
+        d.setFoodId(detail.getFood().getFoodId());
+        d.setFoodName(detail.getFood().getFoodName());
+        d.setPrice(detail.getPrice());
+        d.setQuantity(detail.getQuantity());
+        return d;
+    }).toList();
+
+    dto.setOrderDetails(detailDTOs);
+    return dto;
+}
+
 }

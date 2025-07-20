@@ -1,15 +1,19 @@
 package com.restaurant.restaurant_backend.security;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.*;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -18,50 +22,57 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtils jwtUtils;
     private final CustomUserDetailsService userDetailsService;
 
+    private final List<String> whitelistPaths = List.of(
+            "/api/auth",
+            "/api/food",
+            "/api/foods",
+            "/api/food-categories",
+            "/api/tables",
+            "/api/tables/",
+            "/api/tables/serving",
+            "/api/order-status",
+            "/api/reservations",
+            "/api/with-status"
+    );
+
     @Override
-protected void doFilterInternal(HttpServletRequest request,
-                                HttpServletResponse response,
-                                FilterChain filterChain)
-        throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
 
-    // ✅ Bỏ qua các API không cần xác thực
-    String path = request.getRequestURI();
-    if (path.startsWith("/api/auth") ||
-        path.startsWith("/api/orders") ||
-        path.startsWith("/api/food") ||
-        path.startsWith("/api/tables") ||
-        path.startsWith("/api/order-status") ||
-        path.startsWith("/api/reservations") ||
-        path.startsWith("/api/with-status")
-    ) {
-        filterChain.doFilter(request, response);
-        return;
-    }
+        String requestPath = request.getRequestURI();
 
-    final String authHeader = request.getHeader("Authorization");
-    final String jwt;
-    final String username;
-
-    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-        filterChain.doFilter(request, response);
-        return;
-    }
-
-    jwt = authHeader.substring(7);
-    username = jwtUtils.extractUsername(jwt);
-
-    if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-        var userDetails = userDetailsService.loadUserByUsername(username);
-
-        if (jwtUtils.isTokenValid(jwt, userDetails)) {
-            var authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities()
-            );
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            SecurityContextHolder.getContext().setAuthentication(authToken);
+        // ✅ Bỏ qua xác thực nếu URL thuộc danh sách whitelist
+        boolean isWhitelisted = whitelistPaths.stream().anyMatch(requestPath::startsWith);
+        if (isWhitelisted) {
+            filterChain.doFilter(request, response);
+            return;
         }
-    }
 
-    filterChain.doFilter(request, response);
-}
+        // ✅ Kiểm tra token
+        final String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        String jwtToken = authHeader.substring(7);
+        String username = jwtUtils.extractUsername(jwtToken);
+
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            var userDetails = userDetailsService.loadUserByUsername(username);
+
+            if (jwtUtils.isTokenValid(jwtToken, userDetails)) {
+                var authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities()
+                );
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        }
+
+        filterChain.doFilter(request, response);
+    }
+    
 }

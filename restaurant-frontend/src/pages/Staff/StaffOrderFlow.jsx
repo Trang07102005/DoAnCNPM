@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
 
 const StaffOrderFlow = () => {
-  const navigate = useNavigate(); // ✅ Di chuyển vào bên trong component này
   const [step, setStep] = useState(1);
   const [tables, setTables] = useState([]);
   const [foods, setFoods] = useState([]);
@@ -13,9 +11,12 @@ const StaffOrderFlow = () => {
   const [numberOfGuests, setNumberOfGuests] = useState(1);
   const [orderDetails, setOrderDetails] = useState([]);
 
+  const token = localStorage.getItem("token");
+  const userId = parseInt(localStorage.getItem("userId"));
+
   const fetchTables = async () => {
     try {
-    const res = await axios.get("http://localhost:8080/api/tables/with-status");
+      const res = await axios.get("http://localhost:8080/api/tables/with-status");
       setTables(res.data);
     } catch (err) {
       console.error("Lỗi API bàn:", err);
@@ -89,38 +90,48 @@ const StaffOrderFlow = () => {
   };
 
   const handleSubmitOrder = async () => {
-  if (orderDetails.length === 0) {
-    alert("Vui lòng chọn ít nhất 1 món");
-    return;
-  }
-const rawUserId = localStorage.getItem("userId");
+    if (orderDetails.length === 0) {
+      alert("Vui lòng chọn ít nhất 1 món");
+      return;
+    }
 
-if (!rawUserId || isNaN(parseInt(rawUserId))) {
-  alert("Lỗi: Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
-  return;
-}
-  const data = {
-    tableId: selectedTable.tableId,
-    createdById: parseInt(localStorage.getItem("userId")),
-    orderDetails: orderDetails.map(d => ({
-      foodId: d.foodId,
-      quantity: d.quantity,
-      price: d.price
-    }))
+    if (!userId || isNaN(userId)) {
+      alert("Lỗi: Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
+      return;
+    }
+
+    const data = {
+      tableId: selectedTable.tableId,
+      createdById: userId,
+      orderDetails: orderDetails.map(d => ({
+        foodId: d.foodId,
+        quantity: d.quantity,
+        price: d.price
+      }))
+    };
+
+    try {
+      await axios.post("http://localhost:8080/api/orders", data, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert("Tạo đơn hàng thành công");
+
+      // ✅ Cập nhật lại UI
+      fetchTables();
+      setStep(1);
+      setSelectedTable(null);
+      setCustomerName("");
+      setNote("");
+      setNumberOfGuests(1);
+      setOrderDetails([]);
+    } catch (err) {
+      console.error("Lỗi tạo đơn hàng:", err);
+      alert("Lỗi: " + (err.response?.data || "Không rõ lỗi"));
+    }
   };
-
-  console.log("DATA GỬI:", data); 
-
-  try {
-    await axios.post("http://localhost:8080/api/orders", data);
-    alert("Tạo đơn hàng thành công");
-    navigate("/chef/kitchen");
-  } catch (err) {
-    console.error("Lỗi tạo đơn hàng:", err);
-    alert("Lỗi: " + (err.response?.data || "Không rõ lỗi"));
-  }
-};
-
 
   const getStatusColor = (status) => {
     if (!status) return 'text-gray-500';

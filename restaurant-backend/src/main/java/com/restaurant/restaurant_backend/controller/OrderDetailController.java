@@ -1,5 +1,6 @@
 package com.restaurant.restaurant_backend.controller;
 
+import com.restaurant.restaurant_backend.dto.OrderDetailDTO;
 import com.restaurant.restaurant_backend.model.Order;
 import com.restaurant.restaurant_backend.model.OrderDetail;
 import com.restaurant.restaurant_backend.repository.OrderDetailRepository;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/order-details")
@@ -21,33 +23,44 @@ public class OrderDetailController {
     private final OrderDetailRepository orderDetailRepository;
     private final OrderRepository orderRepository; // ✅ THÊM DÒNG NÀY
 
-    // ✅ Lấy danh sách món trong một đơn
     @GetMapping("/by-order/{orderId}")
-    public List<OrderDetail> getDetailsByOrder(@PathVariable Integer orderId) {
-        return orderDetailRepository.findByOrder_OrderId(orderId);
+public ResponseEntity<List<OrderDetailDTO>> getDetailsByOrder(@PathVariable Integer orderId) {
+    List<OrderDetail> details = orderDetailRepository.findByOrder_OrderId(orderId);
+    List<OrderDetailDTO> dtoList = details.stream().map(detail -> {
+        OrderDetailDTO dto = new OrderDetailDTO();
+        dto.setOrderDetailId(detail.getOrderDetailId());
+        dto.setFoodId(detail.getFood().getFoodId());
+        dto.setFoodName(detail.getFood().getFoodName());
+        dto.setPrice(detail.getPrice());
+        dto.setQuantity(detail.getQuantity());
+        return dto;
+    }).collect(Collectors.toList());
+
+    return ResponseEntity.ok(dtoList);
+}
+
+
+@PutMapping("/{id}/quantity")
+public ResponseEntity<?> updateQuantity(@PathVariable Integer id, @RequestParam Integer quantity) {
+    OrderDetail detail = orderDetailRepository.findById(id).orElse(null);
+    if (detail == null) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy món trong đơn");
     }
 
-    // ✅ Cập nhật số lượng món trong đơn và cập nhật tổng tiền
-    @PutMapping("/{id}/quantity")
-    public ResponseEntity<?> updateQuantity(@PathVariable Integer id, @RequestParam Integer quantity) {
-        OrderDetail detail = orderDetailRepository.findById(id).orElse(null);
-        if (detail == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy món trong đơn");
-        }
+    detail.setQuantity(quantity);
+    orderDetailRepository.save(detail);
 
-        detail.setQuantity(quantity);
-        orderDetailRepository.save(detail);
+    // ✅ Cập nhật lại tổng tiền đơn hàng chính xác
+    Order order = detail.getOrder();
+    List<OrderDetail> updatedDetails = orderDetailRepository.findByOrder_OrderId(order.getOrderId());
+    BigDecimal newTotal = updatedDetails.stream()
+        .map(d -> d.getPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+    order.setTotal(newTotal);
+    orderRepository.save(order);
 
-        // ✅ Cập nhật lại tổng tiền đơn hàng
-        Order order = detail.getOrder();
-        BigDecimal newTotal = order.getOrderDetails().stream()
-            .map(d -> d.getPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        order.setTotal(newTotal);
-        orderRepository.save(order);
-
-        return ResponseEntity.ok("Cập nhật số lượng và tổng tiền thành công");
-    }
+    return ResponseEntity.ok("Cập nhật số lượng và tổng tiền thành công");
+}
 
     // ✅ Xoá một món trong đơn
     @DeleteMapping("/{id}")

@@ -1,13 +1,15 @@
 package com.restaurant.restaurant_backend.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "food")
-@Data
+@Getter
+@Setter
 public class Food {
 
     @Id
@@ -41,5 +43,15 @@ public class Food {
         this.imageUrl = imageUrl;
         this.status = status;
         this.category = category;
+    }
+
+    @Override
+    public String toString() {
+        return "Food{" +
+                "foodId=" + foodId +
+                ", foodName='" + foodName + '\'' +
+                ", price=" + price +
+                ", status='" + status +  '\'' +
+                '}';
     }
 }

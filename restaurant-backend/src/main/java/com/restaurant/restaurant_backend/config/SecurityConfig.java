@@ -34,33 +34,59 @@ public class SecurityConfig {
     private final CustomUserDetailsService userDetailsService;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-            .cors(Customizer.withDefaults()) // ✅ Cho phép CORS
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/users/**").hasRole("ADMIN")
-                .requestMatchers("/api/auth/**").permitAll()          // Cho phép truy cập không cần token
-                .requestMatchers("/api/food/**", "/api/foods/**").permitAll()
-                .requestMatchers("/api/food").permitAll()
-                .requestMatchers("/api/chef").permitAll()
-                .requestMatchers("/api/food-categories/**").permitAll()
-                .requestMatchers("/api/tables").permitAll()
-                .requestMatchers("/api/orders/**", "/api/orders").permitAll()
-                .requestMatchers("/api/pending").permitAll()
-                .requestMatchers("/api/tables/**").permitAll()
-                .requestMatchers("/api/with-status").permitAll()
-                .requestMatchers("/api/order-status/**").permitAll()
-                .requestMatchers("api/reservations", "/api/reservations/**").permitAll()
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .anyRequest().authenticated()
-)           
-            .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authenticationProvider())
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(Customizer.withDefaults())
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            // ✅ Public APIs (Không cần token)
+            .requestMatchers(
+                "/api/auth/**",
+                "/api/food/**",
+                "/api/chef",
+                "/api/food-categories/**",
+                "/api/pending",
+                "/api/tables",
+                "/api/tables/**",
+                "/api/with-status",
+                "/api/order-status/**",
+                "/api/reservations",
+                "/api/reservations/**",
+                "/error"
+            ).permitAll()
 
-        return http.build();
-    }
+            // ✅ ADMIN-only APIs
+            .requestMatchers(
+                "/api/users/**",
+                "/api/admin/**"
+            ).hasRole("ADMIN")  // 👈 Dùng hasRole, Spring tự thêm "ROLE_"
+
+            // ✅ STAFF hoặc ADMIN
+            .requestMatchers(
+                "/api/orders/by-table/**",
+                "/api/orders/by-user/**"
+            ).hasAnyRole("STAFF", "ADMIN") // 👈 Đổi thành hasAnyRole
+
+            // ✅ STAFF only
+            .requestMatchers(
+                "/api/orders",
+                "/api/orders/**",
+                "/api/tables/serving",
+                "/api/order-details/**"
+            ).hasRole("STAFF")
+
+            // ✅ Các API khác yêu cầu đăng nhập
+            .anyRequest().authenticated()
+        )
+        .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authenticationProvider(authenticationProvider())
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
+    return http.build();
+}
+
+
+
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http)
