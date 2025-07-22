@@ -16,5 +16,9 @@ public class OrderDTO {
     private Integer numberOfGuests;
     private String note;
     private Integer tableId;
+
+    // ✅ Thêm trường tableName ở đây:
+    private String tableName;
+
     private List<OrderDetailDTO> orderDetails;
 }

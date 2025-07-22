@@ -27,26 +27,27 @@ public class OrderController {
     private final OrderDetailRepository orderDetailRepository;
     private final OrderStatusRepository orderStatusRepository;
 
-    // ✅ Lấy tất cả order
-    @PreAuthorize("hasAuthority('ROLE_STAFF')")
+    // ✅ Lấy tất cả order (ROLE_STAFF + ROLE_CASHIER)
+    @PreAuthorize("hasAnyAuthority('ROLE_STAFF', 'ROLE_CASHIER')")
     @GetMapping
-public ResponseEntity<List<OrderDTO>> getAllOrders() {
-    List<Order> orders = orderRepository.findAll();
-    List<OrderDTO> dtos = orders.stream().map(this::convertToDTO).toList();
-    return ResponseEntity.ok(dtos);
-}
+    public ResponseEntity<List<OrderDTO>> getAllOrders() {
+        List<Order> orders = orderRepository.findAll();
+        List<OrderDTO> dtos = orders.stream().map(this::convertToDTO).toList();
+        return ResponseEntity.ok(dtos);
+    }
 
     // ✅ Lấy order theo bàn
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     @GetMapping("/by-table/{tableId}")
-public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tableId) {
-    List<Order> orders = orderRepository.findByRestaurantTable_TableId(tableId);
-    List<OrderDTO> dtos = orders.stream().map(this::convertToDTO).toList();
-    return ResponseEntity.ok(dtos);
-}
+    public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tableId) {
+        List<Order> orders = orderRepository.findByRestaurantTable_TableId(tableId);
+        List<OrderDTO> dtos = orders.stream().map(this::convertToDTO).toList();
+        return ResponseEntity.ok(dtos);
+    }
 
-    // ✅ Lấy order theo trạng thái
-    @PreAuthorize("hasAuthority('ROLE_STAFF')")
+    // ✅ Lấy order theo trạng thái (ROLE_STAFF + ROLE_CASHIER)
+    @PreAuthorize("hasAnyAuthority('ROLE_STAFF', 'ROLE_CASHIER')")
+    @GetMapping("/by-status/{status}")
     public ResponseEntity<List<OrderDTO>> getOrdersByStatus(@PathVariable String status) {
         List<Order> orders = orderRepository.findByStatus(status);
         List<OrderDTO> dtos = orders.stream().map(this::convertToDTO).toList();
@@ -63,17 +64,15 @@ public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tab
     // ✅ Lấy order theo khoảng thời gian
     @PreAuthorize("hasAuthority('ROLE_STAFF')")
     @GetMapping("/by-time")
-    public List<Order> getOrdersByTime(
-            @RequestParam String start,
-            @RequestParam String end) {
+    public List<Order> getOrdersByTime(@RequestParam String start, @RequestParam String end) {
         LocalDateTime startTime = LocalDateTime.parse(start);
         LocalDateTime endTime = LocalDateTime.parse(end);
         return orderRepository.findByOrderTimeBetween(startTime, endTime);
     }
 
-
-        @PreAuthorize("hasAuthority('ROLE_STAFF')")
-        @PostMapping
+    // ✅ Tạo đơn hàng (STAFF)
+    @PreAuthorize("hasAuthority('ROLE_STAFF')")
+    @PostMapping
     public ResponseEntity<?> createOrder(@RequestBody CreateOrderRequest req) {
         if (req.getTableId() == null || req.getCreatedById() == null || req.getOrderDetails() == null || req.getOrderDetails().isEmpty()) {
             return ResponseEntity.badRequest().body("Thiếu thông tin bắt buộc");
@@ -96,14 +95,11 @@ public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tab
         order = orderRepository.save(order);
 
         BigDecimal total = BigDecimal.ZERO;
-        int addedCount = 0; // ✅ Đếm số món hợp lệ
+        int addedCount = 0;
 
         for (OrderDetailRequest detailReq : req.getOrderDetails()) {
             Food food = foodRepository.findById(detailReq.getFoodId()).orElse(null);
-            if (food == null) {
-                System.err.println("⚠️ Không tìm thấy món ăn với ID: " + detailReq.getFoodId());
-                continue;
-            }
+            if (food == null) continue;
 
             OrderDetail detail = new OrderDetail();
             detail.setOrder(order);
@@ -124,7 +120,7 @@ public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tab
         }
 
         if (addedCount == 0) {
-            orderRepository.delete(order); // Xoá order rỗng
+            orderRepository.delete(order);
             return ResponseEntity.badRequest().body("Không có món ăn hợp lệ trong đơn hàng.");
         }
 
@@ -137,9 +133,8 @@ public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tab
         return ResponseEntity.status(HttpStatus.CREATED).body(order);
     }
 
-
-    // ✅ Cập nhật trạng thái order
-    @PreAuthorize("hasAuthority('ROLE_STAFF')")
+    // ✅ Cập nhật trạng thái đơn hàng (STAFF + CASHIER)
+    @PreAuthorize("hasAnyAuthority('ROLE_STAFF', 'ROLE_CASHIER')")
     @PutMapping("/{orderId}/status")
     public ResponseEntity<?> updateOrderStatus(@PathVariable Integer orderId, @RequestParam String status) {
         Order order = orderRepository.findById(orderId).orElse(null);
@@ -150,9 +145,9 @@ public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tab
         order.setStatus(status);
         orderRepository.save(order);
 
-        // Nếu hoàn thành hoặc hủy -> đổi trạng thái bàn
-        if ("Đã thanh toán".equals(status) || "Đã hủy".equals(status)) {
-            RestaurantTable table = order.getRestaurantTable();
+        // Trả bàn nếu cần
+        RestaurantTable table = order.getRestaurantTable();
+        if (table != null && ("Đã thanh toán".equals(status) || "Đã hủy".equals(status))) {
             table.setStatus("Trống");
             tableRepository.save(table);
         }
@@ -160,7 +155,7 @@ public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tab
         return ResponseEntity.ok("Cập nhật trạng thái đơn hàng thành công");
     }
 
-    // ✅ Xóa order (tuỳ mục đích)
+    // ✅ Xoá đơn hàng
     @PreAuthorize("hasAuthority('ROLE_STAFF')")
     @DeleteMapping("/{orderId}")
     public ResponseEntity<?> deleteOrder(@PathVariable Integer orderId) {
@@ -169,11 +164,9 @@ public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tab
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy đơn hàng");
         }
 
-        // Xóa chi tiết đơn hàng + trạng thái món
         orderDetailRepository.deleteAll(order.getOrderDetails());
         orderStatusRepository.deleteAll(order.getOrderStatuses());
 
-        // Đổi trạng thái bàn nếu cần
         RestaurantTable table = order.getRestaurantTable();
         if (table != null && "Đang phục vụ".equals(table.getStatus())) {
             table.setStatus("Trống");
@@ -184,28 +177,28 @@ public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tab
         return ResponseEntity.ok("Xóa đơn hàng thành công");
     }
 
+    // ✅ Convert entity -> DTO
     private OrderDTO convertToDTO(Order order) {
-    OrderDTO dto = new OrderDTO();
-    dto.setOrderId(order.getOrderId());
-    dto.setStatus(order.getStatus());
-    dto.setOrderTime(order.getOrderTime());
-    dto.setTotal(order.getTotal());
+        OrderDTO dto = new OrderDTO();
+        dto.setOrderId(order.getOrderId());
+        dto.setStatus(order.getStatus());
+        dto.setOrderTime(order.getOrderTime());
+        dto.setTotal(order.getTotal());
 
-    if (order.getRestaurantTable() != null) {
-        dto.setTableId(order.getRestaurantTable().getTableId());
+        if (order.getRestaurantTable() != null) {
+            dto.setTableId(order.getRestaurantTable().getTableId());
+        }
+
+        List<OrderDetailDTO> detailDTOs = order.getOrderDetails().stream().map(detail -> {
+            OrderDetailDTO d = new OrderDetailDTO();
+            d.setFoodId(detail.getFood().getFoodId());
+            d.setFoodName(detail.getFood().getFoodName());
+            d.setPrice(detail.getPrice());
+            d.setQuantity(detail.getQuantity());
+            return d;
+        }).toList();
+
+        dto.setOrderDetails(detailDTOs);
+        return dto;
     }
-
-    List<OrderDetailDTO> detailDTOs = order.getOrderDetails().stream().map(detail -> {
-        OrderDetailDTO d = new OrderDetailDTO();
-        d.setFoodId(detail.getFood().getFoodId());
-        d.setFoodName(detail.getFood().getFoodName());
-        d.setPrice(detail.getPrice());
-        d.setQuantity(detail.getQuantity());
-        return d;
-    }).toList();
-
-    dto.setOrderDetails(detailDTOs);
-    return dto;
-}
-
 }

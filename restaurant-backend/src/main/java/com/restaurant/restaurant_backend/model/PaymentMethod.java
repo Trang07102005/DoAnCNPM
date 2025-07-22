@@ -23,4 +23,5 @@ public class PaymentMethod {
 
     @Column(length = 255)
     private String note;
+    
 }

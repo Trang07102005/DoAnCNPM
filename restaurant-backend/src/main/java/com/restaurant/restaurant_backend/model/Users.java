@@ -50,5 +50,8 @@ public class Users {
         this.email = email;
         this.role = role;
     }
-    
+    public Users(Integer userId) {
+    this.userId = userId;
+}
+
 }
