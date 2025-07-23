@@ -7,6 +7,7 @@ C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-ba
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\OrderController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\OrderDetailController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\OrderStatusController.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\PaymentInvoiceController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\ReservationController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\RestaurantTableController.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\controller\UserController.java
@@ -17,6 +18,7 @@ C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-ba
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\dto\OrderDetailDTO.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\dto\OrderDetailRequest.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\dto\OrderDTO.java
+C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\dto\PaymentRequestDTO.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\dto\PendingDishDTO.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\dto\RegisterRequest.java
 C:\Users\ltttr\OneDrive\Documents\CNPM_QuanLyNhaHang-main\DoAnCNPM\restaurant-backend\src\main\java\com\restaurant\restaurant_backend\model\Food.java

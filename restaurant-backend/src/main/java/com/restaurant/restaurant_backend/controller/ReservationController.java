@@ -57,8 +57,12 @@ public class ReservationController {
             return ResponseEntity.badRequest().body("Không tìm thấy bàn");
         }
 
+        LocalDateTime now = LocalDateTime.now();
+        if (!start.isAfter(now.plusMinutes(30))) {
         table.setStatus("Đã đặt");
         tableRepository.save(table);
+}
+
 
         reservation.setStatus("Đã đặt");
         Reservation savedRes = reservationRepository.save(reservation);
@@ -72,6 +76,15 @@ public class ReservationController {
         Reservation existing = reservationRepository.findById(id).orElse(null);
         if (existing == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy đặt bàn");
+        }
+
+        // Cập nhật lại trạng thái bàn nếu cần
+        LocalDateTime now = LocalDateTime.now();
+        RestaurantTable table = existing.getRestaurantTable();
+        if (!"Đang phục vụ".equalsIgnoreCase(table.getStatus())) {
+            boolean active = isTimeSlotOverlapping(table.getTableId(), now, existing.getReservationId());
+            table.setStatus(active ? "Đã đặt" : "Trống");
+            tableRepository.save(table);
         }
 
         if (updatedReservation.getCustomerName() == null || updatedReservation.getCustomerName().trim().isEmpty()) {
@@ -124,6 +137,7 @@ public class ReservationController {
 
         return ResponseEntity.ok("Cập nhật đặt bàn thành công");
     }
+
 
     // ✅ Cập nhật trạng thái đặt bàn
     @PutMapping("/status/{id}")

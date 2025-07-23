@@ -7,4 +7,5 @@ public class OrderDetailRequest {
     private Integer foodId;
     private Integer quantity;
     private BigDecimal price;
+     private Integer orderId;
 }

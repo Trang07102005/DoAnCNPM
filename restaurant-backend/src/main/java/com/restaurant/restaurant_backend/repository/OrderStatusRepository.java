@@ -11,4 +11,5 @@ public interface OrderStatusRepository extends JpaRepository<OrderStatus, Intege
     List<OrderStatus> findByOrder_OrderId(Integer orderId); // Tìm trạng thái món ăn theo Order ID
     List<OrderStatus> findByFood_FoodId(Integer foodId); // Tìm trạng thái món ăn theo Food ID
     List<OrderStatus> findByStatus(String status); // Tìm trạng thái món ăn theo trạng thái
+    List<OrderStatus> findByStatusIn(List<String> statuses); // Tìm trạng thái món ăn theo danh sách trạng thái
 }

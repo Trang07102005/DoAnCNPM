@@ -2,7 +2,8 @@
 
     import com.restaurant.restaurant_backend.dto.OrderDTO;
     import com.restaurant.restaurant_backend.dto.OrderDetailDTO;
-    import com.restaurant.restaurant_backend.model.*;
+import com.restaurant.restaurant_backend.dto.PaymentRequestDTO;
+import com.restaurant.restaurant_backend.model.*;
     import com.restaurant.restaurant_backend.repository.*;
     import lombok.RequiredArgsConstructor;
     import org.springframework.http.*;
@@ -12,7 +13,9 @@
 
     import java.math.BigDecimal;
     import java.time.LocalDateTime;
-    import java.util.List;
+import java.util.HashMap;
+import java.util.List;
+    import java.util.Map;
 
     @RestController
     @RequestMapping("/api/cashier")
@@ -46,12 +49,15 @@
         @PreAuthorize("hasAuthority('ROLE_CASHIER')")
         @Transactional
         @PostMapping("/pay-orders")
-        public ResponseEntity<?> payOrders(
-                @RequestParam List<Integer> orderIds,
-                @RequestParam Integer methodId,
-                @RequestParam Integer cashierId,
-                @RequestParam(required = false) String note
-        ) {
+        public ResponseEntity<?> payOrders(@RequestBody PaymentRequestDTO  request) {
+            List<Integer> orderIds = request.getOrderIds();
+            Integer methodId = request.getMethodId();
+            Integer cashierId = request.getCashierId();
+            String note = request.getNote();
+
+            // giữ nguyên phần xử lý như cũ bên trong
+
+
             PaymentMethod method = paymentMethodRepository.findById(methodId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy phương thức thanh toán"));
 
@@ -87,8 +93,10 @@
                     tableRepository.save(table);
                 }
             }
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Thanh toán thành công. Tổng tiền: " + totalAmount);
+            return ResponseEntity.ok(response);
 
-            return ResponseEntity.ok("Thanh toán thành công. Tổng tiền: " + totalAmount);
         }
 
         @GetMapping("/order-details/by-order/{orderId}")

@@ -29,6 +29,26 @@ const CashierPayment = () => {
     fetchPendingOrders();
     fetchPaymentMethods();
   }, []);
+    useEffect(() => {
+    if (step !== 2 || selectedOrders.length === 0) return;
+
+    const fetchDetails = async () => {
+        let details = [];
+        for (const id of selectedOrders) {
+        try {
+            const res = await axios.get(`http://localhost:8080/api/cashier/order-details/by-order/${id}`, {
+            headers: { Authorization: `Bearer ${token}` }
+            });
+            details = [...details, ...res.data];
+        } catch (err) {
+            toast.error("Lỗi chi tiết đơn: " + id);
+        }
+        }
+        setOrderDetails(details);
+    };
+
+    fetchDetails();
+    }, [step, selectedOrders]);
 
   const fetchPendingOrders = async () => {
     try {
@@ -104,16 +124,18 @@ const CashierPayment = () => {
     }
 
     try {
-      const res = await axios.post("http://localhost:8080/api/cashier/pay-orders", null, {
-        params: {
-          orderIds: selectedOrders,
-          methodId: paymentMethod,
-          cashierId: cashierId,
-          note: `Chia ${splitCount} người`
-        },
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      toast.success(res.data);
+           const res = await axios.post("http://localhost:8080/api/cashier/pay-orders", {
+            orderIds: selectedOrders,
+            methodId: paymentMethod,
+            cashierId: cashierId,
+            note: `Chia ${splitCount} người`
+            }, {
+            headers: { Authorization: `Bearer ${token}` }
+            });
+
+            // ✅ Hiển thị toast nếu có message từ backend
+            toast.success(res.data.message || "Thanh toán thành công!");
+
         fetchPendingOrders();
         setSelectedOrders([]);
         setOrderDetails([]);
@@ -123,7 +145,7 @@ const CashierPayment = () => {
         setStep(1);
 
     } catch (err) {
-      toast.error("Lỗi khi thanh toán: " + (err.response?.data || err.message));
+  toast.error("Lỗi khi thanh toán: " (err.response?.data?.message || err.message)); // Hiển thị lỗi từ backend nếu có
     }
   };
 
@@ -161,8 +183,19 @@ const CashierPayment = () => {
               ))}
             </tbody>
           </table>
-          <button onClick={fetchOrderDetails} className="bg-blue-600 text-white px-4 py-2 rounded">Tiếp theo</button>
-        </>
+            <button
+            onClick={() => {
+                if (selectedOrders.length === 0) {
+                toast.error("Vui lòng chọn đơn hàng!");
+                return;
+                }
+                setStep(2); // ✅ chỉ setStep, việc fetch sẽ chạy tự động ở Bước 2
+            }}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
+            Tiếp theo
+            </button>
+        </> 
       )}
 
       {step === 2 && (

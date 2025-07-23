@@ -11,5 +11,5 @@ public class OrderDetailDTO {
     private String foodName;
     private BigDecimal price;
     private Integer quantity;
-    
+    private Integer orderId;   
 }
