@@ -4,6 +4,8 @@ import com.restaurant.restaurant_backend.model.Reservation;
 import com.restaurant.restaurant_backend.model.RestaurantTable;
 import com.restaurant.restaurant_backend.repository.ReservationRepository;
 import com.restaurant.restaurant_backend.repository.RestaurantTableRepository;
+
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,6 +23,7 @@ public class ReservationScheduler {
     private final RestaurantTableRepository tableRepository;
 
     // ✅ Chạy mỗi phút để kiểm tra các đặt bàn đã hết hạn
+    @Transactional
     @Scheduled(fixedRate = 60_000) // 60_000 ms = 60 giây
     public void resetExpiredReservations() {
         LocalDateTime now = LocalDateTime.now();

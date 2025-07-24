@@ -37,6 +37,7 @@ public ResponseEntity<List<OrderDetailDTO>> getDetailsByOrder(@PathVariable Inte
         dto.setFoodName(detail.getFood().getFoodName());
         dto.setPrice(detail.getPrice());
         dto.setQuantity(detail.getQuantity());
+        dto.setImageUrl(detail.getFood().getImageUrl());
         return dto;
     }).collect(Collectors.toList());
 
@@ -55,11 +56,12 @@ public ResponseEntity<?> updateQuantity(@PathVariable Integer id, @RequestParam 
     orderDetailRepository.save(detail);
 
     Order order = detail.getOrder();
-    recalculateOrderTotal(order); // ✅ GỌI lại hàm đã viết
-
+    recalculateOrderTotal(order); 
 
     return ResponseEntity.ok("Cập nhật số lượng và tổng tiền thành công");
 }
+
+
 
     // ✅ Xoá một món trong đơn
     @DeleteMapping("/{id}")
@@ -81,14 +83,18 @@ public ResponseEntity<?> updateQuantity(@PathVariable Integer id, @RequestParam 
 
         return ResponseEntity.ok("Đã xoá món trong đơn và cập nhật tổng tiền");
     }
-    private void recalculateOrderTotal(Order order) {
-    List<OrderDetail> details = orderDetailRepository.findByOrder_OrderId(order.getOrderId());
-    BigDecimal newTotal = details.stream()
-            .map(d -> d.getPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-    order.setTotal(newTotal);
-    orderRepository.save(order);
-}
+
+    public void recalculateOrderTotal(Order order) {
+        List<OrderDetail> details = orderDetailRepository.findByOrder(order);
+        BigDecimal total = BigDecimal.ZERO;
+        for (OrderDetail detail : details) {
+            BigDecimal subtotal = detail.getFood().getPrice().multiply(BigDecimal.valueOf(detail.getQuantity()));
+            total = total.add(subtotal);
+        }
+        order.setTotal(total);                  // ✅ Cập nhật lại total
+        orderRepository.save(order);           // ✅ Lưu thay đổi
+    }
+    
     @PostMapping
     public ResponseEntity<?> addFoodToOrder(@RequestBody OrderDetailRequest req) {
         if (req.getOrderId() == null || req.getFoodId() == null || req.getQuantity() == null || req.getQuantity() < 1) {
@@ -126,12 +132,7 @@ public ResponseEntity<?> updateQuantity(@PathVariable Integer id, @RequestParam 
         }
 
         // ✅ Recalculate order total
-        List<OrderDetail> updatedDetails = orderDetailRepository.findByOrder_OrderId(order.getOrderId());
-        BigDecimal newTotal = updatedDetails.stream()
-            .map(d -> d.getPrice().multiply(BigDecimal.valueOf(d.getQuantity())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-        order.setTotal(newTotal);
-        orderRepository.save(order);
+        recalculateOrderTotal(order);
 
         return ResponseEntity.ok("Thêm món và cập nhật tổng tiền thành công");
     }

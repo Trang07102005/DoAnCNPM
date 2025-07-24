@@ -1,11 +1,14 @@
 package com.restaurant.restaurant_backend.controller;
 
 import com.restaurant.restaurant_backend.dto.CreateOrderRequest;
+import com.restaurant.restaurant_backend.dto.MonthlyRevenueDTO;
 import com.restaurant.restaurant_backend.dto.OrderDTO;
 import com.restaurant.restaurant_backend.dto.OrderDetailDTO;
 import com.restaurant.restaurant_backend.dto.OrderDetailRequest;
 import com.restaurant.restaurant_backend.model.*;
 import com.restaurant.restaurant_backend.repository.*;
+import com.restaurant.restaurant_backend.service.OrderService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,6 +27,7 @@ public class OrderController {
     private final OrderRepository orderRepository;
     private final RestaurantTableRepository tableRepository;
     private final FoodRepository foodRepository;
+    private final OrderService orderService;
     private final OrderDetailRepository orderDetailRepository;
     private final OrderStatusRepository orderStatusRepository;
 
@@ -69,6 +73,20 @@ public class OrderController {
         LocalDateTime endTime = LocalDateTime.parse(end);
         return orderRepository.findByOrderTimeBetween(startTime, endTime);
     }
+
+    // ✅ Lấy order theo ID (ROLE_STAFF + ROLE_CASHIER)
+    @PreAuthorize("hasAnyAuthority('ROLE_STAFF', 'ROLE_CASHIER')")
+    @GetMapping("/{orderId}")
+        public ResponseEntity<?> getOrderById(@PathVariable Integer orderId) {
+        Order order = orderRepository.findById(orderId).orElse(null);
+                if (order == null) {
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy đơn hàng");
+                }
+
+            OrderDTO dto = convertToDTO(order);
+            return ResponseEntity.ok(dto);
+    }   
+
 
     // ✅ Tạo đơn hàng (STAFF)
     @PreAuthorize("hasAuthority('ROLE_STAFF')")
@@ -201,4 +219,10 @@ public class OrderController {
         dto.setOrderDetails(detailDTOs);
         return dto;
     }
+
+
+        @GetMapping("/revenue/monthly")
+        public ResponseEntity<List<MonthlyRevenueDTO>> getMonthlyRevenue() {
+            return ResponseEntity.ok(orderService.getMonthlyRevenue());
+        }
 }

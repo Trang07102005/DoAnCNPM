@@ -116,38 +116,49 @@ const CashierPayment = () => {
   };
 
   const handlePay = async () => {
-    const methodName = paymentMethods.find(m => m.paymentMethodID === parseInt(paymentMethod))?.methodName;
-
-    if (methodName === "Tiền mặt" && cashReceived < totalAmount) {
+    const methodName = paymentMethods.find(
+      (m) => m.paymentMethodID === parseInt(paymentMethod)
+    )?.methodName;
+  
+    // ❗ Dùng tổng tính từ UI, không lấy lại từ API
+    const finalAmount = totalAmount;
+  
+    if (methodName === "Tiền mặt" && cashReceived < finalAmount) {
       toast.error("Số tiền khách đưa không đủ để thanh toán!");
       return;
     }
-
+  
     try {
-           const res = await axios.post("http://localhost:8080/api/cashier/pay-orders", {
-            orderIds: selectedOrders,
-            methodId: paymentMethod,
-            cashierId: cashierId,
-            note: `Chia ${splitCount} người`
-            }, {
-            headers: { Authorization: `Bearer ${token}` }
-            });
-
-            // ✅ Hiển thị toast nếu có message từ backend
-            toast.success(res.data.message || "Thanh toán thành công!");
-
-        fetchPendingOrders();
-        setSelectedOrders([]);
-        setOrderDetails([]);
-        setPaymentMethod('');
-        setCashReceived(0);
-        setSplitCount(1);
-        setStep(1);
-
+      const res = await axios.post(
+        "http://localhost:8080/api/cashier/pay-orders",
+        {
+          orderIds: selectedOrders,
+          methodId: paymentMethod,
+          cashierId: cashierId,
+          note: `Chia ${splitCount} người`,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
+      toast.success(res.data.message || "Thanh toán thành công!");
+  
+      fetchPendingOrders();
+      setSelectedOrders([]);
+      setOrderDetails([]);
+      setPaymentMethod("");
+      setCashReceived(0);
+      setSplitCount(1);
+      setStep(1);
     } catch (err) {
-  toast.error("Lỗi khi thanh toán: " (err.response?.data?.message || err.message)); // Hiển thị lỗi từ backend nếu có
+      toast.error(
+        "Lỗi khi thanh toán: " + (err.response?.data?.message || err.message)
+      );
     }
   };
+  
+  
 
   return (
     <div className="container mx-auto p-4">

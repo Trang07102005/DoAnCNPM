@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository // Đánh dấu đây là một Spring Repository
@@ -26,5 +28,7 @@ public interface UserRepository extends JpaRepository<Users, Integer> {
     Optional<Users> findByEmail(String email);
     Optional<Users> findByUsername(String username);
     List<Users> findByRole_Name(String roleName);
+    @Query("SELECT u.role.name, COUNT(u) FROM Users u GROUP BY u.role.name")
+    List<Object[]> countUsersByRole();
 
 }

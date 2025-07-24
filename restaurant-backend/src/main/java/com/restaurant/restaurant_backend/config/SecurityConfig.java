@@ -70,7 +70,6 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             // ✅ STAFF only
             .requestMatchers(
                 "/api/orders",
-                "/api/orders/**",
                 "/api/tables/serving"
             ).hasRole("STAFF")
             .requestMatchers(
@@ -78,17 +77,10 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 "/api/order-status/by-order/**",
                 "/api/order-details/**",
                 "/api/order-details/{orderDetailId}/quantity/**",
-                "/api/order-details/delete/**"
+                "/api/order-details/delete/**",
+                "/api/orders/**"
             ).hasAnyRole("STAFF", "CASHIER")
-            .requestMatchers(
-                "/api/cashier",
-                "/api/pending-orders",
-                "/api/pay-orders",
-                "/api/payment-methods",
-                "/api/payment-invoices/**",
-                "/api/order-details/by-order/**",
-                "/api/cashier/**"
-            ).hasRole("CASHIER")  // 👈 Dùng hasRole, Spring tự thêm "ROLE_"
+            .requestMatchers("/api/cashier/**").hasRole("CASHIER") // 👈 Dùng hasRole, Spring tự thêm "ROLE_"
             // ✅ Các API khác yêu cầu đăng nhập
             .anyRequest().authenticated()
         )
