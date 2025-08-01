@@ -16,7 +16,7 @@ import java.util.function.Function;
 public class JwtUtils {
 
     private final String jwtSecret = "jwt-secret-key-restaurant-12345678901234567890"; // >= 256-bit
-    private final long jwtExpirationMs = 10 * 60 * 1000; // 10 phút
+    private final long jwtExpirationMs = 30 * 60 * 1000; // 10 phút
 
     private Key getSignKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());

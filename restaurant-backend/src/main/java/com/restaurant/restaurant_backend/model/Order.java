@@ -23,6 +23,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "OrderID")
     private Integer orderId;
+    
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "TableID")
@@ -31,6 +32,7 @@ public class Order {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CreatedBy")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Users createdBy;
 
     @Column(name = "OrderTime")
@@ -48,6 +50,7 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private List<OrderStatus> orderStatuses;
 
     @Override
@@ -59,6 +62,8 @@ public class Order {
                 ", total=" + total +
                 '}';
     }
+
+    
     
 }
 

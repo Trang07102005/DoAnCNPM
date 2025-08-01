@@ -57,11 +57,11 @@ public class ReservationController {
             return ResponseEntity.badRequest().body("Không tìm thấy bàn");
         }
 
-        LocalDateTime now = LocalDateTime.now();
-        if (!start.isAfter(now.plusMinutes(30))) {
+       
+        
         table.setStatus("Đã đặt");
         tableRepository.save(table);
-}
+
 
 
         reservation.setStatus("Đã đặt");

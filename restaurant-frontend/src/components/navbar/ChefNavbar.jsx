@@ -163,57 +163,54 @@ const ChefNavbar = ({ onLogout }) => {
         </div>
       </div>
 
-      {/* Main dashboard area */}
-      <div className="h-screen flex-1 bg-zinc-100 space-y-6">
-        {/* Topbar */}
-        <div className="w-full h-[8ch] px-12 bg-zinc-50 shadow-md flex items-center justify-between">
-          <div className="w-96 border border-zinc-300 rounded-full h-11 flex items-center justify-center">
-            <input
-              type="text"
-              placeholder="Search..."
-              className="flex-1 h-full rounded-full outline-none border-none bg-zinc-50 px-4"
-            />
-            <button className="px-4 h-full flex items-center justify-center text-base text-zinc-600 border-l border-zinc-300">
-              <FontAwesomeIcon icon={faMagnifyingGlass} />
-            </button>
-          </div>
+      <div className="h-screen flex-1 bg-zinc-100 flex flex-col overflow-hidden">
+  {/* Topbar */}
+  <div className="w-full h-[8ch] px-12 bg-white shadow flex items-center justify-between">
+    {/* Search bar */}
+    <div className="w-96 h-11 border border-zinc-300 rounded-full flex items-center overflow-hidden">
+      <input
+        type="text"
+        placeholder="Search..."
+        className="flex-1 h-full px-4 bg-white outline-none border-none text-sm"
+      />
+      <button className="px-4 h-full flex items-center justify-center text-zinc-600 border-l border-zinc-300">
+        <FontAwesomeIcon icon={faMagnifyingGlass} />
+      </button>
+    </div>
 
-          <div className="flex items-center gap-x-8">
-              <div className="text-black text-lg font-medium">
-              Welcome, <span className="text-orange-500 font-bold">{localStorage.getItem("username")}</span>
-              </div>
-
-              <img
-                  src="https://static.vecteezy.com/system/resources/previews/037/219/950/non_2x/illustration-of-a-chef-holding-a-platter-and-showing-thumbs-up-free-png.png"
-                  alt="profile"
-                  className="w-11 h-11 rounded-full object-cover cursor-pointer"
-              />
-              </div>
-
-        </div>
-
-        {/* Page content */}
-        <div className="w-full px-12">
-          <h1 className="text-xl font-semibold mt-6 mb-2">
-            {
-              {
-                dashboard: "Trang Dashboard",
-                "dish-orders": "Danh Sách Món Đặt",
-                "ingredients": "Danh Sách Nguyên Liệu",
-                "ingredient-report": "Báo Cáo Xuất Nhập Tồn",
-                "dish-list-report": "Báo Cáo Danh Sách Món",
-              }[selectedPage] || "Trang"
-            }
-          </h1>
-
-          {selectedPage === "dashboard" && <div>Nội dung dashboard...</div>}
-          {selectedPage === "dish-orders" && <KitchenDashboard/>}
-          {selectedPage === "ingredients" && <div>Nội dung nguyên liệu...</div>}
-          {selectedPage === "ingredient-report" && <div>Nội dung báo cáo xuất nhập tồn...</div>}
-          {selectedPage === "dish-list-report" && <div>Nội dung báo cáo món...</div>}
-        </div>
-
+    {/* Right section */}
+    <div className="flex items-center gap-x-6">
+      <div className="text-zinc-800 text-base font-medium">
+        Welcome, {localStorage.getItem("username")}
       </div>
+      <img
+        src="https://static.vecteezy.com/system/resources/thumbnails/009/636/683/small_2x/admin-3d-illustration-icon-png.png"
+        alt="profile"
+        className="w-11 h-11 rounded-full object-cover"
+      />
+    </div>
+  </div>
+
+  {/* Page content */}
+  <div className="flex-1 overflow-y-auto px-12 py-6">
+    <h1 className="text-xl font-semibold mb-4">
+      {{
+        dashboard: "Trang Dashboard",
+        "dish-orders": "Danh Sách Món Đặt",
+        ingredients: "Danh Sách Nguyên Liệu",
+        "ingredient-report": "Báo Cáo Xuất Nhập Tồn",
+        "dish-list-report": "Báo Cáo Danh Sách Món",
+      }[selectedPage] || "Trang"}
+    </h1>
+
+    {selectedPage === "dashboard" && <div>Nội dung dashboard...</div>}
+    {selectedPage === "dish-orders" && <KitchenDashboard />}
+    {selectedPage === "ingredients" && <div>Nội dung nguyên liệu...</div>}
+    {selectedPage === "ingredient-report" && <div>Nội dung báo cáo xuất nhập tồn...</div>}
+    {selectedPage === "dish-list-report" && <div>Nội dung báo cáo món...</div>}
+  </div>
+</div>
+
     </div>
   );
 };

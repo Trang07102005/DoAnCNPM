@@ -89,94 +89,100 @@ const TableManager = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-6 bg-white rounded shadow space-y-6">
-      <div className="flex justify-end">
-        <button
-          onClick={() => setShowModal(true)}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-        >
-          Thêm Bàn
-        </button>
-      </div>
+    <div className="max-w-6xl mx-auto p-6 bg-gradient-to-br from-green-100 via-blue-100 to-purple-100 rounded-3xl shadow-2xl space-y-6">
+  <div className="flex justify-between items-center">
+    <h2 className="text-4xl font-extrabold text-gray-800 tracking-tight">🍽️ Danh Sách Bàn</h2>
+    <button
+      onClick={() => setShowModal(true)}
+      className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600 text-white px-6 py-2.5 rounded-xl shadow-lg transition font-semibold"
+    >
+      + Thêm Bàn
+    </button>
+  </div>
 
-      <h2 className="text-3xl font-semibold border-b pb-2">Danh Sách Bàn</h2>
-
-      <table className="w-full border">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="p-2 text-left">STT</th>
-            <th className="p-2 text-left">Tên bàn</th>
-            <th className="p-2 text-center">Thao tác</th>
+  <div className="overflow-x-auto rounded-xl">
+    <table className="min-w-full divide-y divide-gray-300">
+      <thead className="bg-gradient-to-r from-blue-300 to-green-300 text-gray-900 text-lg font-bold uppercase">
+        <tr>
+          <th className="px-6 py-3 text-left">STT</th>
+          <th className="px-6 py-3 text-left">Tên Bàn</th>
+          <th className="px-6 py-3 text-center">Thao Tác</th>
+        </tr>
+      </thead>
+      <tbody className="bg-white">
+        {tables.map((t, idx) => (
+          <tr key={t.tableId} className="even:bg-green-50 hover:bg-blue-50 transition-all duration-200">
+            <td className="px-6 py-4 text-lg font-bold text-gray-700">{idx + 1}</td>
+            <td className="px-6 py-4 text-lg font-medium text-gray-900">☕ {t.tableName}</td>
+            <td className="px-6 py-4 text-center space-x-3">
+              <button
+                onClick={() => handleEdit(t)}
+                className="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1.5 rounded-md font-medium shadow-sm transition"
+              >
+                ✏️ Sửa
+              </button>
+              <button
+                onClick={() => handleDelete(t.tableId)}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-1.5 rounded-md font-medium shadow-sm transition"
+              >
+                🗑️ Xóa
+              </button>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {tables.map((t, idx) => (
-            <tr key={t.tableId} className="even:bg-gray-50">
-              <td className="p-2">{idx + 1}</td>
-              <td className="p-2">{t.tableName}</td>
-              <td className="p-2 text-center space-x-2">
-                <button
-                  onClick={() => handleEdit(t)}
-                  className="bg-blue-600 text-white px-3 py-1 rounded"
-                >
-                  Sửa
-                </button>
-                <button
-                  onClick={() => handleDelete(t.tableId)}
-                  className="bg-red-600 text-white px-3 py-1 rounded"
-                >
-                  Xóa
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        ))}
+      </tbody>
+    </table>
+  </div>
 
-      <AnimatePresence>
-        {showModal && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 flex justify-center items-center"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white p-4 rounded shadow w-full max-w-md"
+  {/* Modal */}
+  <AnimatePresence>
+    {showModal && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/30 backdrop-blur-sm flex justify-center items-center z-50"
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          className="bg-white p-6 rounded-2xl w-full max-w-md shadow-xl border-[5px] border-green-200"
+        >
+          <h3 className="text-2xl font-bold mb-5 text-gray-800 text-center">
+            {isEditing ? "✏️ Sửa Bàn" : "➕ Thêm Bàn Mới"}
+          </h3>
+
+          <input
+            type="text"
+            className="w-full border border-gray-300 rounded-lg px-4 py-2 mb-6 focus:ring-2 focus:ring-green-500 outline-none text-lg"
+            placeholder="Nhập tên bàn..."
+            value={form.tableName}
+            name="tableName"
+            onChange={(e) => setForm({ ...form, tableName: e.target.value })}
+          />
+
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={closeModal}
+              className="px-4 py-2 rounded-md bg-gray-400 hover:bg-gray-500 text-white transition font-medium"
             >
-              <h3 className="text-xl font-semibold mb-3">
-                {isEditing ? "Sửa Bàn" : "Thêm Bàn"}
-              </h3>
-              <input
-                type="text"
-                className="w-full border p-2 mb-3"
-                placeholder="Tên bàn"
-                value={form.tableName}
-                name="tableName"
-                onChange={(e) => setForm({ ...form, tableName: e.target.value })}
-              />
-              <div className="flex justify-end space-x-2">
-                <button
-                  onClick={closeModal}
-                  className="bg-gray-400 text-white px-3 py-1 rounded"
-                >
-                  Đóng
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  className="bg-green-600 text-white px-3 py-1 rounded"
-                >
-                  {isEditing ? "Cập nhật" : "Tạo"}
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+              Hủy
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="px-4 py-2 rounded-md bg-gradient-to-r from-green-400 to-blue-400 hover:from-green-500 hover:to-blue-500 text-white font-semibold transition"
+            >
+              {isEditing ? "Cập Nhật" : "Tạo"}
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+</div>
+
+
   );
 };
 

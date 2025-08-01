@@ -10,11 +10,14 @@ import com.restaurant.restaurant_backend.repository.*;
 import com.restaurant.restaurant_backend.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -209,10 +212,19 @@ public class OrderController {
 
         List<OrderDetailDTO> detailDTOs = order.getOrderDetails().stream().map(detail -> {
             OrderDetailDTO d = new OrderDetailDTO();
+            d.setOrderDetailId(detail.getOrderDetailId()); // nếu cần id
             d.setFoodId(detail.getFood().getFoodId());
             d.setFoodName(detail.getFood().getFoodName());
+            d.setImageUrl(detail.getFood().getImageUrl());
+
             d.setPrice(detail.getPrice());
             d.setQuantity(detail.getQuantity());
+
+            // 👉 Tính total = price * quantity
+        BigDecimal total = detail.getPrice().multiply(BigDecimal.valueOf(detail.getQuantity()));
+        d.setTotal(total);
+
+        d.setOrderId(order.getOrderId());
             return d;
         }).toList();
 
@@ -225,4 +237,14 @@ public class OrderController {
         public ResponseEntity<List<MonthlyRevenueDTO>> getMonthlyRevenue() {
             return ResponseEntity.ok(orderService.getMonthlyRevenue());
         }
+
+        @GetMapping("/filter")
+public ResponseEntity<List<Order>> filterOrders(
+        @RequestParam(required = false) String status,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+        @RequestParam(required = false) Integer tableId) {
+
+    List<Order> orders = orderService.filterOrders(status, date);
+    return ResponseEntity.ok(orders);
+}
 }

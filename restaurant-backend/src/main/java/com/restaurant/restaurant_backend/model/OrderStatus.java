@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "orderstatus")
@@ -30,6 +31,7 @@ public class OrderStatus {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "FoodID")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Food food;
 
     @Column(name = "Status")

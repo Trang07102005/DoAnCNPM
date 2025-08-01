@@ -1,8 +1,4 @@
 package com.restaurant.restaurant_backend.model;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import jakarta.persistence.*;
 import lombok.*;
 import java.math.BigDecimal;
@@ -25,31 +21,31 @@ public class PaymentInvoice {
     private Order order;
 
     @ManyToOne
-    @JoinColumn(name = "paymentMethodID", nullable = false)
+    @JoinColumn(name = "paymentMethodID", nullable = true) // Cho phép null khi chưa chọn phương thức
     private PaymentMethod paymentMethod;
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal paidAmount;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private LocalDateTime paidAt = LocalDateTime.now();
+    @Column(nullable = true)  // Cho phép null vì hóa đơn draft chưa thanh toán
+    private LocalDateTime paidAt;
+
+    // Bỏ @PrePersist vì không nên tự động gán paidAt nếu là draft
 
     @ManyToOne
-    @JoinColumn(name = "cashierID")
+    @JoinColumn(name = "cashierID", nullable = true)
     private Users cashier;
 
     @Column(length = 255)
     private String note;
 
     @Enumerated(EnumType.STRING)
-    @Builder.Default
     @Column(nullable = false, length = 20)
     private InvoiceStatus status = InvoiceStatus.DRAFT;
 
-    
     public static enum InvoiceStatus {
         DRAFT,
         FINALIZED
     }
 }
+

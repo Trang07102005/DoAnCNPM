@@ -13,4 +13,7 @@ public class OrderDetailDTO {
     private Integer quantity;
     private Integer orderId;   
     private String imageUrl;
+    private BigDecimal total;
+
+    
 }

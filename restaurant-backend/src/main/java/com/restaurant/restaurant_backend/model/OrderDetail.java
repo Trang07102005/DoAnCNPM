@@ -19,6 +19,7 @@ import lombok.Setter;
 import java.math.BigDecimal;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Getter
 @Setter
@@ -39,6 +40,7 @@ private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FoodID")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Food food;
 
     @Column(name = "Quantity", nullable = false)

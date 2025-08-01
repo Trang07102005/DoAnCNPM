@@ -8,6 +8,7 @@ import java.util.List;
 
 @Data
 public class OrderDTO {
+    private Integer createdById;
     private Integer orderId;
     private String status;
     private LocalDateTime orderTime;

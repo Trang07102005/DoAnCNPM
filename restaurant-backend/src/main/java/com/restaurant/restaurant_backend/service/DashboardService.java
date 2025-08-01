@@ -1,5 +1,7 @@
 package com.restaurant.restaurant_backend.service;
 
+import com.restaurant.restaurant_backend.dto.OrderChartDTO;
+import com.restaurant.restaurant_backend.dto.RevenueStatsDTO;
 import com.restaurant.restaurant_backend.repository.FoodRepository;
 import com.restaurant.restaurant_backend.repository.UserRepository;
 import com.restaurant.restaurant_backend.repository.OrderRepository;
@@ -45,4 +47,55 @@ public class DashboardService {
             return map;
         }).collect(Collectors.toList());
     }
+
+    public List<OrderChartDTO> getOrderStats(String type) {
+        List<Object[]> data;
+
+        switch (type.toLowerCase()) {
+            case "day":
+                data = orderRepository.countOrdersByDay();
+                break;
+            case "month":
+                data = orderRepository.countOrdersByMonth();
+                break;
+            case "year":
+                data = orderRepository.countOrdersByYear();
+                break;
+            default:
+                throw new IllegalArgumentException("Type must be: day, month, or year");
+        }
+
+        return data.stream()
+                .map(obj -> new OrderChartDTO(obj[0].toString(), ((Number) obj[1]).intValue()))
+                .collect(Collectors.toList());
+    }
+
+    public List<RevenueStatsDTO> getRevenueStats(String type) {
+        List<Object[]> rawData;
+
+        switch (type.toLowerCase()) {
+            case "daily":
+                rawData = orderRepository.sumRevenueByDay();
+                break;
+            case "monthly":
+                rawData = orderRepository.sumRevenueByMonth();
+                break;
+            case "yearly":
+                rawData = orderRepository.sumRevenueByYear();
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid type: " + type);
+        }
+
+        return rawData.stream().map(row -> {
+            String label = row[0].toString(); // ngày / tháng / năm (String)
+            Double total = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+
+            return new RevenueStatsDTO(label, total);
+        }).collect(Collectors.toList());
+    }
+    
+
+
+
 }

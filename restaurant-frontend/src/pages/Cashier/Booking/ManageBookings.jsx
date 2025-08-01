@@ -16,6 +16,8 @@ const ManageBookings = () => {
     reservationTime: ""
   });
 
+  const token = localStorage.getItem("token");
+
   useEffect(() => {
     fetchTables();
     fetchReservations();
@@ -23,229 +25,282 @@ const ManageBookings = () => {
 
   const fetchTables = async () => {
     try {
-      const token = localStorage.getItem("token");
       const res = await axios.get("http://localhost:8080/api/tables", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTables(res.data);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Không thể tải danh sách bàn.");
     }
   };
 
   const fetchReservations = async () => {
     try {
-      const token = localStorage.getItem("token");
       const res = await axios.get("http://localhost:8080/api/reservations", {
         headers: { Authorization: `Bearer ${token}` }
       });
       setReservations(res.data);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast.error("Không thể tải danh sách đặt bàn.");
     }
   };
 
-  const handleBookClick = () => {
+  const handleTableClick = (table) => {
+    if (table.status !== "Trống") {
+      toast.warning("Bàn này đã được đặt hoặc đang sử dụng.");
+      return;
+    }
+    setSelectedTable(table);
     setShowForm(true);
-    setSelectedTable(null);
-    setFormData({
-      customerName: "",
-      phone: "",
-      email: "",
-      numberOfPeople: 1,
-      note: "",
-      reservationTime: ""
-    });
   };
 
   const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleSubmit = async () => {
-    if (!formData.customerName || !formData.email || !formData.reservationTime || !selectedTable) {
+    const { customerName, phone, email, numberOfPeople, note, reservationTime } = formData;
+  
+    if (!customerName || !email || !reservationTime || !selectedTable) {
       toast.warn("Vui lòng nhập đầy đủ thông tin và chọn bàn.");
       return;
     }
-
-    const data = {
-      customerName: formData.customerName.trim(),
-      phone: formData.phone.trim(),
-      email: formData.email.trim(),
-      numberOfPeople: parseInt(formData.numberOfPeople),
-      note: formData.note.trim(),
-      reservationTime: formData.reservationTime,
-      restaurantTable: { tableId: selectedTable.tableId }
-    };
-
+  
     try {
-      const token = localStorage.getItem("token");
-      await axios.post("http://localhost:8080/api/reservations", data, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.post(
+        "http://localhost:8080/api/reservations",
+        {
+          customerName: customerName.trim(),
+          phone: phone.trim(),
+          email: email.trim(),
+          numberOfPeople: parseInt(numberOfPeople),
+          note: note.trim(),
+          reservationTime,
+          restaurantTable: { tableId: selectedTable.tableId },
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+  
       toast.success("Đặt bàn thành công!");
       setShowForm(false);
-      fetchReservations();
+      setSelectedTable(null);
+      fetchReservations(); // để cập nhật danh sách đặt bàn
+      await fetchTables(); // ✅ đảm bảo status mới của bàn được cập nhật
+  
     } catch (err) {
-      console.error(err);
       if (err.response?.status === 409) {
-        toast.error("Bàn đã có người đặt trong thời gian này, vui lòng chọn giờ khác.");
+        toast.error("Bàn đã được đặt trong thời gian này.");
       } else {
         toast.error("Đặt bàn thất bại.");
       }
     }
   };
+  
 
   const handleCancel = async (id) => {
     if (!window.confirm("Bạn có chắc muốn huỷ đặt bàn này?")) return;
     try {
-      const token = localStorage.getItem("token");
       await axios.delete(`http://localhost:8080/api/reservations/${id}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success("Huỷ đặt bàn thành công!");
       fetchReservations();
-    } catch (err) {
-      console.error(err);
+      fetchTables();
+    } catch {
       toast.error("Huỷ đặt bàn thất bại.");
     }
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="font-semibold text-lg">Quản lý đặt bàn</h2>
-        <button
-          onClick={handleBookClick}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-        >
-          Đặt Bàn
-        </button>
-      </div>
+    <div className="space-y-8 p-6 bg-gray-50 rounded-lg shadow-md">
+      <h2 className="text-2xl font-bold text-gray-800">Quản lý đặt bàn</h2>
 
+      {/* Bàn vật lý */}
       <div>
-        <h3 className="font-semibold mb-2">Danh sách đặt bàn</h3>
-        <table className="min-w-full border bg-white rounded shadow">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="border px-3 py-2">Khách hàng</th>
-              <th className="border px-3 py-2">Bàn</th>
-              <th className="border px-3 py-2">Thời gian</th>
-              <th className="border px-3 py-2">Trạng thái</th>
-              <th className="border px-3 py-2">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody>
-            {reservations.map((r) => (
-              <tr key={r.reservationId} className="even:bg-gray-50">
-                <td className="border px-3 py-2">{r.customerName}</td>
-                <td className="border px-3 py-2">{r.restaurantTable?.tableName}</td>
-                <td className="border px-3 py-2">
-                  {new Date(r.reservationTime).toLocaleString()}
-                </td>
-                <td className="border px-3 py-2">{r.status}</td>
-                <td className="border px-3 py-2">
-                  <button
-                    onClick={() => handleCancel(r.reservationId)}
-                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                  >
-                    Huỷ
-                  </button>
-                </td>
+  <h3 className="text-lg font-bold text-red-600 mb-4 uppercase">Danh sách bàn</h3>
+  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
+    {tables.map((table) => {
+      const isAvailable = table.status === "Trống";
+      return (
+        <div
+          key={table.tableId}
+          onClick={() => isAvailable && handleTableClick(table)}
+          className={`w-24 h-24 rounded-full flex flex-col items-center justify-center text-white font-semibold text-sm shadow-md transition-all duration-300 select-none ${
+            isAvailable
+              ? "bg-green-500 hover:bg-green-600 cursor-pointer"
+              : table.status === "Đã đặt"
+              ? "bg-yellow-500 opacity-80 cursor-not-allowed"
+              : "bg-red-500 opacity-80 cursor-not-allowed"
+          } ${selectedTable?.tableId === table.tableId ? "ring-4 ring-red-400" : ""}`}
+        >
+          <div className="text-base">{table.tableName}</div>
+          <div className="text-xs">{table.status}</div>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+
+      {/* Danh sách đặt bàn */}
+      <div>
+        <h3 className="font-semibold text-lg text-gray-700 mb-3">Danh sách đặt bàn</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full bg-white border border-gray-300 shadow-sm rounded-md">
+            <thead className="bg-gradient-to-r from-sky-400 to-green-400 text-white">
+              <tr>
+                <th className="px-4 py-3 text-left">Khách hàng</th>
+                <th className="px-4 py-3 text-left">Bàn</th>
+                <th className="px-4 py-3 text-left">Thời gian</th>
+                <th className="px-4 py-3 text-left">Trạng thái</th>
+                <th className="px-4 py-3 text-center">Thao tác</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {reservations.map((r) => (
+                <tr key={r.reservationId} className="even:bg-gray-50 hover:bg-rose-100">
+                  <td className="px-4 py-2">{r.customerName}</td>
+                  <td className="px-4 py-2">{r.restaurantTable?.tableName}</td>
+                  <td className="px-4 py-2">{new Date(r.reservationTime).toLocaleString()}</td>
+                  <td className="px-4 py-2">{r.status}</td>
+                  <td className="px-4 py-2 text-center">
+                    <button
+                      onClick={() => handleCancel(r.reservationId)}
+                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                    >
+                      Huỷ
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {showForm && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-md p-6 w-full max-w-md shadow-lg space-y-3">
-            <h3 className="text-lg font-semibold mb-2">Thông tin đặt bàn</h3>
+  <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md space-y-5 relative border-t-4 border-red-600">
+      <h3 className="text-2xl font-bold text-red-600 mb-3">
+        Đặt bàn: {selectedTable?.tableName}
+      </h3>
 
-            <select
-              value={selectedTable?.tableId || ""}
-              onChange={(e) => {
-                const t = tables.find((tb) => tb.tableId === parseInt(e.target.value));
-                setSelectedTable(t);
-              }}
-              className="w-full border rounded px-3 py-2"
+      {/* Tên khách */}
+      <input
+        type="text"
+        name="customerName"
+        placeholder="Tên khách hàng *"
+        value={formData.customerName}
+        onChange={handleInputChange}
+        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+      />
+
+      {/* SĐT */}
+      <input
+        type="text"
+        name="phone"
+        placeholder="Số điện thoại"
+        value={formData.phone}
+        onChange={handleInputChange}
+        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+      />
+
+      {/* Email */}
+      <input
+        type="email"
+        name="email"
+        placeholder="Email *"
+        value={formData.email}
+        onChange={handleInputChange}
+        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+      />
+
+      {/* Số người */}
+      <div>
+        <label className="block mb-2 font-semibold text-gray-700">Số người:</label>
+        <div className="flex flex-wrap gap-2">
+          {[1, 2, 3, 4, 5].map((num) => (
+            <button
+              key={num}
+              type="button"
+              className={`px-3 py-2 rounded-lg border font-medium transition
+                ${
+                  formData.numberOfPeople == num
+                    ? "bg-red-100 border-red-500 text-red-600"
+                    : "bg-white border-gray-300 text-gray-700 hover:border-red-400 hover:text-red-600"
+                }`}
+              onClick={() => setFormData({ ...formData, numberOfPeople: num })}
             >
-              <option value="">Chọn bàn</option>
-              {tables.map((t) => (
-                <option key={t.tableId} value={t.tableId}>
-                  {t.tableName}
-                </option>
-              ))}
-            </select>
-
-            <input
-              type="text"
-              name="customerName"
-              value={formData.customerName}
-              onChange={handleInputChange}
-              placeholder="Tên khách hàng *"
-              className="w-full border rounded px-3 py-2"
-            />
-            <input
-              type="text"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              placeholder="Số điện thoại"
-              className="w-full border rounded px-3 py-2"
-            />
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Email *"
-              className="w-full border rounded px-3 py-2"
-            />
-            <input
-              type="number"
-              min="1"
-              name="numberOfPeople"
-              value={formData.numberOfPeople}
-              onChange={handleInputChange}
-              placeholder="Số người"
-              className="w-full border rounded px-3 py-2"
-            />
-            <input
-              type="datetime-local"
-              name="reservationTime"
-              value={formData.reservationTime}
-              onChange={handleInputChange}
-              className="w-full border rounded px-3 py-2"
-            />
-            <textarea
-              name="note"
-              value={formData.note}
-              onChange={handleInputChange}
-              placeholder="Ghi chú"
-              className="w-full border rounded px-3 py-2"
-            />
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setShowForm(false)}
-                className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded"
-              >
-                Đóng
-              </button>
-              <button
-                onClick={handleSubmit}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-              >
-                Xác nhận
-              </button>
-            </div>
-          </div>
+              {num}
+            </button>
+          ))}
+          <button
+            type="button"
+            className={`px-3 py-2 rounded-lg border font-medium transition
+              ${
+                formData.numberOfPeople > 5 || formData.numberOfPeople === ""
+                  ? "bg-red-100 border-red-500 text-red-600"
+                  : "bg-white border-gray-300 text-gray-700 hover:border-red-400 hover:text-red-600"
+              }`}
+            onClick={() => setFormData({ ...formData, numberOfPeople: "" })}
+          >
+            Khác
+          </button>
         </div>
-      )}
+        {formData.numberOfPeople === "" && (
+          <input
+            type="number"
+            name="numberOfPeople"
+            min="1"
+            placeholder="Nhập số người"
+            value={formData.numberOfPeople}
+            onChange={handleInputChange}
+            className="mt-3 w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+          />
+        )}
+      </div>
+
+      {/* Ngày giờ */}
+      <input
+        type="datetime-local"
+        name="reservationTime"
+        value={formData.reservationTime}
+        onChange={handleInputChange}
+        className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-400"
+      />
+
+      {/* Ghi chú */}
+      <textarea
+        name="note"
+        placeholder="Ghi chú"
+        rows={3}
+        value={formData.note}
+        onChange={handleInputChange}
+        className="w-full border border-gray-300 rounded-lg px-4 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-red-400"
+      />
+
+      {/* Nút xác nhận & huỷ */}
+      <div className="flex justify-end gap-3 pt-2">
+        <button
+          onClick={() => setShowForm(false)}
+          className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition"
+        >
+          Huỷ
+        </button>
+        <button
+          onClick={handleSubmit}
+          className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition font-semibold"
+        >
+          Xác nhận
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
+
     </div>
   );
 };

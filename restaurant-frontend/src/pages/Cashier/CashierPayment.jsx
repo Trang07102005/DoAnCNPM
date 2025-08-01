@@ -166,172 +166,217 @@ const CashierPayment = () => {
 
       {step === 1 && (
         <>
-          <table className="table-auto w-full border mb-4">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 border">Chọn</th>
-                <th className="p-2 border">Mã đơn</th>
-                <th className="p-2 border">Bàn</th>
-                <th className="p-2 border">Thời gian</th>
-                <th className="p-2 border">Tổng tiền</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map(order => (
-                <tr key={order.orderId}>
-                  <td className="p-2 border text-center">
-                    <input
-                      type="checkbox"
-                      checked={selectedOrders.includes(order.orderId)}
-                      onChange={() => toggleOrderSelection(order.orderId)}
-                    />
-                  </td>
-                  <td className="p-2 border text-center">{order.orderId}</td>
-                  <td className="p-2 border text-center">{order.tableName || order.restaurantTable?.tableName}</td>
-                  <td className="p-2 border text-center">{new Date(order.orderTime).toLocaleString()}</td>
-                  <td className="p-2 border text-center">{order.total.toLocaleString()} ₫</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-            <button
-            onClick={() => {
-                if (selectedOrders.length === 0) {
-                toast.error("Vui lòng chọn đơn hàng!");
-                return;
-                }
-                setStep(2); // ✅ chỉ setStep, việc fetch sẽ chạy tự động ở Bước 2
-            }}
-            className="bg-blue-600 text-white px-4 py-2 rounded"
-            >
-            Tiếp theo
-            </button>
+        <table className="table-auto w-full rounded-lg overflow-hidden shadow-lg">
+  <thead>
+    <tr className="bg-gradient-to-r from-sky-400 to-green-400 text-white font-semibold">
+      <th className="p-3 border border-green-200">Chọn</th>
+      <th className="p-3 border border-green-200">Mã đơn</th>
+      <th className="p-3 border border-green-200">Bàn</th>
+      <th className="p-3 border border-green-200">Thời gian</th>
+      <th className="p-3 border border-green-200">Tổng tiền</th>
+    </tr>
+  </thead>
+  <tbody>
+    {orders.map((order, idx) => (
+      <tr
+        key={order.orderId}
+        className={`${idx % 2 === 0 ? "bg-green-50" : "bg-white"} hover:bg-green-100 transition-colors cursor-pointer`}
+      >
+        <td className="p-3 border border-green-200 text-center">
+          <input
+            type="checkbox"
+            checked={selectedOrders.includes(order.orderId)}
+            onChange={() => toggleOrderSelection(order.orderId)}
+            className="w-5 h-5 cursor-pointer accent-green-500"
+          />
+        </td>
+        <td className="p-3 border border-green-200 text-center">{order.orderId}</td>
+        <td className="p-3 border border-green-200 text-center">{order.tableName || order.restaurantTable?.tableName}</td>
+        <td className="p-3 border border-green-200 text-center">{new Date(order.orderTime).toLocaleString()}</td>
+        <td className="p-3 border border-green-200 text-green-600 font-bold text-center">{order.total.toLocaleString()} ₫</td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+
+<button
+  onClick={() => {
+    if (selectedOrders.length === 0) {
+      toast.error("Vui lòng chọn đơn hàng!");
+      return;
+    }
+    setStep(2); // ✅ chỉ setStep, việc fetch sẽ chạy tự động ở Bước 2
+  }}
+  className="bg-blue-600 hover:bg-blue-700 mt-10 focus:outline-none focus:ring-4 focus:ring-blue-300 text-white font-semibold px-6 py-2 rounded-lg shadow-md transition duration-200 ease-in-out"
+>
+  Tiếp theo
+</button>
+
         </> 
       )}
 
       {step === 2 && (
         <>
           <h3 className="text-lg font-semibold mb-2">Chi tiết món trong đơn</h3>
-          <table className="table-auto w-full border mb-4">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="p-2 border">Tên món</th>
-                <th className="p-2 border">Số lượng</th>
-                <th className="p-2 border">Đơn giá</th>
-                <th className="p-2 border">Tạm tính</th>
-                <th className="p-2 border">Cập nhật</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orderDetails.map((item, idx) => (
-                <tr key={idx}>
-                  <td className="p-2 border">{item.foodName}</td>
-                  <td className="p-2 border text-center">
-                    <input
-                      type="number"
-                      value={item.quantity}
-                      min={1}
-                      onChange={(e) => {
-                        const newDetails = [...orderDetails];
-                        newDetails[idx].quantity = parseInt(e.target.value) || 1;
-                        setOrderDetails(newDetails);
-                      }}
-                      className="border p-1 w-16 text-center"
-                    />
-                  </td>
-                  <td className="p-2 border text-right">{item.price.toLocaleString()} ₫</td>
-                  <td className="p-2 border text-right">{(item.price * item.quantity).toLocaleString()} ₫</td>
-                  <td className="p-2 border text-center">
-                    <button
-                      className="bg-yellow-500 text-white px-2 py-1 rounded"
-                      onClick={() => item.orderDetailId != null ? updateQuantity(item.orderDetailId, item.quantity) : toast.error("Không thể cập nhật: thiếu ID món ăn!")}
-                    >
-                      Lưu
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <table className="table-auto w-full rounded-lg overflow-hidden shadow-lg mb-4">
+  <thead>
+    <tr className="bg-gradient-to-r from-sky-400 to-green-400 text-white font-semibold">
+      <th className="p-3 border border-green-200">Tên món</th>
+      <th className="p-3 border border-green-200">Số lượng</th>
+      <th className="p-3 border border-green-200">Đơn giá</th>
+      <th className="p-3 border border-green-200">Tạm tính</th>
+      <th className="p-3 border border-green-200">Cập nhật</th>
+    </tr>
+  </thead>
+  <tbody>
+    {orderDetails.map((item, idx) => (
+      <tr
+        key={idx}
+        className={`${idx % 2 === 0 ? "bg-green-50" : "bg-white"} hover:bg-green-100 transition-colors`}
+      >
+        <td className="p-3 border border-green-200">{item.foodName}</td>
+        <td className="p-3 border border-green-200 text-center">
+          <input
+            type="number"
+            value={item.quantity}
+            min={1}
+            onChange={(e) => {
+              const newDetails = [...orderDetails];
+              newDetails[idx].quantity = parseInt(e.target.value) || 1;
+              setOrderDetails(newDetails);
+            }}
+            className="border border-green-300 rounded px-2 w-16 text-center"
+          />
+        </td>
+        <td className="p-3 border border-green-200 text-right">{item.price.toLocaleString()} ₫</td>
+        <td className="p-3 border border-green-200 text-right">{(item.price * item.quantity).toLocaleString()} ₫</td>
+        <td className="p-3 border border-green-200 text-center">
+          <button
+            className="bg-yellow-400 hover:bg-yellow-500 text-white font-semibold px-3 py-1 rounded shadow transition duration-300"
+            onClick={() =>
+              item.orderDetailId != null
+                ? updateQuantity(item.orderDetailId, item.quantity)
+                : toast.error("Không thể cập nhật: thiếu ID món ăn!")
+            }
+          >
+            Lưu
+          </button>
+        </td>
+      </tr>
+    ))}
+  </tbody>
+</table>
+          <div className="mb-4 flex items-center gap-3">
+  <label className="font-semibold text-gray-700 whitespace-nowrap">Phương thức thanh toán:</label>
+  <select
+    className="border border-green-400 bg-white text-gray-800 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200 shadow-sm"
+    value={paymentMethod}
+    onChange={(e) => setPaymentMethod(e.target.value)}
+  >
+    <option value="" disabled>--Chọn--</option>
+    {paymentMethods.map(method => (
+      <option key={method.paymentMethodID} value={method.paymentMethodID}>
+        {method.methodName}
+      </option>
+    ))}
+  </select>
+</div>
 
-          <div className="mb-4">
-            <label>Phương thức thanh toán: </label>
-            <select
-              className="border p-2 ml-2"
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            >
-              <option value="">--Chọn--</option>
-              {paymentMethods.map(method => (
-                <option key={method.paymentMethodID} value={method.paymentMethodID}>
-                  {method.methodName}
-                </option>
-              ))}
-            </select>
-          </div>
 
-          <div className="mb-4">
-            <label>Chia hóa đơn cho bao nhiêu người: </label>
-            <input
-              type="number"
-              min={1}
-              value={splitCount}
-              onChange={(e) => setSplitCount(parseInt(e.target.value) || 1)}
-              className="border p-2 w-24 ml-2"
-            />
-          </div>
+<div className="mb-6 flex items-center gap-3">
+  <label className="font-semibold text-gray-700 whitespace-nowrap">
+    Chia hóa đơn cho bao nhiêu người:
+  </label>
+  <input
+    type="number"
+    min={1}
+    value={splitCount}
+    onChange={(e) => setSplitCount(parseInt(e.target.value) || 1)}
+    className="border border-green-400 rounded-md px-3 py-2 w-24 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200 shadow-sm"
+  />
+</div>
 
-          <div className="text-right font-semibold text-lg mt-4">
-            Tổng tiền: {totalAmount.toLocaleString()} ₫<br />
-            Mỗi người trả: {amountPerPerson.toLocaleString()} ₫
-          </div>
+<div className="text-right font-semibold text-lg text-gray-800 mt-6 mb-6 space-y-1">
+  <p>Tổng tiền: <span className="text-green-600">{totalAmount.toLocaleString()} ₫</span></p>
+  <p>Mỗi người trả: <span className="text-green-600">{amountPerPerson.toLocaleString()} ₫</span></p>
+</div>
 
-          <div className="flex gap-2">
-            <button onClick={() => setStep(1)} className="bg-gray-400 text-white px-4 py-2 rounded">Quay lại</button>
-            <button onClick={goToFinalPaymentStep} className="bg-green-600 text-white px-4 py-2 rounded">Xác nhận thanh toán</button>
-          </div>
+<div className="flex gap-4 justify-end">
+  <button
+    onClick={() => setStep(1)}
+    className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-md transition duration-200"
+  >
+    Quay lại
+  </button>
+  <button
+    onClick={goToFinalPaymentStep}
+    className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md transition duration-200"
+  >
+    Xác nhận thanh toán
+  </button>
+</div>
+
         </>
       )}
 
       {step === 3 && (
         <>
-          <h3 className="text-xl font-bold mb-4">Xác nhận thanh toán</h3>
-          {paymentMethods.find(m => m.paymentMethodID === parseInt(paymentMethod))?.methodName === "Tiền mặt" && (
-            <div className="mb-4">
-              <label>Tiền khách đưa: </label>
-              <input
-                type="number"
-                min={0}
-                value={cashReceived}
-                onChange={(e) => setCashReceived(parseInt(e.target.value) || 0)}
-                className="border p-2 ml-2 w-32"
-              />
-              <div className="mt-2 text-green-700 font-semibold">
-                {cashReceived > 0 &&    
-                  `Tiền thối lại: ${(cashReceived - totalAmount).toLocaleString()} ₫`}
-              </div>
-            </div>
-          )}
 
-          {paymentMethods.find(m => m.paymentMethodID === parseInt(paymentMethod))?.methodName === "Chuyển khoản" && (
-            <div className="mb-4">
-              <p className="text-blue-600">Vui lòng quét mã QR bên dưới để thanh toán:</p>
-              <img src="/images/qr-code-momo.png" alt="QR chuyển khoản" className="w-48 h-48 mt-2" />
-              <p className="text-sm text-gray-600 mt-2">Ghi chú: "Thanh toán đơn tại quầy"</p>
-            </div>
-          )}
+        <div className="mb-8 p-6 rounded-lg shadow-lg bg-gradient-to-br from-sky-100 via-green-50 to-green-200">
+        <h3 className="text-2xl font-bold mb-6 text-gray-900">Xác nhận thanh toán</h3>
+  {paymentMethods.find(m => m.paymentMethodID === parseInt(paymentMethod))?.methodName === "Tiền mặt" && (
+    <div className="mb-6">
+      <label className="block mb-2 font-semibold text-gray-700">Tiền khách đưa:</label>
+      <input
+        type="number"
+        min={0}
+        value={cashReceived}
+        onChange={(e) => setCashReceived(parseInt(e.target.value) || 0)}
+        className="border border-green-400 rounded-md px-3 py-2 w-36 text-gray-800 focus:outline-none focus:ring-2 focus:ring-green-400 transition duration-200 shadow-sm"
+      />
+      {cashReceived > 0 && (
+        <p className="mt-3 text-green-700 font-semibold">
+          Tiền thối lại: {(cashReceived - totalAmount).toLocaleString()} ₫
+        </p>
+      )}
+    </div>
+  )}
 
-          <div className="text-right font-semibold text-lg mt-4">
-            Tạm tính: {subtotal.toLocaleString()} ₫<br />
-            Thuế (5%): {tax.toLocaleString()} ₫<br />
-            Tổng tiền: {totalAmount.toLocaleString()} ₫<br />
-            Mỗi người trả: {amountPerPerson.toLocaleString()} ₫
-          </div>
+  {paymentMethods.find(m => m.paymentMethodID === parseInt(paymentMethod))?.methodName === "Chuyển khoản" && (
+    <div className="mb-6 p-4 bg-blue-50 rounded-md border border-blue-300">
+      <p className="text-blue-700 font-medium mb-3">
+        Vui lòng quét mã QR bên dưới để thanh toán:
+      </p>
+      <img src="/images/qr-code-momo.png" alt="QR chuyển khoản" className="w-48 h-48 mx-auto mb-3 rounded-md shadow-sm" />
+      <p className="text-sm text-gray-500 italic text-center">
+        Ghi chú: "Thanh toán đơn tại quầy"
+      </p>
+    </div>
+  )}
 
-          <div className="flex gap-2">
-            <button onClick={() => setStep(2)} className="bg-gray-400 text-white px-4 py-2 rounded">Quay lại</button>
-            <button onClick={handlePay} className="bg-green-600 text-white px-4 py-2 rounded">Hoàn tất thanh toán</button>
-          </div>
+  <div className="text-right font-semibold text-lg mt-6 space-y-1 text-gray-800">
+    <p>Tạm tính: {subtotal.toLocaleString()} ₫</p>
+    <p>Thuế (5%): {tax.toLocaleString()} ₫</p>
+    <p className="text-xl font-bold text-green-700">Tổng tiền: {totalAmount.toLocaleString()} ₫</p>
+    <p className="text-lg text-gray-700">Mỗi người trả: {amountPerPerson.toLocaleString()} ₫</p>
+  </div>
+
+  <div className="flex gap-3 mt-6">
+    <button
+      onClick={() => setStep(2)}
+      className="bg-gray-400 hover:bg-gray-500 text-white px-5 py-2 rounded-md transition"
+    >
+      Quay lại
+    </button>
+    <button
+      onClick={handlePay}
+      className="bg-green-600 hover:bg-green-700 text-white px-5 py-2 rounded-md transition"
+    >
+      Hoàn tất thanh toán
+    </button>
+  </div>
+</div>
+
         </>
       )}
     </div>

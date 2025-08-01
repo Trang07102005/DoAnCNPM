@@ -8,4 +8,14 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080', // địa chỉ backend
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })

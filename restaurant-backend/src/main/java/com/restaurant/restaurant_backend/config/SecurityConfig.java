@@ -79,10 +79,16 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 "/api/order-details/{orderDetailId}/quantity/**",
                 "/api/order-details/delete/**",
                 "/api/orders/**"
-            ).hasAnyRole("STAFF", "CASHIER")
+            ).hasAnyRole("STAFF", "CASHIER", "MANAGER")
             .requestMatchers("/api/cashier/**").hasRole("CASHIER") // 👈 Dùng hasRole, Spring tự thêm "ROLE_"
+
+            .requestMatchers(
+                "/api/manager/**",
+                "/api/orders/filter"
+                ).hasRole("MANAGER") // 👈 THÊM DÒNG NÀY
             // ✅ Các API khác yêu cầu đăng nhập
             .anyRequest().authenticated()
+            
         )
         .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authenticationProvider(authenticationProvider())

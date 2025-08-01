@@ -75,6 +75,11 @@ public class UserController {
         return userRepository.findByRole_Name("chef");
     }
 
+
+    @GetMapping("/by-role")
+public List<Users> getUsersByRole(@RequestParam String role) {
+    return userRepository.findByRole_Name(role);
+}
     
 
 }

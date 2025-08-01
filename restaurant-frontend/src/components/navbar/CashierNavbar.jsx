@@ -103,52 +103,69 @@ const CashierNavbar = ({ onLogout }) => {
           </h1>
         </div>
 
-        {/* Menu */}
         <ul className="pt-6 space-y-0.5">
-{Menus.map((Menu, index) => (
-  <div key={index}>
-    <li
-      className={`flex items-center gap-3 rounded-md py-3 px-4 cursor-pointer text-zinc-50 hover:bg-zinc-800/50 transition-all duration-300 ${
-        selectedPage === Menu.key ? "bg-zinc-800/40" : ""
-      }`}
-      onClick={() => {
-        if (Menu.children) {
-              setOpen(true); // 🟢 Mở sidebar nếu có submenu
-              setExpandedMenu(expandedMenu === Menu.key ? null : Menu.key);
-          } else {
-              setSelectedPage(Menu.key);
-              setExpandedMenu(null); // đóng dropdown khác
+  {Menus.map((Menu, index) => (
+    <div key={index}>
+      <li
+        className={`flex items-center gap-3 rounded-md py-3 px-4 cursor-pointer truncate
+          transition-colors duration-300 select-none
+          ${
+            selectedPage === Menu.key
+              ? "text-green-600 font-semibold"
+              : "text-gray-400 hover:text-green-500"
           }
-      }}
-    >
-      <span className="text-lg">{Menu.icon}</span>
-      <span className={`${!open && "hidden"} transition-all`}>
-        {Menu.title}
-      </span>
-      {Menu.children && (
-        <span className="ml-auto">{expandedMenu === Menu.key ? "▾" : "▸"}</span>
-      )}
-    </li>
+          ${open ? "justify-start" : "justify-center"}
+        `}
+        onClick={() => {
+          if (Menu.children) {
+            setOpen(true);
+            setExpandedMenu(expandedMenu === Menu.key ? null : Menu.key);
+          } else {
+            setSelectedPage(Menu.key);
+            setExpandedMenu(null);
+          }
+        }}
+      >
+        <span
+          className={`text-lg flex-shrink-0 ${
+            selectedPage === Menu.key ? "text-green-600" : "text-gray-400"
+          }`}
+        >
+          {Menu.icon}
+        </span>
+        <span className={`${!open && "hidden"} transition-all`}>
+          {Menu.title}
+        </span>
+        {Menu.children && (
+          <span className="ml-auto">{expandedMenu === Menu.key ? "▾" : "▸"}</span>
+        )}
+      </li>
 
-    {/* Submenu */}
-    {Menu.children && expandedMenu === Menu.key && (
-      <ul className="ml-8 space-y-1">
-        {Menu.children.map((child, i) => (
-          <li
-            key={i}
-            className={`py-2 px-3 rounded-md cursor-pointer text-zinc-300 hover:bg-zinc-700/40 transition-all ${
-              selectedPage === child.key ? "bg-zinc-800/30 text-white" : ""
-            }`}
-            onClick={() => setSelectedPage(child.key)}
-          >
-            {child.title}
-          </li>
-        ))}
-      </ul>
-    )}
-  </div>
-))}
+      {/* Submenu */}
+      {Menu.children && expandedMenu === Menu.key && (
+        <ul className="ml-8 mt-1 space-y-3">
+          {Menu.children.map((child, i) => (
+            <li
+              key={i}
+              className={`py-2 px-3 rounded-md cursor-pointer truncate border-l-4
+                transition-colors duration-300 select-none
+                ${
+                  selectedPage === child.key
+                    ? "border-green-600 text-green-600 font-semibold"
+                    : "border-gray-400 text-gray-400 hover:text-green-500 hover:border-green-500"
+                }
+              `}
+              onClick={() => setSelectedPage(child.key)}
+            >
+              {child.title}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  ))}
 </ul>
+
 
         {/* Log out */}
         <div className="absolute bottom-6 left-0 w-full px-4 ">

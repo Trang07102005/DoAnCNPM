@@ -10,26 +10,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.restaurant.restaurant_backend.repository.FoodRepository;
-import com.restaurant.restaurant_backend.repository.OrderDetailRepository;
 import com.restaurant.restaurant_backend.repository.OrderRepository;
 import com.restaurant.restaurant_backend.repository.UserRepository;
+import com.restaurant.restaurant_backend.service.DashboardService;
+
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/admin/dashboard")
+@RequiredArgsConstructor
 public class AdminDashboardController {
 
-    @Autowired
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
+    private final UserRepository usersRepository;
+    private final FoodRepository foodRepository;
+    private final DashboardService dashboardService;
 
-    @Autowired
-    private OrderDetailRepository orderDetailRepository;
-
-    @Autowired
-    private UserRepository usersRepository;
-
-    @Autowired
-    private FoodRepository foodRepository;
-
+    // Route: GET /api/admin/dashboard
     @GetMapping
     public ResponseEntity<?> getDashboardStats() {
         long totalBookings = orderRepository.count(); // Số đơn hàng
@@ -45,5 +42,22 @@ public class AdminDashboardController {
 
         return ResponseEntity.ok(result);
     }
-}
 
+    // Route: GET /api/admin/dashboard/summary
+    @GetMapping("/summary")
+    public ResponseEntity<?> getSummary() {
+        return ResponseEntity.ok(dashboardService.getDashboardSummary());
+    }
+
+    // Route: GET /api/admin/dashboard/orders-by-status
+    @GetMapping("/orders-by-status")
+    public ResponseEntity<?> getOrdersByStatus() {
+        return ResponseEntity.ok(dashboardService.getOrderStatusPie());
+    }
+
+    // Route: GET /api/admin/dashboard/users-by-role
+    @GetMapping("/users-by-role")
+    public ResponseEntity<?> getUsersByRole() {
+        return ResponseEntity.ok(dashboardService.getUserRolePie());
+    }
+}

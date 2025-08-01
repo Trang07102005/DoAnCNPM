@@ -1,92 +1,123 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import {
-  LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend
-} from 'recharts';
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUtensils,
+  faDollarSign,
+  faShoppingCart,
+  faUsers,
+} from "@fortawesome/free-solid-svg-icons";
+
+const COLORS = ["#0088FE", "#d1d5db"]; // Màu: Xanh + Xám
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
-    totalBookings: 0,
-    totalRevenue: 0,
     totalFoods: 0,
     totalUsers: 0,
+    totalBookings: 0,
+    totalRevenue: 0,
   });
 
-  const [monthlyData, setMonthlyData] = useState([]);
-  const [loading, setLoading] = useState(true);
-
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const headers = {
-          Authorization: `Bearer ${token}`
-        };
+    const token = localStorage.getItem("token");
 
-        // Gọi cả 2 API
-        const [generalRes, monthlyRes] = await Promise.all([
-          axios.get("http://localhost:8080/api/admin/dashboard", { headers }),
-          axios.get("http://localhost:8080/api/admin/dashboard/monthly-stats", { headers }),
-        ]);
-
-        console.log("📊 Dashboard tổng quan:", generalRes.data);
-        console.log("📈 Dữ liệu biểu đồ:", monthlyRes.data);
-
-        setStats(generalRes.data);
-        setMonthlyData(monthlyRes.data);
-      } catch (err) {
-        console.error("❌ Lỗi khi lấy dữ liệu dashboard:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchStats();
+    axios
+      .get("http://localhost:8080/api/admin/dashboard/summary", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => setStats(res.data))
+      .catch((err) => {
+        console.error("Lỗi khi tải dashboard:", err);
+      });
   }, []);
 
-  if (loading) {
-    return <div className="text-center text-white p-6">Đang tải dữ liệu...</div>;
-  }
+  const formatNumber = (num) =>
+    num.toLocaleString("vi-VN", { minimumFractionDigits: 0 });
 
-  
+  const formatMoney = (amount) =>
+    amount.toLocaleString("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    });
+
+  const chartMock = (value) => [
+    { name: "Used", value },
+    { name: "Remaining", value: Math.max(value * 0.5, 1) },
+  ];
+
+  const Card = ({ title, value, unit, chartData, icon }) => (
+    <div className="bg-white shadow-md rounded-2xl p-4 flex flex-col items-center hover:shadow-lg transition">
+      <div className="text-gray-500 text-sm mb-1">{title}</div>
+      <div className="text-2xl font-semibold text-black mb-3">
+        {unit === "vnd" ? formatMoney(value) : formatNumber(value)}
+      </div>
+      <div className="relative w-24 h-24">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={chartData}
+              dataKey="value"
+              outerRadius={40}
+              innerRadius={25}
+              stroke="none"
+            >
+              {chartData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={index === 0 ? COLORS[0] : COLORS[1]}
+                />
+              ))}
+            </Pie>
+            <Tooltip />
+          </PieChart>
+        </ResponsiveContainer>
+        <FontAwesomeIcon
+          icon={icon}
+          className="absolute top-1/2 left-1/2 text-blue-600 text-xl transform -translate-x-1/2 -translate-y-1/2"
+        />
+      </div>
+    </div>
+  );
 
   return (
-    <div className="p-6 space-y-8">
-      <h2 className='font-bold text-xl'>Admin Dashboard</h2>
-
-      {/* Tổng quan */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-white">
-        <div className="bg-gradient-to-r from-red-900 to-black p-4 rounded-xl shadow">
-          <h2 className="text-sm">Tổng Orders</h2>
-          <p className="text-2xl font-bold">{stats.totalBookings}</p>
-        </div>
-        <div className="bg-gradient-to-r from-red-900 to-black p-4 rounded-xl shadow">
-          <h2 className="text-sm">Tổng doanh thu</h2>
-          <p className="text-2xl font-bold">{stats.totalRevenue.toLocaleString('vi-VN')} ₫</p>
-        </div>
-        <div className="bg-gradient-to-r from-red-900 to-black p-4 rounded-xl shadow">
-          <h2 className="text-sm">Tổng số món ăn</h2>
-          <p className="text-2xl font-bold">{stats.totalFoods}</p>
-        </div>
-        <div className="bg-gradient-to-r from-red-900 to-black p-4 rounded-xl shadow">
-          <h2 className="text-sm">Tổng số người dùng</h2>
-          <p className="text-2xl font-bold">{stats.totalUsers}</p>
-        </div>
-      </div>
-
-      {/* Biểu đồ */}
-      <div className="bg-white rounded-xl shadow p-6">
-        <h2 className="text-xl font-bold mb-4 text-gray-800">Biểu đồ doanh thu theo tháng</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={monthlyData}>
-            <Line type="monotone" dataKey="totalRevenue" stroke="#ef4444" strokeWidth={3} />
-            <CartesianGrid stroke="#ccc" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+    <div className="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <Card
+        title="MENU"
+        value={stats.totalFoods}
+        unit="count"
+        chartData={chartMock(stats.totalFoods)}
+        icon={faUtensils}
+      />
+      <Card
+        title="DOANH THU"
+        value={stats.totalRevenue}
+        unit="vnd"
+        chartData={chartMock(stats.totalRevenue)}
+        icon={faDollarSign}
+      />
+      <Card
+        title="ORDERS"
+        value={stats.totalBookings}
+        unit="count"
+        chartData={chartMock(stats.totalBookings)}
+        icon={faShoppingCart}
+      />
+      <Card
+        title="NGƯỜI DÙNG"
+        value={stats.totalUsers}
+        unit="count"
+        chartData={chartMock(stats.totalUsers)}
+        icon={faUsers}
+      />
     </div>
   );
 };

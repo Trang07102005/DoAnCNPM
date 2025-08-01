@@ -19,19 +19,20 @@ public class OrderStatusController {
 
     private final OrderStatusRepository orderStatusRepository;
 
-    // ✅ Lấy danh sách món chưa chế biến
     @GetMapping("/pending")
-    public List<PendingDishDTO> getPendingDishes() {
+public List<PendingDishDTO> getPendingDishes() {
     return orderStatusRepository.findByStatusIn(List.of("Chưa chế biến", "Đang chế biến")).stream()
         .map(os -> new PendingDishDTO(
             os.getOrderStatusId(),
             os.getFood().getFoodName(),
             os.getOrder().getOrderId(),
             os.getStatus(),
-            os.getUpdatedAt()
+            os.getUpdatedAt(),
+            os.getFood().getImageUrl() // <== THÊM DÒNG NÀY
         ))
         .toList();
 }
+
 
 
 

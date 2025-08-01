@@ -2,6 +2,7 @@ package com.restaurant.restaurant_backend.repository;
 
 import com.restaurant.restaurant_backend.model.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface OrderRepository extends JpaRepository<Order, Integer> {
+public interface OrderRepository extends JpaRepository<Order, Integer>, JpaSpecificationExecutor<Order> {
 
     // Tìm các đơn theo ID bàn
     List<Order> findByRestaurantTable_TableId(Integer tableId);
@@ -42,14 +43,40 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
                    "GROUP BY MONTH(order_time)", nativeQuery = true)
     List<Object[]> getMonthlyRevenue();
 
-    // Số đơn theo từng tháng (JPQL)
-    @Query("SELECT MONTH(o.orderTime), COUNT(o) FROM Order o GROUP BY MONTH(o.orderTime)")
-    List<Object[]> countOrdersByMonth();
+   
 
     @Query("SELECT o.status, COUNT(o) FROM Order o GROUP BY o.status")
     List<Object[]> countOrdersByStatus();
 
     @Query("SELECT SUM(o.total) FROM Order o")
     Double sumTotalRevenue();
+
+    // Đếm đơn theo ngày
+@Query("SELECT FUNCTION('DATE', o.orderTime), COUNT(o) FROM Order o GROUP BY FUNCTION('DATE', o.orderTime) ORDER BY FUNCTION('DATE', o.orderTime)")
+List<Object[]> countOrdersByDay();
+
+// Đếm đơn theo tháng
+@Query("SELECT FUNCTION('MONTH', o.orderTime), COUNT(o) FROM Order o GROUP BY FUNCTION('MONTH', o.orderTime) ORDER BY FUNCTION('MONTH', o.orderTime)")
+List<Object[]> countOrdersByMonth();
+
+// Đếm đơn theo năm
+@Query("SELECT FUNCTION('YEAR', o.orderTime), COUNT(o) FROM Order o GROUP BY FUNCTION('YEAR', o.orderTime) ORDER BY FUNCTION('YEAR', o.orderTime)")
+List<Object[]> countOrdersByYear();
+
+
+@Query("SELECT DATE(o.orderTime) as orderDay, SUM(o.total) FROM Order o GROUP BY DATE(o.orderTime) ORDER BY orderDay ASC")
+List<Object[]> sumRevenueByDay();
+
+
+@Query("SELECT FUNCTION('DATE_FORMAT', o.orderTime, '%Y-%m') as orderMonth, SUM(o.total) FROM Order o GROUP BY orderMonth ORDER BY orderMonth ASC")
+List<Object[]> sumRevenueByMonth();
+
+
+@Query("SELECT YEAR(o.orderTime) as orderYear, SUM(o.total) FROM Order o GROUP BY orderYear ORDER BY orderYear ASC")
+List<Object[]> sumRevenueByYear();
+
+
+
+    
 
 }

@@ -91,32 +91,28 @@ public class RestaurantTableController {
     // Lọc theo status "Trống"
     return tableRepository.findByStatus("Trống");
     }
-    // ✅ API: Lấy danh sách bàn và cập nhật trạng thái động theo thời gian thực
     @GetMapping("/with-status")
-    public List<RestaurantTable> getTablesWithRealTimeStatus() {
-        List<RestaurantTable> tables = tableRepository.findAll();
-        LocalDateTime now = LocalDateTime.now();
-    
-        for (RestaurantTable table : tables) {
-            // Nếu bàn đang phục vụ thì giữ nguyên trạng thái
-            if ("Đang phục vụ".equalsIgnoreCase(table.getStatus())) {
-                continue;
-            }
-    
-            boolean hasActiveReservation = reservationRepository
-                .findByRestaurantTable_TableIdAndReservationTimeBetween(
-                    table.getTableId(),
-                    now.minusMinutes(59),
-                    now.plusMinutes(59)
-                ).stream()
-                .anyMatch(r -> "Đã đặt".equals(r.getStatus()));
-    
-            // Nếu không đang phục vụ, thì cập nhật theo tình trạng đặt
-            table.setStatus(hasActiveReservation ? "Đã đặt" : "Trống");
+public List<RestaurantTable> getTablesWithRealTimeStatus() {
+    List<RestaurantTable> tables = tableRepository.findAll();
+
+    for (RestaurantTable table : tables) {
+        // Nếu bàn đang phục vụ thì giữ nguyên trạng thái
+        if ("Đang phục vụ".equalsIgnoreCase(table.getStatus())) {
+            continue;
         }
-    
-        return tables;
+
+        boolean hasActiveReservation = reservationRepository
+            .findByRestaurantTable_TableId(table.getTableId())
+            .stream()
+            .anyMatch(r -> "Đã đặt".equalsIgnoreCase(r.getStatus()));
+
+        // Nếu không đang phục vụ, thì cập nhật theo tình trạng đặt
+        table.setStatus(hasActiveReservation ? "Đã đặt" : "Trống");
     }
+
+    return tables;
+}
+
 
     @GetMapping("/serving")
 public ResponseEntity<List<RestaurantTable>> getTablesBeingServed() {

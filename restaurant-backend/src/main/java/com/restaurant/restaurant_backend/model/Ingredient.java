@@ -1,5 +1,7 @@
 package com.restaurant.restaurant_backend.model;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -27,5 +29,11 @@ public class Ingredient {
     private String ingredientName;
 
     @Column(name = "Unit", nullable = false)
-    private String unit; // Gram, ml, cái
+    private String unit;
+
+    @Column(name = "QuantityInStock", nullable = false)
+    private BigDecimal quantityInStock;  // Thêm trường này
+
+    @Column(name = "ImageUrl")
+    private String imageUrl;  // ✅ Thêm dòng này
 }

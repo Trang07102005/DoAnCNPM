@@ -101,50 +101,69 @@ const StaffNavbar = ({ onLogout }) => {
 
         {/* Menu */}
         <ul className="pt-6 space-y-0.5">
-{Menus.map((Menu, index) => (
-  <div key={index}>
-    <li
-      className={`flex items-center gap-3 rounded-md py-3 px-4 cursor-pointer text-zinc-50 hover:bg-zinc-800/50 transition-all duration-300 ${
-        selectedPage === Menu.key ? "bg-zinc-800/40" : ""
-      }`}
-      onClick={() => {
-        if (Menu.children) {
-              setOpen(true); // 🟢 Mở sidebar nếu có submenu
-              setExpandedMenu(expandedMenu === Menu.key ? null : Menu.key);
-          } else {
-              setSelectedPage(Menu.key);
-              setExpandedMenu(null); // đóng dropdown khác
-          }
-      }}
-    >
-      <span className="text-lg">{Menu.icon}</span>
-      <span className={`${!open && "hidden"} transition-all`}>
-        {Menu.title}
-      </span>
-      {Menu.children && (
-        <span className="ml-auto">{expandedMenu === Menu.key ? "▾" : "▸"}</span>
-      )}
-    </li>
+        {Menus.map((Menu, index) => (
+          <div key={index}>
+            <li
+              className={`flex items-center gap-3 rounded-md py-3 px-4 cursor-pointer truncate
+                transition-colors duration-300 select-none
+                ${
+                  selectedPage === Menu.key
+                    ? "text-yellow-600 font-semibold"
+                    : "text-gray-400 hover:text-yellow-500"
+                }
+                ${open ? "justify-start" : "justify-center"}
+              `}
+              onClick={() => {
+                if (Menu.children) {
+                  setOpen(true);
+                  setExpandedMenu(expandedMenu === Menu.key ? null : Menu.key);
+                } else {
+                  setSelectedPage(Menu.key);
+                  setExpandedMenu(null);
+                }
+              }}
+            >
+              <span
+                className={`text-lg flex-shrink-0 ${
+                  selectedPage === Menu.key ? "text-yellow-600" : "text-gray-400"
+                }`}
+              >
+                {Menu.icon}
+              </span>
+              <span className={`${!open && "hidden"} transition-all`}>
+                {Menu.title}
+              </span>
+              {Menu.children && (
+                <span className="ml-auto">{expandedMenu === Menu.key ? "▾" : "▸"}</span>
+              )}
+            </li>
 
-    {/* Submenu */}
-    {Menu.children && expandedMenu === Menu.key && (
-      <ul className="ml-8 space-y-1">
-        {Menu.children.map((child, i) => (
-          <li
-            key={i}
-            className={`py-2 px-3 rounded-md cursor-pointer text-zinc-300 hover:bg-zinc-700/40 transition-all ${
-              selectedPage === child.key ? "bg-zinc-800/30 text-white" : ""
-            }`}
-            onClick={() => setSelectedPage(child.key)}
-          >
-            {child.title}
-          </li>
-        ))}
-      </ul>
-    )}
-  </div>
-))}
+      {/* Submenu */}
+      {Menu.children && expandedMenu === Menu.key && (
+        <ul className="ml-8 mt-1 space-y-3">
+          {Menu.children.map((child, i) => (
+            <li
+              key={i}
+              className={`py-2 px-3 rounded-md cursor-pointer truncate border-l-4
+                transition-colors duration-300 select-none
+                ${
+                  selectedPage === child.key
+                    ? "border-yellow-600 text-yellow-600 font-semibold"
+                    : "border-gray-400 text-gray-400 hover:text-yellow-500 hover:border-yellow-500"
+                }
+              `}
+              onClick={() => setSelectedPage(child.key)}
+            >
+              {child.title}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  ))}
 </ul>
+
+
 
         {/* Log out */}
         <div className="absolute bottom-6 left-0 w-full px-4 ">
@@ -161,7 +180,8 @@ const StaffNavbar = ({ onLogout }) => {
       </div>
 
       {/* Main dashboard area */}
-      <div className="h-screen flex-1 bg-zinc-100 space-y-6">
+      <div className="h-screen flex-1 bg-zinc-100 flex flex-col overflow-hidden space-y-6">
+
         {/* Topbar */}
         <div className="w-full h-[8ch] px-12 bg-zinc-50 shadow-md flex items-center justify-between">
           <div className="w-96 border border-zinc-300 rounded-full h-11 flex items-center justify-center">
@@ -189,25 +209,28 @@ const StaffNavbar = ({ onLogout }) => {
 
         </div>
 
-        {/* Page content */}
-        <div className="w-full px-12">
-          <h1 className="text-xl font-semibold mt-6 mb-2">
-            {
-              {
-                dashboard: "Trang Dashboard",
-                "order-management": "Quản Lý Order",
-                "table-report": "Báo Cáo Bàn Đặt",
-                "best-seller-report": "Báo Cáo Món Bán Chạy",
-              }[selectedPage] || "Trang"
-            }
-          </h1>
+       {/* Page content */}
+<div className="flex-1 overflow-y-auto px-12 pb-12">
+  <h1 className="text-xl font-semibold mt-6 mb-6">
+    {{
+      dashboard: "Trang Dashboard",
+      "order-management": "Quản Lý Order",
+      "table-report": "Báo Cáo Bàn Đặt",
+      "best-seller-report": "Báo Cáo Món Bán Chạy",
+    }[selectedPage] || "Trang"}
+  </h1>
 
-            {/* Nội dung page cụ thể */}
-            {selectedPage === "dashboard" && <StaffDashboard/>}
-            {selectedPage === "order-management" && <StaffOrderFlow/>}
-            {selectedPage === "table-report" && <div>Nội dung báo cáo bàn đặt...</div>}
-            {selectedPage === "best-seller-report" && <div>Nội dung món bán chạy...</div>}
-          </div>
+  {/* Render nội dung theo selectedPage */}
+  {selectedPage === "dashboard" && <StaffDashboard />}
+  {selectedPage === "order-management" && <StaffOrderFlow />}
+  {selectedPage === "table-report" && (
+    <div className="text-gray-600 italic">Nội dung báo cáo bàn đặt đang được phát triển...</div>
+  )}
+  {selectedPage === "best-seller-report" && (
+    <div className="text-gray-600 italic">Nội dung báo cáo món bán chạy đang được phát triển...</div>
+  )}
+</div>
+
 
       </div>
     </div>
