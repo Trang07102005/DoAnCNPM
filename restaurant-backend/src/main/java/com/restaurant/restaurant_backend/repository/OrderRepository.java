@@ -74,7 +74,7 @@ List<Object[]> sumRevenueByMonth();
 
 @Query("SELECT YEAR(o.orderTime) as orderYear, SUM(o.total) FROM Order o GROUP BY orderYear ORDER BY orderYear ASC")
 List<Object[]> sumRevenueByYear();
-
+List<Order> findByRestaurantTable_TableIdAndStatusInOrderByOrderTimeDesc(Integer tableId, List<String> status);
 
 
     

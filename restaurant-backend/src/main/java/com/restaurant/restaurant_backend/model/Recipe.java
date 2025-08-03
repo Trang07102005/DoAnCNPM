@@ -1,18 +1,11 @@
 package com.restaurant.restaurant_backend.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne; // Dùng OneToOne
-import jakarta.persistence.Table;
-import jakarta.persistence.FetchType;
-
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Table(name = "recipe")
@@ -25,10 +18,13 @@ public class Recipe {
     @Column(name = "RecipeID")
     private Integer recipeId;
 
-    @OneToOne(fetch = FetchType.LAZY) // Mối quan hệ 1-1 với Food (mỗi công thức cho 1 món ăn)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "FoodID")
     private Food food;
 
     @Column(name = "Description")
     private String description;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<RecipeDetail> recipeDetails;
 }

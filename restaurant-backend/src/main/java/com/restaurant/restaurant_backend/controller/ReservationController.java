@@ -1,9 +1,7 @@
 package com.restaurant.restaurant_backend.controller;
 
 import com.restaurant.restaurant_backend.model.Reservation;
-import com.restaurant.restaurant_backend.model.RestaurantTable;
 import com.restaurant.restaurant_backend.repository.ReservationRepository;
-import com.restaurant.restaurant_backend.repository.RestaurantTableRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -19,7 +17,6 @@ import java.util.Map;
 public class ReservationController {
 
     private final ReservationRepository reservationRepository;
-    private final RestaurantTableRepository tableRepository;
 
     // ✅ Lấy tất cả đặt bàn
     @GetMapping
@@ -27,7 +24,7 @@ public class ReservationController {
         return reservationRepository.findAll();
     }
 
-    // ✅ Tạo đặt bàn
+    // ✅ Tạo đặt bàn mới (không set trạng thái bàn)
     @PostMapping
     public ResponseEntity<?> createReservation(@RequestBody Reservation reservation) {
         if (reservation.getCustomerName() == null || reservation.getCustomerName().trim().isEmpty()) {
@@ -41,28 +38,18 @@ public class ReservationController {
         }
 
         Integer tableId = reservation.getRestaurantTable().getTableId();
-        LocalDateTime start = reservation.getReservationTime();
-        LocalDateTime end = start.plusHours(1);
+        LocalDateTime reservationTime = reservation.getReservationTime();
+        LocalDateTime checkStart = reservationTime.minusHours(1).minusMinutes(30);
+        LocalDateTime checkEnd = reservationTime.plusHours(1).plusMinutes(30);
 
         boolean exists = reservationRepository
-                .findByRestaurantTable_TableIdAndReservationTimeBetween(tableId, start.minusHours(1), end)
+                .findByRestaurantTable_TableIdAndReservationTimeBetween(tableId, checkStart, checkEnd)
                 .stream().findAny().isPresent();
 
         if (exists) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Bàn đã có người đặt trong khoảng thời gian này");
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("Bàn đã được đặt trong khoảng thời gian này hoặc quá gần thời gian khác.");
         }
-
-        RestaurantTable table = tableRepository.findById(tableId).orElse(null);
-        if (table == null) {
-            return ResponseEntity.badRequest().body("Không tìm thấy bàn");
-        }
-
-       
-        
-        table.setStatus("Đã đặt");
-        tableRepository.save(table);
-
-
 
         reservation.setStatus("Đã đặt");
         Reservation savedRes = reservationRepository.save(reservation);
@@ -70,21 +57,12 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(savedRes);
     }
 
-    // ✅ Cập nhật thông tin đặt bàn
+    // ✅ Cập nhật đặt bàn
     @PutMapping("/{id}")
     public ResponseEntity<?> updateReservation(@PathVariable Integer id, @RequestBody Reservation updatedReservation) {
         Reservation existing = reservationRepository.findById(id).orElse(null);
         if (existing == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy đặt bàn");
-        }
-
-        // Cập nhật lại trạng thái bàn nếu cần
-        LocalDateTime now = LocalDateTime.now();
-        RestaurantTable table = existing.getRestaurantTable();
-        if (!"Đang phục vụ".equalsIgnoreCase(table.getStatus())) {
-            boolean active = isTimeSlotOverlapping(table.getTableId(), now, existing.getReservationId());
-            table.setStatus(active ? "Đã đặt" : "Trống");
-            tableRepository.save(table);
         }
 
         if (updatedReservation.getCustomerName() == null || updatedReservation.getCustomerName().trim().isEmpty()) {
@@ -98,32 +76,18 @@ public class ReservationController {
         }
 
         Integer newTableId = updatedReservation.getRestaurantTable().getTableId();
-        LocalDateTime newStart = updatedReservation.getReservationTime();
-        LocalDateTime newEnd = newStart.plusHours(1);
+        LocalDateTime newReservationTime = updatedReservation.getReservationTime();
+        LocalDateTime checkStart = newReservationTime.minusHours(1).minusMinutes(30);
+        LocalDateTime checkEnd = newReservationTime.plusHours(1).plusMinutes(30);
 
         boolean exists = reservationRepository
-                .findByRestaurantTable_TableIdAndReservationTimeBetween(newTableId, newStart.minusHours(1), newEnd)
+                .findByRestaurantTable_TableIdAndReservationTimeBetween(newTableId, checkStart, checkEnd)
                 .stream()
                 .anyMatch(r -> !r.getReservationId().equals(id));
 
         if (exists) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Bàn đã có người đặt trong khoảng thời gian này");
-        }
-
-        // Nếu đổi bàn, cập nhật trạng thái bàn
-        if (!existing.getRestaurantTable().getTableId().equals(newTableId)) {
-            RestaurantTable oldTable = existing.getRestaurantTable();
-            oldTable.setStatus("Trống");
-            tableRepository.save(oldTable);
-
-            RestaurantTable newTable = tableRepository.findById(newTableId).orElse(null);
-            if (newTable == null) {
-                return ResponseEntity.badRequest().body("Không tìm thấy bàn mới");
-            }
-            newTable.setStatus("Đã đặt");
-            tableRepository.save(newTable);
-
-            existing.setRestaurantTable(newTable);
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body("Bàn đã được đặt trong khoảng thời gian này hoặc quá gần thời gian khác.");
         }
 
         existing.setCustomerName(updatedReservation.getCustomerName().trim());
@@ -132,14 +96,13 @@ public class ReservationController {
         existing.setNumberOfPeople(updatedReservation.getNumberOfPeople());
         existing.setNote(updatedReservation.getNote());
         existing.setReservationTime(updatedReservation.getReservationTime());
+        existing.setRestaurantTable(updatedReservation.getRestaurantTable());
 
         reservationRepository.save(existing);
-
         return ResponseEntity.ok("Cập nhật đặt bàn thành công");
     }
 
-
-    // ✅ Cập nhật trạng thái đặt bàn
+    // ✅ Cập nhật trạng thái đặt bàn (giữ nguyên table, không thay đổi table status)
     @PutMapping("/status/{id}")
     public ResponseEntity<?> updateStatus(@PathVariable Integer id, @RequestBody Map<String, String> req) {
         Reservation resv = reservationRepository.findById(id).orElse(null);
@@ -154,13 +117,6 @@ public class ReservationController {
 
         resv.setStatus(status);
         reservationRepository.save(resv);
-
-        if (status.equals("Hoàn thành") || status.equals("Đã huỷ")) {
-            RestaurantTable table = resv.getRestaurantTable();
-            table.setStatus("Trống");
-            tableRepository.save(table);
-        }
-
         return ResponseEntity.ok("Cập nhật trạng thái thành công");
     }
 
@@ -172,21 +128,16 @@ public class ReservationController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy đặt bàn");
         }
 
-        if (resv.getStatus().equals("Đã đặt")) {
-            RestaurantTable table = resv.getRestaurantTable();
-            table.setStatus("Trống");
-            tableRepository.save(table);
-        }
-
         reservationRepository.deleteById(id);
         return ResponseEntity.ok("Xoá đặt bàn thành công");
     }
-    private boolean isTimeSlotOverlapping(Integer tableId, LocalDateTime start, Integer excludeReservationId) {
-    LocalDateTime end = start.plusHours(1);
-    return reservationRepository
-        .findByRestaurantTable_TableIdAndReservationTimeBetween(tableId, start.minusHours(1), end)
-        .stream()
-        .anyMatch(r -> excludeReservationId == null || !r.getReservationId().equals(excludeReservationId));
-}
 
+    // ✅ Dùng cho cập nhật trạng thái bàn (nếu sau này muốn dùng)
+    private boolean isTimeSlotOverlapping(Integer tableId, LocalDateTime start, Integer excludeReservationId) {
+        LocalDateTime end = start.plusHours(1);
+        return reservationRepository
+            .findByRestaurantTable_TableIdAndReservationTimeBetween(tableId, start.minusHours(1), end)
+            .stream()
+            .anyMatch(r -> excludeReservationId == null || !r.getReservationId().equals(excludeReservationId));
+    }
 }

@@ -188,6 +188,7 @@ const AddRecipe = () => {
             id="description"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            maxLength={1000}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-green-400 focus:border-green-400 transition-all duration-200"
             placeholder="Nhập mô tả công thức..."
             rows={3}

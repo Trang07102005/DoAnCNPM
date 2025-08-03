@@ -20,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/orders")
@@ -33,6 +34,7 @@ public class OrderController {
     private final OrderService orderService;
     private final OrderDetailRepository orderDetailRepository;
     private final OrderStatusRepository orderStatusRepository;
+    private final ReservationRepository reservationRepository; // Đã có
 
     // ✅ Lấy tất cả order (ROLE_STAFF + ROLE_CASHIER)
     @PreAuthorize("hasAnyAuthority('ROLE_STAFF', 'ROLE_CASHIER')")
@@ -47,7 +49,10 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     @GetMapping("/by-table/{tableId}")
     public ResponseEntity<List<OrderDTO>> getOrdersByTable(@PathVariable Integer tableId) {
-        List<Order> orders = orderRepository.findByRestaurantTable_TableId(tableId);
+        List<Order> orders = orderRepository.findByRestaurantTable_TableIdAndStatusInOrderByOrderTimeDesc(
+            tableId, 
+            List.of("Đang xử lý", "Đang phục vụ")
+        );
         List<OrderDTO> dtos = orders.stream().map(this::convertToDTO).toList();
         return ResponseEntity.ok(dtos);
     }
@@ -80,16 +85,14 @@ public class OrderController {
     // ✅ Lấy order theo ID (ROLE_STAFF + ROLE_CASHIER)
     @PreAuthorize("hasAnyAuthority('ROLE_STAFF', 'ROLE_CASHIER')")
     @GetMapping("/{orderId}")
-        public ResponseEntity<?> getOrderById(@PathVariable Integer orderId) {
+    public ResponseEntity<?> getOrderById(@PathVariable Integer orderId) {
         Order order = orderRepository.findById(orderId).orElse(null);
-                if (order == null) {
-                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy đơn hàng");
-                }
-
-            OrderDTO dto = convertToDTO(order);
-            return ResponseEntity.ok(dto);
-    }   
-
+        if (order == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy đơn hàng");
+        }
+        OrderDTO dto = convertToDTO(order);
+        return ResponseEntity.ok(dto);
+    }
 
     // ✅ Tạo đơn hàng (STAFF)
     @PreAuthorize("hasAuthority('ROLE_STAFF')")
@@ -100,10 +103,20 @@ public class OrderController {
         }
 
         RestaurantTable table = tableRepository.findById(req.getTableId()).orElse(null);
-        if (table == null || !"Trống".equalsIgnoreCase(table.getStatus())) {
+        if (table == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy bàn");
+        }
+
+        // Kiểm tra reservation với trạng thái "Khách đã đến" bằng Optional
+        Optional<Reservation> reservationOpt = reservationRepository.findByRestaurantTable_TableIdAndStatus(req.getTableId(), "Khách đã đến");
+        if (reservationOpt.isEmpty() && !"Trống".equalsIgnoreCase(table.getStatus())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Bàn không hợp lệ hoặc đã có người ngồi");
         }
 
+        if (reservationOpt.isPresent() || "Trống".equalsIgnoreCase(table.getStatus())) {
+            table.setStatus("Đang phục vụ");
+            tableRepository.save(table);
+        }
         Users createdBy = new Users();
         createdBy.setUserId(req.getCreatedById());
 
@@ -148,6 +161,7 @@ public class OrderController {
         order.setTotal(total);
         orderRepository.save(order);
 
+        // Cập nhật trạng thái bàn thành "Đang phục vụ" sau khi tạo đơn hàng
         table.setStatus("Đang phục vụ");
         tableRepository.save(table);
 
@@ -216,15 +230,11 @@ public class OrderController {
             d.setFoodId(detail.getFood().getFoodId());
             d.setFoodName(detail.getFood().getFoodName());
             d.setImageUrl(detail.getFood().getImageUrl());
-
             d.setPrice(detail.getPrice());
             d.setQuantity(detail.getQuantity());
-
-            // 👉 Tính total = price * quantity
-        BigDecimal total = detail.getPrice().multiply(BigDecimal.valueOf(detail.getQuantity()));
-        d.setTotal(total);
-
-        d.setOrderId(order.getOrderId());
+            BigDecimal total = detail.getPrice().multiply(BigDecimal.valueOf(detail.getQuantity()));
+            d.setTotal(total);
+            d.setOrderId(order.getOrderId());
             return d;
         }).toList();
 
@@ -232,19 +242,18 @@ public class OrderController {
         return dto;
     }
 
+    @GetMapping("/revenue/monthly")
+    public ResponseEntity<List<MonthlyRevenueDTO>> getMonthlyRevenue() {
+        return ResponseEntity.ok(orderService.getMonthlyRevenue());
+    }
 
-        @GetMapping("/revenue/monthly")
-        public ResponseEntity<List<MonthlyRevenueDTO>> getMonthlyRevenue() {
-            return ResponseEntity.ok(orderService.getMonthlyRevenue());
-        }
+    @GetMapping("/filter")
+    public ResponseEntity<List<Order>> filterOrders(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(required = false) Integer tableId) {
 
-        @GetMapping("/filter")
-public ResponseEntity<List<Order>> filterOrders(
-        @RequestParam(required = false) String status,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-        @RequestParam(required = false) Integer tableId) {
-
-    List<Order> orders = orderService.filterOrders(status, date);
-    return ResponseEntity.ok(orders);
-}
+        List<Order> orders = orderService.filterOrders(status, date);
+        return ResponseEntity.ok(orders);
+    }
 }

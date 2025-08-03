@@ -2,19 +2,23 @@ import React, { useState } from "react";
 
 const CustomerInfoModal = ({ onClose, onContinue }) => {
   const [name, setName] = useState("");
-  const [guests, setGuests] = useState(1);
+  const [guests, setGuests] = useState(1); // giá trị chọn
+  const [customGuests, setCustomGuests] = useState(""); // input custom
   const [note, setNote] = useState("");
 
   const handleSubmit = () => {
+    const finalGuests = guests === 0 ? parseInt(customGuests) : guests;
+
     if (!name.trim()) {
       alert("Vui lòng nhập tên khách hàng");
       return;
     }
-    if (guests < 1) {
+    if (!finalGuests || finalGuests < 1) {
       alert("Số khách phải >= 1");
       return;
     }
-    onContinue(name, guests, note);
+
+    onContinue(name, finalGuests, note);
   };
 
   return (
@@ -48,7 +52,10 @@ const CustomerInfoModal = ({ onClose, onContinue }) => {
           {[1, 2, 3, 4, 5].map((n) => (
             <button
               key={n}
-              onClick={() => setGuests(n)}
+              onClick={() => {
+                setGuests(n);
+                setCustomGuests("");
+              }}
               className={`rounded-lg border px-4 py-2 text-sm
                 ${guests === n
                   ? "border-red-500 bg-red-100 text-red-600 font-semibold"
@@ -59,7 +66,10 @@ const CustomerInfoModal = ({ onClose, onContinue }) => {
             </button>
           ))}
           <button
-            onClick={() => setGuests(0)}
+            onClick={() => {
+              setGuests(0);
+              setCustomGuests("");
+            }}
             className={`rounded-lg border px-4 py-2 text-sm col-span-3 text-center
               ${guests === 0
                 ? "border-red-500 bg-red-100 text-red-600 font-semibold"
@@ -76,8 +86,8 @@ const CustomerInfoModal = ({ onClose, onContinue }) => {
             min="1"
             placeholder="Enter number of guests"
             className="w-full border border-gray-200 rounded-lg px-3 py-2 mb-4"
-            value={guests}
-            onChange={(e) => setGuests(parseInt(e.target.value) || 1)}
+            value={customGuests}
+            onChange={(e) => setCustomGuests(e.target.value)}
           />
         )}
 

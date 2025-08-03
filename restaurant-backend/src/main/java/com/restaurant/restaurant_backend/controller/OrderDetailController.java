@@ -5,15 +5,19 @@ import com.restaurant.restaurant_backend.dto.OrderDetailRequest;
 import com.restaurant.restaurant_backend.model.Food;
 import com.restaurant.restaurant_backend.model.Order;
 import com.restaurant.restaurant_backend.model.OrderDetail;
+import com.restaurant.restaurant_backend.model.OrderStatus;
 import com.restaurant.restaurant_backend.repository.FoodRepository;
 import com.restaurant.restaurant_backend.repository.OrderDetailRepository;
 import com.restaurant.restaurant_backend.repository.OrderRepository;
+import com.restaurant.restaurant_backend.repository.OrderStatusRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,64 +28,63 @@ import java.util.stream.Collectors;
 public class OrderDetailController {
 
     private final OrderDetailRepository orderDetailRepository;
-    private final OrderRepository orderRepository; // ✅ THÊM DÒNG NÀY
+    private final OrderRepository orderRepository;
     private final FoodRepository foodRepository;
+    private final OrderStatusRepository orderStatusRepository; // Thêm repository
 
     @GetMapping("/by-order/{orderId}")
-public ResponseEntity<List<OrderDetailDTO>> getDetailsByOrder(@PathVariable Integer orderId) {
-    List<OrderDetail> details = orderDetailRepository.findByOrder_OrderId(orderId);
-    List<OrderDetailDTO> dtoList = details.stream().map(detail -> {
-        OrderDetailDTO dto = new OrderDetailDTO();
-        dto.setOrderDetailId(detail.getOrderDetailId());
-        dto.setFoodId(detail.getFood().getFoodId());
-        dto.setFoodName(detail.getFood().getFoodName());
-        dto.setPrice(detail.getPrice());
-        dto.setQuantity(detail.getQuantity());
-        dto.setImageUrl(detail.getFood().getImageUrl());
-        return dto;
-    }).collect(Collectors.toList());
+    public ResponseEntity<List<OrderDetailDTO>> getDetailsByOrder(@PathVariable Integer orderId) {
+        List<OrderDetail> details = orderDetailRepository.findByOrder_OrderId(orderId);
+        List<OrderDetailDTO> dtoList = details.stream().map(detail -> {
+            OrderDetailDTO dto = new OrderDetailDTO();
+            dto.setOrderDetailId(detail.getOrderDetailId());
+            dto.setFoodId(detail.getFood().getFoodId());
+            dto.setFoodName(detail.getFood().getFoodName());
+            dto.setPrice(detail.getPrice());
+            dto.setQuantity(detail.getQuantity());
+            dto.setImageUrl(detail.getFood().getImageUrl());
+            return dto;
+        }).collect(Collectors.toList());
 
-    return ResponseEntity.ok(dtoList);
-}
-
-
-@PutMapping("/{id}/quantity")
-public ResponseEntity<?> updateQuantity(@PathVariable Integer id, @RequestParam Integer quantity) {
-    OrderDetail detail = orderDetailRepository.findById(id).orElse(null);
-    if (detail == null) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy món trong đơn");
+        return ResponseEntity.ok(dtoList);
     }
 
-    detail.setQuantity(quantity);
-    orderDetailRepository.save(detail);
-
-    Order order = detail.getOrder();
-    recalculateOrderTotal(order); 
-
-    return ResponseEntity.ok("Cập nhật số lượng và tổng tiền thành công");
-}
-
-
-
-    // ✅ Xoá một món trong đơn
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteDetail(@PathVariable Integer id) {
-        if (!orderDetailRepository.existsById(id)) {
+    @PutMapping("/{id}/quantity")
+    public ResponseEntity<?> updateQuantity(@PathVariable Integer id, @RequestParam Integer quantity) {
+        OrderDetail detail = orderDetailRepository.findById(id).orElse(null);
+        if (detail == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy món trong đơn");
         }
 
+        detail.setQuantity(quantity);
+        orderDetailRepository.save(detail);
+
+        Order order = detail.getOrder();
+        recalculateOrderTotal(order);
+
+        return ResponseEntity.ok("Cập nhật số lượng và tổng tiền thành công");
+    }
+    @Transactional
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteDetail(@PathVariable Integer id) {
         OrderDetail detail = orderDetailRepository.findById(id).orElse(null);
         if (detail == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy món trong đơn");
         }
 
         Order order = detail.getOrder();
-        orderDetailRepository.deleteById(id);
+        Integer foodId = detail.getFood().getFoodId();
 
-        recalculateOrderTotal(order); // ✅ GỌI lại hàm đã viết
-        orderRepository.save(order); // Cập nhật tổng tiền đơn hàng
+        // ✅ Xóa trạng thái món ăn trước
+        orderStatusRepository.deleteByOrder_OrderIdAndFood_FoodId(order.getOrderId(), foodId);
 
-        return ResponseEntity.ok("Đã xoá món trong đơn và cập nhật tổng tiền");
+        // ✅ Xóa món trong đơn
+        orderDetailRepository.delete(detail);
+
+        // ✅ Cập nhật lại tổng tiền
+        recalculateOrderTotal(order);
+
+        return ResponseEntity.ok("Đã xoá món và cập nhật tổng tiền");
     }
 
     public void recalculateOrderTotal(Order order) {
@@ -91,10 +94,10 @@ public ResponseEntity<?> updateQuantity(@PathVariable Integer id, @RequestParam 
             BigDecimal subtotal = detail.getFood().getPrice().multiply(BigDecimal.valueOf(detail.getQuantity()));
             total = total.add(subtotal);
         }
-        order.setTotal(total);                  // ✅ Cập nhật lại total
-        orderRepository.save(order);           // ✅ Lưu thay đổi
+        order.setTotal(total);
+        orderRepository.save(order);
     }
-    
+
     @PostMapping
     public ResponseEntity<?> addFoodToOrder(@RequestBody OrderDetailRequest req) {
         if (req.getOrderId() == null || req.getFoodId() == null || req.getQuantity() == null || req.getQuantity() < 1) {
@@ -127,14 +130,20 @@ public ResponseEntity<?> updateQuantity(@PathVariable Integer id, @RequestParam 
             detail.setOrder(order);
             detail.setFood(food);
             detail.setQuantity(req.getQuantity());
-            detail.setPrice(food.getPrice()); // lấy giá tại thời điểm gọi
+            detail.setPrice(food.getPrice());
             orderDetailRepository.save(detail);
+
+            // Thêm bản ghi order_status
+            OrderStatus status = new OrderStatus();
+            status.setOrder(order);
+            status.setFood(food);
+            status.setStatus("Chưa chế biến");
+            status.setUpdatedAt(LocalDateTime.now());
+            orderStatusRepository.save(status);
         }
 
-        // ✅ Recalculate order total
         recalculateOrderTotal(order);
 
         return ResponseEntity.ok("Thêm món và cập nhật tổng tiền thành công");
     }
-
 }

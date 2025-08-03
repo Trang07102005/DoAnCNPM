@@ -15,4 +15,6 @@ public class PendingDishDTO {
     private String status;
     private LocalDateTime updatedAt;
     private String imageUrl;
+    private String tableName;
+    private Integer foodId;
 }

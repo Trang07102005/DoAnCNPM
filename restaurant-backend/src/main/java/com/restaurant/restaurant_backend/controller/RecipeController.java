@@ -40,56 +40,37 @@ public class RecipeController {
     private final IngredientRepository ingredientRepo;
 
     @PostMapping("/add")
-@Transactional
-public ResponseEntity<?> addRecipe(@RequestBody RecipeCreateDTO dto) {
-    Optional<Food> foodOpt = foodRepo.findById(dto.getFoodId());
-    if (foodOpt.isEmpty()) {
-        return ResponseEntity.badRequest().body("Không tìm thấy món ăn với id: " + dto.getFoodId());
-    }
-
-    // Kiểm tra nguyên liệu tồn kho đủ không
-    for (RecipeCreateDTO.IngredientDetail detail : dto.getIngredients()) {
-        Optional<Ingredient> ingOpt = ingredientRepo.findById(detail.getIngredientId());
-        if (ingOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Nguyên liệu không tồn tại với id: " + detail.getIngredientId());
+    @Transactional
+    public ResponseEntity<?> addRecipe(@RequestBody RecipeCreateDTO dto) {
+        Optional<Food> foodOpt = foodRepo.findById(dto.getFoodId());
+        if (foodOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Không tìm thấy món ăn với id: " + dto.getFoodId());
         }
-        Ingredient ing = ingOpt.get();
-        if (ing.getQuantityInStock().compareTo(detail.getQuantity()) < 0) {
-            return ResponseEntity.badRequest()
-                .body("Nguyên liệu '" + ing.getIngredientName() + "' không đủ tồn kho. Tồn: " 
-                      + ing.getQuantityInStock() + ", yêu cầu: " + detail.getQuantity());
+
+        Recipe recipe = new Recipe();
+        recipe.setFood(foodOpt.get());
+        recipe.setDescription(dto.getDescription());
+        recipe = recipeRepo.save(recipe);
+
+        for (RecipeCreateDTO.IngredientDetail detail : dto.getIngredients()) {
+            Optional<Ingredient> ingOpt = ingredientRepo.findById(detail.getIngredientId());
+            if (ingOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Nguyên liệu không tồn tại với id: " + detail.getIngredientId());
+            }
+
+            RecipeDetail recipeDetail = new RecipeDetail();
+            recipeDetail.setRecipe(recipe);
+            recipeDetail.setIngredient(ingOpt.get());
+            recipeDetail.setQuantity(detail.getQuantity());
+            detailRepo.save(recipeDetail);
         }
+
+        return ResponseEntity.ok("Thêm công thức thành công");
     }
-
-    // Tạo công thức
-    Recipe recipe = new Recipe();
-    recipe.setFood(foodOpt.get());
-    recipe.setDescription(dto.getDescription());
-    recipe = recipeRepo.save(recipe);
-
-    // Thêm nguyên liệu vào công thức và trừ tồn kho
-    for (RecipeCreateDTO.IngredientDetail detail : dto.getIngredients()) {
-        Ingredient ing = ingredientRepo.findById(detail.getIngredientId()).get();
-
-        RecipeDetail recipeDetail = new RecipeDetail();
-        recipeDetail.setRecipe(recipe);
-        recipeDetail.setIngredient(ing);
-        recipeDetail.setQuantity(detail.getQuantity());
-        detailRepo.save(recipeDetail);
-
-        // Trừ tồn kho
-        ing.setQuantityInStock(ing.getQuantityInStock().subtract(detail.getQuantity()));
-        ingredientRepo.save(ing);
-    }
-
-    return ResponseEntity.ok("Thêm công thức thành công");
-}
-
 
     @GetMapping("/all")
     public List<RecipeSummaryDTO> getAllRecipes() {
         List<Recipe> recipes = recipeRepo.findAll();
-
         return recipes.stream()
             .map(r -> new RecipeSummaryDTO(
                 r.getRecipeId(),
@@ -101,130 +82,110 @@ public ResponseEntity<?> addRecipe(@RequestBody RecipeCreateDTO dto) {
     }
 
     @GetMapping("/{id}")
-public ResponseEntity<?> getRecipeById(@PathVariable Integer id) {
-    Optional<Recipe> recipeOpt = recipeRepo.findById(id);
-    if (recipeOpt.isEmpty()) {
-        return ResponseEntity.notFound().build();
-    }
-
-    Recipe recipe = recipeOpt.get();
-
-    List<RecipeDetail> details = detailRepo.findByRecipe_RecipeId(recipe.getRecipeId());
-    List<RecipeDetailResponseDTO.IngredientDTO> ingredientDetails = details.stream()
-        .map(d -> new RecipeDetailResponseDTO.IngredientDTO(
-            d.getIngredient().getIngredientId(),
-            d.getIngredient().getIngredientName(),
-            d.getIngredient().getUnit(),
-            d.getQuantity()
-        ))
-        .collect(Collectors.toList());
-
-    RecipeDetailResponseDTO response = new RecipeDetailResponseDTO(
-        recipe.getRecipeId(),
-        recipe.getFood().getFoodId(),
-        recipe.getFood().getFoodName(),
-        recipe.getDescription(),
-        ingredientDetails
-    );
-
-    return ResponseEntity.ok(response);
-}
-
-@Transactional
-@PutMapping("/{id}")
-public ResponseEntity<?> updateRecipe(@PathVariable Integer id, @RequestBody RecipeCreateDTO dto) {
-    Optional<Recipe> recipeOpt = recipeRepo.findById(id);
-    if (recipeOpt.isEmpty()) {
-        return ResponseEntity.notFound().build();
-    }
-
-    Recipe recipe = recipeOpt.get();
-
-    Optional<Food> foodOpt = foodRepo.findById(dto.getFoodId());
-    if (foodOpt.isEmpty()) {
-        return ResponseEntity.badRequest().body("Món ăn không tồn tại");
-    }
-    recipe.setFood(foodOpt.get());
-    recipe.setDescription(dto.getDescription());
-
-    // Lấy chi tiết nguyên liệu cũ
-    List<RecipeDetail> oldDetails = detailRepo.findByRecipe_RecipeId(recipe.getRecipeId());
-
-    // Tính lại tồn kho: cộng lại số lượng nguyên liệu cũ đã dùng (hoàn trả)
-    for (RecipeDetail oldDetail : oldDetails) {
-        Ingredient ing = oldDetail.getIngredient();
-        ing.setQuantityInStock(ing.getQuantityInStock().add(oldDetail.getQuantity()));
-        ingredientRepo.save(ing);
-    }
-
-    // Kiểm tra nguyên liệu tồn kho đủ cho nguyên liệu mới không
-    for (RecipeCreateDTO.IngredientDetail detail : dto.getIngredients()) {
-        Optional<Ingredient> ingOpt = ingredientRepo.findById(detail.getIngredientId());
-        if (ingOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("Nguyên liệu không tồn tại với id: " + detail.getIngredientId());
+    public ResponseEntity<?> getRecipeById(@PathVariable Integer id) {
+        Optional<Recipe> recipeOpt = recipeRepo.findById(id);
+        if (recipeOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
-        Ingredient ing = ingOpt.get();
-        if (ing.getQuantityInStock().compareTo(detail.getQuantity()) < 0) {
-            return ResponseEntity.badRequest()
-                .body("Nguyên liệu '" + ing.getIngredientName() + "' không đủ tồn kho. Tồn: " 
-                      + ing.getQuantityInStock() + ", yêu cầu: " + detail.getQuantity());
+
+        Recipe recipe = recipeOpt.get();
+        List<RecipeDetail> details = detailRepo.findByRecipe_RecipeId(recipe.getRecipeId());
+        List<RecipeDetailResponseDTO.IngredientDTO> ingredientDetails = details.stream()
+            .map(d -> new RecipeDetailResponseDTO.IngredientDTO(
+                d.getIngredient().getIngredientId(),
+                d.getIngredient().getIngredientName(),
+                d.getIngredient().getUnit(),
+                d.getQuantity()
+            ))
+            .collect(Collectors.toList());
+
+        RecipeDetailResponseDTO response = new RecipeDetailResponseDTO(
+            recipe.getRecipeId(),
+            recipe.getFood().getFoodId(),
+            recipe.getFood().getFoodName(),
+            recipe.getDescription(),
+            ingredientDetails
+        );
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> updateRecipe(@PathVariable Integer id, @RequestBody RecipeCreateDTO dto) {
+        Optional<Recipe> recipeOpt = recipeRepo.findById(id);
+        if (recipeOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+
+        Recipe recipe = recipeOpt.get();
+        Optional<Food> foodOpt = foodRepo.findById(dto.getFoodId());
+        if (foodOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Món ăn không tồn tại");
+        }
+        recipe.setFood(foodOpt.get());
+        recipe.setDescription(dto.getDescription());
+        recipeRepo.save(recipe);
+
+        List<RecipeDetail> oldDetails = detailRepo.findByRecipe_RecipeId(recipe.getRecipeId());
+        detailRepo.deleteByRecipe(recipe);
+
+        for (RecipeCreateDTO.IngredientDetail detail : dto.getIngredients()) {
+            Optional<Ingredient> ingOpt = ingredientRepo.findById(detail.getIngredientId());
+            if (ingOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Nguyên liệu không tồn tại với id: " + detail.getIngredientId());
+            }
+
+            RecipeDetail newDetail = new RecipeDetail();
+            newDetail.setRecipe(recipe);
+            newDetail.setIngredient(ingOpt.get());
+            newDetail.setQuantity(detail.getQuantity());
+            detailRepo.save(newDetail);
+        }
+
+        return ResponseEntity.ok("Cập nhật công thức thành công");
     }
 
-    recipeRepo.save(recipe);
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> deleteRecipe(@PathVariable Integer id) {
+        Optional<Recipe> recipeOpt = recipeRepo.findById(id);
+        if (recipeOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
 
-    // Xóa chi tiết nguyên liệu cũ
-    detailRepo.deleteByRecipe(recipe);
+        Recipe recipe = recipeOpt.get();
+        detailRepo.deleteByRecipe(recipe);
+        recipeRepo.delete(recipe);
 
-    // Thêm nguyên liệu mới và trừ tồn kho
-    for (RecipeCreateDTO.IngredientDetail detail : dto.getIngredients()) {
-        Ingredient ing = ingredientRepo.findById(detail.getIngredientId()).get();
-
-        RecipeDetail newDetail = new RecipeDetail();
-        newDetail.setRecipe(recipe);
-        newDetail.setIngredient(ing);
-        newDetail.setQuantity(detail.getQuantity());
-        detailRepo.save(newDetail);
-
-        ing.setQuantityInStock(ing.getQuantityInStock().subtract(detail.getQuantity()));
-        ingredientRepo.save(ing);
+        return ResponseEntity.ok("Đã xóa công thức");
     }
 
-    return ResponseEntity.ok("Cập nhật công thức thành công");
-}
+    @GetMapping("/by-food/{foodId}")
+    public ResponseEntity<?> getRecipeByFoodId(@PathVariable Integer foodId) {
+        Recipe recipe = recipeRepo.findByFood_FoodId(foodId);
+        if (recipe == null) {
+            return ResponseEntity.notFound().build();
+        }
 
+        List<RecipeDetail> details = detailRepo.findByRecipe_RecipeId(recipe.getRecipeId());
+        List<RecipeDetailResponseDTO.IngredientDTO> ingredientDetails = details.stream()
+            .map(d -> new RecipeDetailResponseDTO.IngredientDTO(
+                d.getIngredient().getIngredientId(),
+                d.getIngredient().getIngredientName(),
+                d.getIngredient().getUnit(),
+                d.getQuantity()
+            ))
+            .collect(Collectors.toList());
 
-@Transactional
-@DeleteMapping("/{id}")
-public ResponseEntity<?> deleteRecipe(@PathVariable Integer id) {
-    Optional<Recipe> recipeOpt = recipeRepo.findById(id);
-    if (recipeOpt.isEmpty()) {
-        return ResponseEntity.notFound().build();
+        RecipeDetailResponseDTO response = new RecipeDetailResponseDTO(
+            recipe.getRecipeId(),
+            recipe.getFood().getFoodId(),
+            recipe.getFood().getFoodName(),
+            recipe.getDescription(),
+            ingredientDetails
+        );
+
+        return ResponseEntity.ok(response);
     }
-
-    Recipe recipe = recipeOpt.get();
-
-    // Lấy chi tiết nguyên liệu của công thức
-    List<RecipeDetail> details = detailRepo.findByRecipe_RecipeId(recipe.getRecipeId());
-
-    // Hoàn trả tồn kho nguyên liệu
-    for (RecipeDetail detail : details) {
-        Ingredient ing = detail.getIngredient();
-        ing.setQuantityInStock(ing.getQuantityInStock().add(detail.getQuantity()));
-        ingredientRepo.save(ing);
-    }
-
-    // Xóa chi tiết nguyên liệu
-    detailRepo.deleteByRecipe(recipe);
-
-    // Xóa công thức
-    recipeRepo.delete(recipe);
-
-    return ResponseEntity.ok("Đã xóa công thức và hoàn trả tồn kho");
-}
-
-
-
-    
-
 }

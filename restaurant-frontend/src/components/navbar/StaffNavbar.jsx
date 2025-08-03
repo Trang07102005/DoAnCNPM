@@ -39,8 +39,7 @@ const StaffNavbar = ({ onLogout }) => {
     icon: <FontAwesomeIcon icon={faMoneyBill} />,
     children: [
       { key: "table-report", title: "Báo Cáo Bàn Đặt" },
-      { key: "best-seller-report", title: "Báo Cáo Món Bán Chạy" },
-      { key: "best-seller-report", title: "áđâsđá" },
+      { key: "best-seller-report", title: "Báo Cáo Món Bán Chạy" }
     ],
   },
 ];
@@ -216,7 +215,7 @@ const StaffNavbar = ({ onLogout }) => {
       dashboard: "Trang Dashboard",
       "order-management": "Quản Lý Order",
       "table-report": "Báo Cáo Bàn Đặt",
-      "best-seller-report": "Báo Cáo Món Bán Chạy",
+      "best-seller-report": "Báo Cáo Món Bán Chạy"
     }[selectedPage] || "Trang"}
   </h1>
 
