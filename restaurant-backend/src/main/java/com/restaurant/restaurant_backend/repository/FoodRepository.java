@@ -13,7 +13,6 @@ public interface FoodRepository extends JpaRepository<Food, Integer> {
     List<Food> findByFoodNameContainingIgnoreCase(String foodName);
     long countByCategory_CategoryId(Integer categoryId);
     boolean existsByCategory_CategoryId(Integer categoryId);
-    
-
+    List<Food> findByStatusIgnoreCase(String status);
 
 }

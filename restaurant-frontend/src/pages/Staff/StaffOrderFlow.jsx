@@ -56,8 +56,8 @@ const StaffOrderFlow = () => {
 
   const fetchFoods = async () => {
     try {
-      const res = await axios.get("http://localhost:8080/api/food");
-      let filteredFoods = res.data;
+      const res = await axios.get("http://localhost:8080/api/food/active");
+      let filteredFoods = res.data; 
       if (selectedCategory) {
         filteredFoods = res.data.filter((food) => food.category?.categoryId === selectedCategory);
       }

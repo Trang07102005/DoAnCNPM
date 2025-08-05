@@ -140,4 +140,10 @@ public ResponseEntity<?> updateFood(@PathVariable Integer id, @RequestBody FoodR
         foodRepository.deleteById(id);
         return ResponseEntity.ok("Xóa món ăn thành công");
     }
+    @GetMapping("/active")
+public ResponseEntity<List<Food>> getSellingFoods() {
+    List<Food> activeFoods = foodRepository.findByStatusIgnoreCase("Đang bán");
+    return ResponseEntity.ok(activeFoods);
+}
+
 }

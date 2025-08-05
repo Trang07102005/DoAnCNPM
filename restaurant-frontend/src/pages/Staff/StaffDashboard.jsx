@@ -123,16 +123,19 @@ const StaffDashboard = () => {
     }
   };
 
-  const fetchMenuItems = async () => {
+    const fetchMenuItems = async () => {
     try {
       const res = await axios.get("http://localhost:8080/api/food", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setMenuItems(res.data);
+      // 👉 Lọc những món có status là "Đang bán"
+      const filtered = res.data.filter(item => item.status === "Đang bán");
+      setMenuItems(filtered);
     } catch (err) {
       console.error("Lỗi khi tải menu:", err);
     }
   };
+
 
   const updateQuantity = async (detailId, quantity) => {
     try {
@@ -154,40 +157,38 @@ const StaffDashboard = () => {
     }
   };
 
-  const addFoodToOrder = async () => {
-    if (!selectedOrder) return;
-    if (!selectedFoodId || quantityToAdd < 1) {
-      toast.warning("Vui lòng chọn món và số lượng hợp lệ");
-      return;
+  const addFoodToOrder = async (foodId, quantity) => {
+  if (!selectedOrder) return;
+  if (!foodId || quantity < 1) {
+    toast.warning("Vui lòng chọn món và số lượng hợp lệ");
+    return;
+  }
+
+  try {
+    const existingDetail = orderDetails.find((d) => d.foodId === parseInt(foodId));
+    if (existingDetail) {
+      const newQuantity = existingDetail.quantity + quantity;
+      await updateQuantity(existingDetail.orderDetailId, newQuantity);
+    } else {
+      await axios.post(
+        "http://localhost:8080/api/order-details",
+        {
+          orderId: selectedOrder.orderId,
+          foodId: foodId,
+          quantity: quantity,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
     }
 
-    try {
-      const existingDetail = orderDetails.find((d) => d.foodId === parseInt(selectedFoodId));
-      if (existingDetail) {
-        const newQuantity = existingDetail.quantity + quantityToAdd;
-        await updateQuantity(existingDetail.orderDetailId, newQuantity);
-      } else {
-        await axios.post(
-          "http://localhost:8080/api/order-details",
-          {
-            orderId: selectedOrder.orderId,
-            foodId: selectedFoodId,
-            quantity: quantityToAdd,
-          },
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
-      }
-
-      fetchOrderDetails(selectedOrder.orderId);
-      setSelectedFoodId("");
-      setQuantityToAdd(1);
-    } catch (err) {
-      console.error("Lỗi khi thêm món:", err);
-      toast.error(" Không thể thêm món: " + (err.response?.data?.message || "Lỗi không xác định"));
-    }
-  };
+    fetchOrderDetails(selectedOrder.orderId);
+  } catch (err) {
+    console.error("Lỗi khi thêm món:", err);
+    toast.error(" Không thể thêm món: " + (err.response?.data?.message || "Lỗi không xác định"));
+  }
+};
 
   const deleteDetail = async (detailId) => {
     try {
@@ -396,18 +397,17 @@ const StaffDashboard = () => {
               </ul>
 
               <button
-                onClick={() => {
-                  pendingItems.forEach((item) => {
-                    setSelectedFoodId(item.foodId);
-                    setQuantityToAdd(item.quantity);
-                    addFoodToOrder();
-                  });
-                  setPendingItems([]);
-                }}
-                className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl font-semibold shadow"
-              >
-                ✅ Xác nhận thêm món
-              </button>
+              onClick={() => {
+                pendingItems.forEach((item) => {
+                  addFoodToOrder(item.foodId, item.quantity); // ✅ Gọi hàm với tham số đúng
+                });
+                setPendingItems([]);
+              }}
+              className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl font-semibold shadow"
+            >
+              ✅ Xác nhận thêm món
+            </button>
+
             </div>
           )}
         </section>

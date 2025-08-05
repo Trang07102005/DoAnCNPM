@@ -94,7 +94,7 @@ public class RestaurantTableController {
     @GetMapping("/with-status")
 public List<RestaurantTable> getTablesWithRealTimeStatus() {
     List<RestaurantTable> tables = tableRepository.findAll();
-
+    LocalDateTime now = LocalDateTime.now();        
     for (RestaurantTable table : tables) {
         // Nếu bàn đang phục vụ thì giữ nguyên trạng thái
         if ("Đang phục vụ".equalsIgnoreCase(table.getStatus())) {
@@ -104,7 +104,15 @@ public List<RestaurantTable> getTablesWithRealTimeStatus() {
         boolean hasActiveReservation = reservationRepository
             .findByRestaurantTable_TableId(table.getTableId())
             .stream()
-            .anyMatch(r -> "Đã đặt".equalsIgnoreCase(r.getStatus()));
+            .anyMatch(r -> {
+                            if (!"Đã đặt".equalsIgnoreCase(r.getStatus())) return false;
+
+                            LocalDateTime resTime = r.getReservationTime();
+                            LocalDateTime start = resTime.minusMinutes(90);
+                            LocalDateTime end = resTime.plusMinutes(90);
+
+                            return !now.isBefore(start) && !now.isAfter(end); // nằm trong khoảng đặt
+                        });
 
         // Nếu không đang phục vụ, thì cập nhật theo tình trạng đặt
         table.setStatus(hasActiveReservation ? "Đã đặt" : "Trống");

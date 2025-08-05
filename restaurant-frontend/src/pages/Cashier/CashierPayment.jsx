@@ -350,7 +350,7 @@
         <p className="text-blue-700 font-medium mb-3">
           Vui lòng quét mã QR bên dưới để thanh toán:
         </p>
-        <img src="/images/qr-code-momo.png" alt="QR chuyển khoản" className="w-48 h-48 mx-auto mb-3 rounded-md shadow-sm" />
+        <img src="https://homepage.momocdn.net/blogscontents/momo-upload-api-220808102122-637955508824191258.png" alt="QR chuyển khoản" className="w-48 h-48 mx-auto mb-3 rounded-md shadow-sm" />
         <p className="text-sm text-gray-500 italic text-center">
           Ghi chú: "Thanh toán đơn tại quầy"
         </p>

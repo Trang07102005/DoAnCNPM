@@ -12,6 +12,5 @@ public interface IngredientService {
     Ingredient updateIngredient(Integer id, Ingredient ingredient);
     void deleteIngredient(Integer id);
     void reduceIngredientStock(Integer ingredientId, BigDecimal quantityUsed) throws RuntimeException;
-    
-    
+
 }
