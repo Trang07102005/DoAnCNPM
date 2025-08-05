@@ -41,6 +41,7 @@
               });
               details = [...details, ...res.data];
           } catch (err) {
+            console.log(err);
               toast.error("Lỗi chi tiết đơn: " + id);
           }
           }
@@ -98,6 +99,7 @@
           });
           details = [...details, ...res.data];
         } catch (err) {
+          console.log(err);
           toast.error("Lỗi chi tiết đơn: " + id);
         }
       }
@@ -115,21 +117,26 @@
       setStep(3);
     };
 
+    
+    
+
     const handlePay = async () => {
-      const methodName = paymentMethods.find(
+      const selectedMethod = paymentMethods.find(
         (m) => m.paymentMethodID === parseInt(paymentMethod)
-      )?.methodName;
+      );
     
-      // ❗ Dùng tổng tính từ UI, không lấy lại từ API
-      const finalAmount = totalAmount;
+      if (!selectedMethod) {
+        toast.error("Vui lòng chọn phương thức thanh toán hợp lệ.");
+        return;
+      }
     
-      if (methodName === "Tiền mặt" && cashReceived < finalAmount) {
+      if (selectedMethod.methodName === "Tiền mặt" && cashReceived < totalAmount) {
         toast.error("Số tiền khách đưa không đủ để thanh toán!");
         return;
       }
     
       try {
-        const res = await axios.post(
+        const response = await axios.post(
           "http://localhost:8080/api/cashier/pay-orders",
           {
             orderIds: selectedOrders,
@@ -142,21 +149,17 @@
           }
         );
     
-        toast.success(res.data.message || "Thanh toán thành công!");
-    
-        fetchPendingOrders();
-        setSelectedOrders([]);
-        setOrderDetails([]);
-        setPaymentMethod("");
-        setCashReceived(0);
-        setSplitCount(1);
-        setStep(1);
-      } catch (err) {
-        toast.error(
-          "Lỗi khi thanh toán: " + (err.response?.data?.message || err.message)
-        );
+        toast.success(response.data.message || "Thanh toán thành công!");
+        setStep(4);
+      } catch (error) {
+        console.error(error);
+        toast.error("Lỗi khi thanh toán: " + (error.response?.data?.message || error.message));
       }
     };
+    
+    
+
+    
     
     
 
@@ -377,9 +380,74 @@
     </div>
   </div>
 
+  
+
           </>
+          
         )}
+
+        {step === 4 && (
+  <div className="text-center p-10 bg-green-50 rounded-lg shadow-lg max-w-xl mx-auto mt-10">
+    <h2 className="text-3xl font-bold text-green-700 mb-4">🎉 Thanh toán thành công!</h2>
+    <p className="text-lg text-gray-700 mb-6">
+      Cảm ơn bạn đã sử dụng dịch vụ. Bạn có thể in hóa đơn hoặc quay lại danh sách đơn hàng.
+    </p>
+
+    <div className="flex justify-center gap-4">
+      {/* In hóa đơn */}
+      <button
+        onClick={async () => {
+          try {
+            const res = await axios.get("http://localhost:8080/api/cashier/invoice", {
+  params: { orderIds: selectedOrders },
+  paramsSerializer: (params) => {
+    return params.orderIds.map(id => `orderIds=${id}`).join("&");
+  },
+  responseType: "blob",
+  headers: { Authorization: `Bearer ${token}` },
+});
+
+
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", "hoa_don.pdf");
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+          } catch (err) {
+            console.error(err);
+            toast.error("Lỗi khi in hóa đơn");
+          }
+        }}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow-md transition"
+      >
+        In hóa đơn
+      </button>
+
+      {/* Quay lại */}
+      <button
+        onClick={() => {
+          fetchPendingOrders();
+          setSelectedOrders([]);
+          setOrderDetails([]);
+          setPaymentMethod("");
+          setCashReceived(0);
+          setSplitCount(1);
+          setStep(1);
+        }}
+        className="bg-gray-500 hover:bg-gray-600 text-white px-5 py-2 rounded-md shadow-md transition"
+      >
+        Quay lại
+      </button>
+    </div>
+  </div>
+)}
+
+
       </div>
+      
+      
     );
   };
 

@@ -1,7 +1,9 @@
 package com.restaurant.restaurant_backend.controller;
 
+import com.restaurant.restaurant_backend.model.Gallery;
 import com.restaurant.restaurant_backend.model.Role;
 import com.restaurant.restaurant_backend.model.Users;
+import com.restaurant.restaurant_backend.repository.GalleryRepository;
 import com.restaurant.restaurant_backend.repository.RoleRepository;
 import com.restaurant.restaurant_backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,11 @@ public class AdminController {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private GalleryRepository galleryRepository;
+
+    
 
     // === QUẢN LÝ NGƯỜI DÙNG ===
     @PutMapping("/users/{id}/role")
@@ -94,4 +101,47 @@ public class AdminController {
 
         return ResponseEntity.ok(role);
     }
+
+    // GET tất cả ảnh
+        @GetMapping("/gallery")
+        public List<Gallery> getAllImages() {
+            return galleryRepository.findAll();
+        }
+        // POST thêm ảnh mới
+@PostMapping("/gallery")
+public ResponseEntity<?> addImage(@RequestBody Gallery image) {
+    if (image.getImageUrl() == null || image.getImageUrl().trim().isEmpty()) {
+        return ResponseEntity.badRequest().body("Link ảnh không được để trống");
+    }
+    Gallery saved = galleryRepository.save(image);
+    return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+}
+
+// PUT cập nhật ảnh
+@PutMapping("/gallery/{id}")
+public ResponseEntity<?> updateImage(@PathVariable Integer id, @RequestBody Gallery image) {
+    Gallery existing = galleryRepository.findById(id).orElse(null);
+    if (existing == null) {
+        return ResponseEntity.notFound().build();
+    }
+
+    existing.setImageUrl(image.getImageUrl());
+    existing.setCaption(image.getCaption());
+    galleryRepository.save(existing);
+    return ResponseEntity.ok(existing);
+}
+
+// DELETE xoá ảnh
+@DeleteMapping("/gallery/{id}")
+public ResponseEntity<?> deleteImage(@PathVariable Integer id) {
+    if (!galleryRepository.existsById(id)) {
+        return ResponseEntity.notFound().build();
+    }
+
+    galleryRepository.deleteById(id);
+    return ResponseEntity.ok("Xoá ảnh thành công");
+}
+
+
+    
 }

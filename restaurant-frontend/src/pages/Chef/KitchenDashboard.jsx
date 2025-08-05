@@ -176,31 +176,36 @@ const KitchenDashboard = () => {
 
           {/* Modal hiển thị công thức với nền mờ */}
           {selectedRecipe && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-              <div className="bg-white p-6 rounded-lg shadow-lg w-11/12 max-w-md">
-                <h3 className="text-xl font-bold mb-4 text-green-700">📝 Công thức: {selectedRecipe.food?.foodName}</h3>
-                <p className="mb-4 text-gray-700"><strong>Mô tả:</strong> {selectedRecipe.description || "Chưa có mô tả"}</p>
-                <h4 className="font-semibold mb-2 text-gray-900">Nguyên liệu:</h4>
-                <ul className="list-disc pl-5 space-y-2 max-h-60 overflow-y-auto pr-2 text-gray-800">
-                  {selectedRecipe.recipeDetails?.length > 0 ? (
-                    selectedRecipe.recipeDetails.map((detail, index) => (
-                      <li key={index} className="hover:text-green-600 transition">
-                        {detail.ingredient?.ingredientName}: {detail.quantity} {detail.ingredient?.unit}
-                      </li>
-                    ))
-                  ) : (
-                    <li className="italic text-gray-500">Chưa có nguyên liệu.</li>
-                  )}
-                </ul>
-                <button
-                  onClick={() => setSelectedRecipe(null)}
-                  className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-                >
-                  Đóng
-                </button>
-              </div>
-            </div>
-          )}
+  <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
+    <div className="bg-white p-6 rounded-lg border border-orange-300 border-2 shadow-lg w-11/12 max-w-md">
+      <h3 className="text-xl font-bold mb-4 text-green-700">
+        📝 Công thức: {selectedRecipe.foodName}
+      </h3>
+      <p className="mb-4 text-gray-700">
+        <strong>Mô tả:</strong> {selectedRecipe.description || "Chưa có mô tả"}
+      </p>
+      <h4 className="font-semibold mb-2 text-gray-900">Nguyên liệu:</h4>
+      <ul className="list-disc pl-5 space-y-2 max-h-60 overflow-y-auto pr-2 text-gray-800">
+        {selectedRecipe.ingredientDetails?.length > 0 ? (
+          selectedRecipe.ingredientDetails.map((detail, index) => (
+            <li key={index} className="hover:text-green-600 transition">
+              {detail.ingredientName}: {detail.quantity} {detail.unit}
+            </li>
+          ))
+        ) : (
+          <li className="italic text-gray-500">Chưa có nguyên liệu.</li>
+        )}
+      </ul>
+      <button
+        onClick={() => setSelectedRecipe(null)}
+        className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
+      >
+        Đóng
+      </button>
+    </div>
+  </div>
+)}
+
 
           {/* Pagination */}
           <div className="flex justify-center mt-4 space-x-2">

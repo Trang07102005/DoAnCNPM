@@ -6,7 +6,7 @@ import {
   faMagnifyingGlass,
   faMoneyBill,
   faRightFromBracket,
-  faTableColumns,
+
   faUser,
   faUtensils,
 } from "@fortawesome/free-solid-svg-icons";
@@ -14,6 +14,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import KitchenDashboard from "../../pages/Chef/KitchenDashboard";
+import ChefIngredientManagement from "../../pages/Chef/ChefIngredientManagement";
+import ChefStockView from "../../pages/Chef/ChefStockView";
+import FoodList from "../../pages/Chef/FoodList";
 
 
 const ChefNavbar = ({ onLogout }) => {
@@ -24,11 +27,7 @@ const ChefNavbar = ({ onLogout }) => {
   const [open, setOpen] = useState(true);
 
   const Menus = [
-    {
-      key: "dashboard",
-      title: "Dashboard",
-      icon: <FontAwesomeIcon icon={faTableColumns} />,
-    },
+   
     {
       key: "dish-orders",
       title: "Danh Sách Món Đặt",
@@ -166,6 +165,10 @@ const ChefNavbar = ({ onLogout }) => {
       <div className="h-screen flex-1 bg-zinc-100 flex flex-col overflow-hidden">
   {/* Topbar */}
   <div className="w-full h-[8ch] px-12 bg-white shadow flex items-center justify-between">
+  <div className="text-2xl font-bold">
+    <span className="text-orange-300">VIET</span>
+    <span className="text-gray-800">TAURANT</span>
+  </div>
     {/* Search bar */}
     <div className="w-96 h-11 border border-zinc-300 rounded-full flex items-center overflow-hidden">
       <input
@@ -195,7 +198,7 @@ const ChefNavbar = ({ onLogout }) => {
   <div className="flex-1 overflow-y-auto px-12 py-6">
     <h1 className="text-xl font-semibold mb-4">
       {{
-        dashboard: "Trang Dashboard",
+        
         "dish-orders": "Danh Sách Món Đặt",
         ingredients: "Danh Sách Nguyên Liệu",
         "ingredient-report": "Báo Cáo Xuất Nhập Tồn",
@@ -203,11 +206,11 @@ const ChefNavbar = ({ onLogout }) => {
       }[selectedPage] || "Trang"}
     </h1>
 
-    {selectedPage === "dashboard" && <div>Nội dung dashboard...</div>}
+
     {selectedPage === "dish-orders" && <KitchenDashboard />}
-    {selectedPage === "ingredients" && <div>Nội dung nguyên liệu...</div>}
-    {selectedPage === "ingredient-report" && <div>Nội dung báo cáo xuất nhập tồn...</div>}
-    {selectedPage === "dish-list-report" && <div>Nội dung báo cáo món...</div>}
+    {selectedPage === "ingredients" && <ChefIngredientManagement />}
+    {selectedPage === "ingredient-report" && <ChefStockView />}
+    {selectedPage === "dish-list-report" && <FoodList />}
   </div>
 </div>
 

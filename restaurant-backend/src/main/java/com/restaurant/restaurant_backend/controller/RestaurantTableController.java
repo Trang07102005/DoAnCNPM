@@ -7,10 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
 import java.util.List;
-
+import java.time.LocalDateTime;
 @RestController
 @RequestMapping("/api/tables")
 @CrossOrigin(origins = "http://localhost:5173") // frontend
@@ -91,10 +89,11 @@ public class RestaurantTableController {
     // Lọc theo status "Trống"
     return tableRepository.findByStatus("Trống");
     }
+
+    
     @GetMapping("/with-status")
 public List<RestaurantTable> getTablesWithRealTimeStatus() {
     List<RestaurantTable> tables = tableRepository.findAll();
-    LocalDateTime now = LocalDateTime.now();
 
     for (RestaurantTable table : tables) {
         // Nếu bàn đang phục vụ thì giữ nguyên trạng thái
@@ -105,21 +104,15 @@ public List<RestaurantTable> getTablesWithRealTimeStatus() {
         boolean hasActiveReservation = reservationRepository
             .findByRestaurantTable_TableId(table.getTableId())
             .stream()
-            .anyMatch(r -> {
-                if (!"Đã đặt".equalsIgnoreCase(r.getStatus())) return false;
+            .anyMatch(r -> "Đã đặt".equalsIgnoreCase(r.getStatus()));
 
-                LocalDateTime resTime = r.getReservationTime();
-                LocalDateTime start = resTime.minusMinutes(90);
-                LocalDateTime end = resTime.plusMinutes(90);
-
-                return !now.isBefore(start) && !now.isAfter(end); // nằm trong khoảng đặt
-            });
-
+        // Nếu không đang phục vụ, thì cập nhật theo tình trạng đặt
         table.setStatus(hasActiveReservation ? "Đã đặt" : "Trống");
     }
 
     return tables;
 }
+
 
     @GetMapping("/serving")
 public ResponseEntity<List<RestaurantTable>> getTablesBeingServed() {

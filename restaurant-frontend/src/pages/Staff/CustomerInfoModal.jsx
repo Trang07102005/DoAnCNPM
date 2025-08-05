@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-
+import { toast } from "react-toastify";
 const CustomerInfoModal = ({ onClose, onContinue }) => {
   const [name, setName] = useState("");
   const [guests, setGuests] = useState(1); // giá trị chọn
@@ -10,11 +10,11 @@ const CustomerInfoModal = ({ onClose, onContinue }) => {
     const finalGuests = guests === 0 ? parseInt(customGuests) : guests;
 
     if (!name.trim()) {
-      alert("Vui lòng nhập tên khách hàng");
+      toast.warning("Vui lòng nhập tên khách hàng");
       return;
     }
     if (!finalGuests || finalGuests < 1) {
-      alert("Số khách phải >= 1");
+      toast.warning("Số khách phải lớn hơn hoặc bằng 1");
       return;
     }
 

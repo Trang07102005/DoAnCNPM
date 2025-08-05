@@ -1,5 +1,10 @@
 package com.restaurant.restaurant_backend.controller;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.restaurant.restaurant_backend.dto.FoodCountDTO;
 import com.restaurant.restaurant_backend.dto.OrderDTO;
 import com.restaurant.restaurant_backend.dto.OrderDetailDTO;
 import com.restaurant.restaurant_backend.dto.PaymentRequestDTO;
@@ -7,15 +12,25 @@ import com.restaurant.restaurant_backend.model.*;
 import com.restaurant.restaurant_backend.repository.*;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
+
+
+
 
 @RestController
 @RequestMapping("/api/cashier")
@@ -177,6 +192,106 @@ public class CashierPaymentController {
     
         order.setTotal(total);
     }
+
+    @GetMapping("/invoice")
+public ResponseEntity<ByteArrayResource> generateInvoice(@RequestParam List<Integer> orderIds) throws IOException, DocumentException {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    Document document = new Document();
+    PdfWriter.getInstance(document, baos);
+    document.open();
+
+    document.add(new Paragraph("💵 HÓA ĐƠN THANH TOÁN"));
+    document.add(new Paragraph("Ngày giờ: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm"))));
+    document.add(new Paragraph("----------------------------------------------------"));
+
+    BigDecimal grandTotal = BigDecimal.ZERO;
+
+    for (Integer orderId : orderIds) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng"));
+
+        document.add(new Paragraph("🧾 Đơn #" + orderId + " - Bàn: " + 
+            (order.getRestaurantTable() != null ? order.getRestaurantTable().getTableName() : "N/A")));
+
+        for (OrderDetail detail : order.getOrderDetails()) {
+            BigDecimal itemTotal = detail.getPrice().multiply(BigDecimal.valueOf(detail.getQuantity()));
+            String line = String.format("• %s x%d = %,.0f₫", 
+                detail.getFood().getFoodName(), 
+                detail.getQuantity(), 
+                itemTotal.doubleValue());
+            document.add(new Paragraph(line));
+        }
+
+        document.add(new Paragraph("Tổng đơn: " + String.format("%,.0f₫", order.getTotal().doubleValue())));
+        document.add(new Paragraph("----------------------------------------------------"));
+
+        grandTotal = grandTotal.add(order.getTotal());
+    }
+
+    document.add(new Paragraph("💰 Tổng thanh toán: " + String.format("%,.0f₫", grandTotal.doubleValue())));
+    document.close();
+
+    ByteArrayResource resource = new ByteArrayResource(baos.toByteArray());
+
+    return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=hoa_don.pdf")
+            .contentType(MediaType.APPLICATION_PDF)
+            .contentLength(resource.contentLength())
+            .body(resource);
+}
+
+@GetMapping("/revenue-summary")
+@PreAuthorize("hasAuthority('ROLE_CASHIER')")
+public ResponseEntity<?> getRevenueSummary() {
+    List<PaymentInvoice> invoices = paymentInvoiceRepository.findAll();
+
+    BigDecimal total = BigDecimal.ZERO;
+    Map<String, BigDecimal> map = new HashMap<>();
+
+    for (PaymentInvoice invoice : invoices) {
+        String method = invoice.getPaymentMethod().getMethodName();
+        BigDecimal amount = invoice.getPaidAmount();
+        map.put(method, map.getOrDefault(method, BigDecimal.ZERO).add(amount));
+        total = total.add(amount);
+    }
+
+    List<Map<String, Object>> details = map.entrySet().stream()
+        .map(entry -> {
+            Map<String, Object> item = new HashMap<>();
+            item.put("method", entry.getKey());
+            item.put("amount", entry.getValue());
+            return item;
+        })
+        .collect(Collectors.toList());
+
+    return ResponseEntity.ok(Map.of(
+        "total", total,
+        "details", details
+    ));
+}
+
+@GetMapping("/foods/top")
+public ResponseEntity<?> getTopOrderedFoods(@RequestParam(required = false) Integer categoryId) {
+    List<Object[]> results;
+
+    if (categoryId != null) {
+        results = orderDetailRepository.findFoodOrderCountsByCategory(categoryId);
+    } else {
+        results = orderDetailRepository.findFoodOrderCounts();
+    }
+
+    List<Map<String, Object>> response = results.stream().map(row -> {
+        Map<String, Object> item = new HashMap<>();
+        item.put("foodName", row[0]);
+        item.put("imageUrl", row[1]);
+        item.put("totalOrdered", row[2]);
+        return item;
+    }).collect(Collectors.toList());
+
+    return ResponseEntity.ok(response);
+}
+
+
     
     
 }

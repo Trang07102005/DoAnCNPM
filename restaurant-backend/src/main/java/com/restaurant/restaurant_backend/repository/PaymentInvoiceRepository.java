@@ -9,5 +9,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PaymentInvoiceRepository extends JpaRepository<PaymentInvoice, Integer> {
     boolean existsByPaymentMethod(PaymentMethod paymentMethod);
+    
 }
 

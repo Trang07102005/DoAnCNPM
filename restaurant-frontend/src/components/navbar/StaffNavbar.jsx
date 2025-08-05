@@ -14,6 +14,8 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StaffOrderFlow from "../../pages/Staff/StaffOrderFlow";
 import StaffDashboard from "../../pages/Staff/StaffDashboard";
+import StaffTableReport from "../../pages/Staff/StaffTableReport";
+import StaffBestSellerReport from "../../pages/Staff/StaffBestSellerReport";
 
 const StaffNavbar = ({ onLogout }) => {
 
@@ -183,6 +185,10 @@ const StaffNavbar = ({ onLogout }) => {
 
         {/* Topbar */}
         <div className="w-full h-[8ch] px-12 bg-zinc-50 shadow-md flex items-center justify-between">
+        <div className="text-2xl font-bold">
+          <span className="text-orange-300">VIET</span>
+          <span className="text-gray-800">TAURANT</span>
+        </div>
           <div className="w-96 border border-zinc-300 rounded-full h-11 flex items-center justify-center">
             <input
               type="text"
@@ -223,10 +229,10 @@ const StaffNavbar = ({ onLogout }) => {
   {selectedPage === "dashboard" && <StaffDashboard />}
   {selectedPage === "order-management" && <StaffOrderFlow />}
   {selectedPage === "table-report" && (
-    <div className="text-gray-600 italic">Nội dung báo cáo bàn đặt đang được phát triển...</div>
+    <StaffTableReport />
   )}
   {selectedPage === "best-seller-report" && (
-    <div className="text-gray-600 italic">Nội dung báo cáo món bán chạy đang được phát triển...</div>
+    <StaffBestSellerReport />
   )}
 </div>
 

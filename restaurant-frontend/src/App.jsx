@@ -8,7 +8,7 @@ import Register from "./pages/login/Register";
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import StaffDashboard from "./pages/Staff/StaffDashboard";
 import CashierDashboard from "./pages/Cashier/CashierDashboard";
-import ManagerDashboard from "./pages/Manager/ManagerDashboard";
+
 import ChefDashboard from "./pages/Chef/ChefDashboard";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import AdminNavbar from "./components/navbar/AdminNavbar";
@@ -25,6 +25,7 @@ import FoodMenu from "./pages/Menus/FoodMenu";
 import Gallery from "./pages/Gallery/Gallery";
 import OurChef from "./pages/OurChef/OurChef";
 import Contact from "./pages/Contact/Contact";
+import ManagerDashboard from "./pages/Manager/Dashboard/ManagerDashboard";
 function App() {
   const [role, setRole] = useState(localStorage.getItem("role") || "");
   const handleLogout = () => {
@@ -65,9 +66,10 @@ function App() {
           <Route path="/foodmenu" element={<FoodMenu />} />
           <Route path="/thuvien" element={<Gallery />} />
           <Route path="/daubep" element={<OurChef />} />
-          <Route path="/lienlac" element={<Contact />} />
+          <Route path="/lienhe" element={<Contact />} />
           <Route path="/login" element={<Login onLogin={(r) => setRole(r)} />} />
           <Route path="/register" element={<Register />} />
+          
 
           {/* Protected routes */}
           <Route path="/admin/dashboard" element={

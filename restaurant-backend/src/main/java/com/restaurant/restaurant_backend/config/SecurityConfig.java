@@ -43,7 +43,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             .requestMatchers(
                 "/api/auth/**",
                 "/api/food/**",
-                "/api/chef",
+                "/api/chef/**",
                 "/api/food-categories/**",
                 "/api/pending",
                 "/api/tables",
@@ -52,21 +52,22 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 "/api/order-status/**",
                 "/api/reservations",
                 "/api/reservations/**",
-                "/error"
+                "/error",
+                "/api/gallery/**"
             ).permitAll()
 
             // ✅ ADMIN-only APIs
             .requestMatchers(
                 "/api/users/**",
-                "/api/admin/**"
-            ).hasRole("ADMIN")  // 👈 Dùng hasRole, Spring tự thêm "ROLE_"
+                "/api/admin/**",
+                "/api/admin/gallery/**"
+            ).hasRole("ADMIN")  
 
             // ✅ STAFF hoặc ADMIN
             .requestMatchers(
                 "/api/orders/by-table/**",
                 "/api/orders/by-user/**"
-            ).hasAnyRole("STAFF", "ADMIN") // 👈 Đổi thành hasAnyRole
-
+            ).hasAnyRole("STAFF", "ADMIN")
             // ✅ STAFF only
             .requestMatchers(
                 "/api/orders",
@@ -80,7 +81,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 "/api/order-details/delete/**",
                 "/api/orders/**"
             ).hasAnyRole("STAFF", "CASHIER", "MANAGER")
-            .requestMatchers("/api/cashier/**").hasRole("CASHIER") // 👈 Dùng hasRole, Spring tự thêm "ROLE_"
+            .requestMatchers("/api/cashier/**").hasRole("CASHIER")
 
             .requestMatchers(
                 "/api/manager/**",

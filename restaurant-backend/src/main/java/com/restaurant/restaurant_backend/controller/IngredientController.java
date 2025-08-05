@@ -56,4 +56,6 @@ public ResponseEntity<?> deleteIngredient(@PathVariable Integer id) {
             .body(Collections.singletonMap("error", ex.getMessage()));
     }
 }
+
+
 }

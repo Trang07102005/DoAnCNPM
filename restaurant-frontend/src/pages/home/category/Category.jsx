@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 const Category = () => {
   const [categoryData, setCategoryData] = useState([]);
@@ -64,15 +65,17 @@ const Category = () => {
              transition-all duration-500 transform
              group-hover:bg-[#E6B15F] group-hover:rotate-[360deg]"
 >
-  <svg
-    className="w-10 h-10 text-[#E6B15F] group-hover:text-black transition-colors duration-300"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    viewBox="0 0 24 24"
-  >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-  </svg>
+  <Link to="/foodmenu">
+      <svg
+        className="w-10 h-10 text-[#E6B15F] group-hover:text-black transition-colors duration-300 cursor-pointer"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+    </Link>
 </div>
 
 

@@ -14,6 +14,7 @@ import {
   import UserManagement from "../../pages/Admin/UserManagement";
   import AdminDashboard from "../../pages/Admin/AdminDashboard";
 import RoleManagement from "../../pages/Admin/RoleManagement";
+import AdminGalleryManagement from "../../pages/Admin/AdminGalleryManagement";
   
   const AdminNavbar = ({ onLogout }) => {
     const [selectedPage, setSelectedPage] = useState("dashboard");
@@ -35,6 +36,11 @@ import RoleManagement from "../../pages/Admin/RoleManagement";
         title: "Quản Lý Phân Quyền",
         icon: <FontAwesomeIcon icon={faGear} />,
         key: "role",
+      },
+      {
+        title: "Quản Lý Thư Viện",
+        icon: <FontAwesomeIcon icon={faGear} />,
+        key: "gallery",
       },
     ];
   
@@ -142,6 +148,10 @@ import RoleManagement from "../../pages/Admin/RoleManagement";
         <div className="h-screen flex-1 bg-zinc-100 flex flex-col overflow-hidden">
   {/* Topbar */}
   <div className="w-full h-[8ch] px-12 bg-white shadow flex items-center justify-between">
+  <div className="text-2xl font-bold">
+    <span className="text-orange-300">VIET</span>
+    <span className="text-gray-800">TAURANT</span>
+  </div>
     {/* Search bar */}
     <div className="w-96 h-11 border border-zinc-300 rounded-full flex items-center overflow-hidden">
       <input
@@ -172,6 +182,7 @@ import RoleManagement from "../../pages/Admin/RoleManagement";
     {selectedPage === "dashboard" && <AdminDashboard />}
     {selectedPage === "user" && <UserManagement />}
     {selectedPage === "role" && <RoleManagement />}
+    {selectedPage === "gallery" && <AdminGalleryManagement />}
   </div>
 </div>
 

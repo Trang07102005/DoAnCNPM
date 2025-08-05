@@ -3,6 +3,8 @@ import axios from "axios";
 import CustomerInfoModal from "./CustomerInfoModal";
 import { faCheckCircle, faClock, faUtensils } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { toast, ToastContainer } from "react-toastify";
+import 'react-toastify/dist/ReactToastify.css';
 
 const StaffOrderFlow = () => {
   const [step, setStep] = useState(1);
@@ -36,9 +38,9 @@ const StaffOrderFlow = () => {
     try {
       const res = await axios.get("http://localhost:8080/api/tables/with-status");
       setTables(res.data);
-      console.log(res.data);
     } catch (err) {
-      alert("Lỗi tải danh sách bàn.");
+      console.log(err);
+      toast.error("❌ Lỗi tải danh sách bàn.");
     }
   };
 
@@ -48,7 +50,7 @@ const StaffOrderFlow = () => {
       setCategories(res.data);
     } catch (err) {
       console.log(err);
-      alert("Lỗi tải danh sách danh mục.");
+      toast.error("❌ Lỗi tải danh sách danh mục.");
     }
   };
 
@@ -62,7 +64,7 @@ const StaffOrderFlow = () => {
       setFoods(filteredFoods);
     } catch (err) {
       console.log(err);
-      alert("Lỗi tải danh sách món.");
+      toast.error("❌ Lỗi tải danh sách món ăn.");
     }
   };
 
@@ -102,7 +104,7 @@ const StaffOrderFlow = () => {
 
   const handleSubmitOrder = async () => {
     if (orderDetails.length === 0) {
-      alert("Chọn ít nhất 1 món.");
+      toast.warning("⚠️ Chọn ít nhất 1 món!");
       return;
     }
 
@@ -121,7 +123,7 @@ const StaffOrderFlow = () => {
         headers,
       });
 
-      alert("Tạo đơn hàng thành công.");
+      toast.success("Tạo đơn hàng thành công!");
       fetchTables();
       setStep(1);
       setSelectedTable(null);
@@ -131,40 +133,45 @@ const StaffOrderFlow = () => {
       setOrderDetails([]);
     } catch (err) {
       console.log(err);
-      alert("Lỗi tạo đơn hàng.");
+      toast.error("❌ Lỗi tạo đơn hàng.");
     }
   };
 
   const handleTableSelect = async (table) => {
     if (table.status === "Đã đặt") {
-      // Kiểm tra thời gian đặt bàn
-      const reservations = await axios.get(`http://localhost:8080/api/reservations`, { headers });
-      const currentReservation = reservations.data.find(
-        (r) => r.restaurantTable?.tableId === table.tableId && r.status === "Đã đặt"
-      );
-      if (currentReservation) {
-        const now = new Date();
-        const reservationTime = new Date(currentReservation.reservationTime);
-        if (now >= reservationTime && now <= new Date(reservationTime.getTime() + 60 * 60 * 1000)) {
-          // Cập nhật trạng thái đặt bàn thành "Khách đã đến" và bàn thành "Đang phục vụ"
-          await axios.put(
-            `http://localhost:8080/api/reservations/status/${currentReservation.reservationId}`,
-            { status: "Khách đã đến" },
-            { headers }
-          );
-          setSelectedTable(table);
-          setStep(2); // Chuyển trực tiếp sang bước chọn món
-          return;
+      try {
+        const reservations = await axios.get(`http://localhost:8080/api/reservations`, { headers });
+        const currentReservation = reservations.data.find(
+          (r) => r.restaurantTable?.tableId === table.tableId && r.status === "Đã đặt"
+        );
+        if (currentReservation) {
+          const now = new Date();
+          const reservationTime = new Date(currentReservation.reservationTime);
+          if (now >= reservationTime && now <= new Date(reservationTime.getTime() + 60 * 60 * 1000)) {
+            await axios.put(
+              `http://localhost:8080/api/reservations/status/${currentReservation.reservationId}`,
+              { status: "Khách đã đến" },
+              { headers }
+            );
+            setSelectedTable(table);
+            setStep(2);
+            toast.info("👋 Khách đã đến. Bắt đầu phục vụ!");
+            return;
+          }
         }
+      } catch (error) {
+        console.log(error);
+        toast.error("❌ Lỗi xử lý trạng thái đặt bàn.");
+        return;
       }
     }
-    // Nếu không phải "Đã đặt" hoặc thời gian chưa đến, mở modal thông tin khách hàng
     setSelectedTable(table);
     setShowCustomerModal(true);
   };
 
   return (
     <div className="space-y-10 p-6 bg-gray-200 min-h-screen rounded-2xl shadow-lg">
+     <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop />
       {step === 1 && (
         <>
           <h2 className="text-3xl font-bold text-green-700 mb-6 tracking-wide drop-shadow-sm">
@@ -251,135 +258,143 @@ const StaffOrderFlow = () => {
             Chọn món ăn
           </h2>
 
-          {/* Thêm danh mục dưới dạng nút */}
-          <div className="mb-6 flex flex-wrap gap-3">
+          {/* DANH MỤC (CATEGORY) NÚT */}
+        <div className="mb-8 flex flex-wrap justify-center gap-4">
+          <button
+            onClick={() => setSelectedCategory(null)}
+            className={`px-5 py-2 rounded-full font-semibold shadow-md transition-all duration-200 border ${
+              selectedCategory === null
+                ? "bg-red-600 text-white border-red-600"
+                : "bg-white text-gray-700 hover:bg-red-100 border-gray-300"
+            }`}
+          >
+            Tất cả
+          </button>
+
+          {categories.map((category) => (
             <button
-              onClick={() => setSelectedCategory(null)}
-              className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                selectedCategory === null
-                  ? "bg-red-600 text-white"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              key={category.categoryId}
+              onClick={() => setSelectedCategory(category.categoryId)}
+              className={`px-5 py-2 rounded-full font-thin shadow-md transition-all duration-200 border ${
+                selectedCategory === category.categoryId
+                  ? "bg-orange-600 text-white border-orange-600"
+                  : "bg-white text-gray-700 hover:bg-red-100 border-gray-300"
               }`}
             >
-              Tất cả
+              {category.categoryName}
             </button>
-            {categories.map((category) => (
-              <button
-                key={category.categoryId}
-                onClick={() => setSelectedCategory(category.categoryId)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
-                  selectedCategory === category.categoryId
-                    ? "bg-red-600 text-white"
-                    : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                }`}
-              >
-                {category.categoryName}
-              </button>
-            ))}
-          </div>
+          ))}
+        </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Cột trái: Danh sách món ăn */}
-            <div className="h-[500px] overflow-y-auto pr-2">
-              <div className="grid grid-cols-2 md:grid-cols-2 gap-6">
-                {foods.map((food) => (
-                  <div
-                    key={food.foodId}
-                    className="rounded-2xl border border-red-300 p-4 shadow-md bg-white hover:shadow-xl transition duration-300 flex flex-col hover:scale-[1.02] transform"
-                  >
-                    <img
-                      src={food.imageUrl}
-                      alt={food.foodName}
-                      className="w-full h-32 object-cover rounded-xl mb-4 border border-red-200"
-                    />
-                    <div className="mt-auto">
-                      <div className="font-bold text-lg text-red-800">{food.foodName}</div>
-                      <div className="text-sm text-gray-600 mb-3">
-                        {food.price.toLocaleString()} VND
-                      </div>
-                      <button
-                        className="w-full bg-red-600 text-white py-2 rounded-xl hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-opacity-50 transition"
-                        onClick={() => handleAddFood(food)}
-                      >
-                        ➕ Thêm món
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
 
-            {/* Cột phải: Đơn hàng đã chọn */}
-            <div>
-              <h3 className="text-2xl font-semibold mb-4 text-red-700 border-b border-red-300 pb-2">
-                🧾 Chi tiết đơn hàng
-              </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 rounded-2xl shadow-inner bg-white">
+  {/* Cột trái: Danh sách món ăn */}
+  <div className="h-[500px] overflow-y-auto pr-2 custom-scroll">
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+    {foods.map((food) => (
+      <div
+        key={food.foodId}
+        className="bg-white rounded-2xl border border-orange-300 shadow-md p-4 transition-transform transform hover:scale-[1.02] hover:shadow-lg flex flex-col justify-between"
+      >
+        <img
+          src={food.imageUrl}
+          alt={food.foodName}
+          className="w-full h-40 object-cover rounded-xl mb-4 border border-orange-200"
+        />
+        <div className="flex flex-col flex-grow">
+          <h3 className="text-xl font-semibold text-orange-700 mb-1 line-clamp-1">
+            {food.foodName}
+          </h3>
+          <p className="text-gray-600 text-sm mb-4">
+            {food.price.toLocaleString()} <span className="text-xs">VND</span>
+          </p>
+          <button
+            className="mt-auto bg-gradient-to-r from-orange-500 to-orange-600 text-white py-2 rounded-xl hover:from-orange-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:ring-opacity-50 transition font-medium"
+            onClick={() => handleAddFood(food)}
+          >
+            ➕ Thêm món
+          </button>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
 
-              {orderDetails.length === 0 ? (
-                <p className="text-gray-500 italic">Chưa chọn món nào.</p>
-              ) : (
-                <ul className="space-y-4 max-h-[500px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-red-400 scrollbar-track-red-100">
-                  {orderDetails.map((d) => (
-                    <li
-                      key={d.foodId}
-                      className="flex items-center bg-white p-4 border border-red-200 rounded-xl shadow-md hover:shadow-lg transition"
-                    >
-                      <img
-                        src={d.imageUrl}
-                        alt={d.foodName}
-                        className="w-20 h-20 object-cover rounded-lg mr-4 border border-red-200"
-                      />
-                      <div className="flex-1">
-                        <div className="font-semibold text-gray-800">{d.foodName}</div>
-                        <div className="text-sm text-gray-500">
-                          {d.price.toLocaleString()} VND
-                        </div>
-                      </div>
-                      <input
-                        type="number"
-                        value={d.quantity}
-                        min="1"
-                        className="w-20 border border-gray-300 rounded-lg px-3 py-2 mr-3 text-center focus:outline-none focus:ring-2 focus:ring-red-400 transition"
-                        onChange={(e) =>
-                          handleQuantityChange(d.foodId, parseInt(e.target.value))
-                        }
-                      />
-                      <button
-                        onClick={() => handleRemoveFood(d.foodId)}
-                        className="text-red-600 hover:text-red-800 font-semibold transition"
-                        aria-label={`Xoá ${d.foodName} khỏi đơn hàng`}
-                      >
-                        Xoá
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
 
-              <div className="mt-6 text-xl font-bold text-right text-gray-900">
-                Tạm tính:{" "}
-                {orderDetails
-                  .reduce((sum, item) => sum + item.price * item.quantity, 0)
-                  .toLocaleString()}{" "}
-                VND
-              </div>
+  {/* Cột phải: Đơn hàng đã chọn */}
+  <div className="bg-white rounded-2xl p-6 shadow-md border border-orange-200">
+  <h3 className="text-2xl font-bold mb-4 text-orange-700 border-b border-orange-300 pb-2 flex items-center gap-2">
+    🧾 <span>Chi tiết đơn hàng</span>
+  </h3>
 
-              <div className="mt-8 flex justify-between">
-                <button
-                  onClick={() => setStep(1)}
-                  className="bg-gray-400 text-white px-6 py-3 rounded-xl hover:bg-gray-500 transition focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
-                >
-                  Quay lại
-                </button>
-                <button
-                  onClick={handleSubmitOrder}
-                  className="bg-red-600 text-white px-8 py-3 rounded-xl hover:bg-red-700 transition focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
-                >
-                  Tạo đơn hàng
-                </button>
-              </div>
+  {orderDetails.length === 0 ? (
+    <p className="text-gray-500 italic">Chưa chọn món nào.</p>
+  ) : (
+    <ul className="space-y-4 max-h-[500px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-orange-400 scrollbar-track-orange-100">
+      {orderDetails.map((d) => (
+        <li
+          key={d.foodId}
+          className="flex items-center bg-orange-50 p-4 border border-orange-200 rounded-xl shadow-sm hover:shadow-md transition"
+        >
+          <img
+            src={d.imageUrl}
+            alt={d.foodName}
+            className="w-20 h-20 object-cover rounded-lg mr-4 border border-orange-200"
+          />
+          <div className="flex-1">
+            <div className="font-semibold text-gray-800 text-base line-clamp-1">{d.foodName}</div>
+            <div className="text-sm text-gray-600">
+              {d.price.toLocaleString()} <span className="text-xs">VND</span>
             </div>
           </div>
+          <input
+            type="number"
+            value={d.quantity}
+            min="1"
+            className="w-20 border border-gray-300 rounded-lg px-3 py-2 mr-3 text-center focus:outline-none focus:ring-2 focus:ring-orange-400 transition text-gray-800"
+            onChange={(e) =>
+              handleQuantityChange(d.foodId, parseInt(e.target.value))
+            }
+          />
+          <button
+            onClick={() => handleRemoveFood(d.foodId)}
+            className="text-orange-600 hover:text-orange-800 font-medium transition"
+            aria-label={`Xoá ${d.foodName} khỏi đơn hàng`}
+          >
+            ✖
+          </button>
+        </li>
+      ))}
+    </ul>
+  )}
+
+  <div className="mt-6 text-xl font-bold text-right text-gray-900">
+    Tạm tính:{" "}
+    {orderDetails
+      .reduce((sum, item) => sum + item.price * item.quantity, 0)
+      .toLocaleString()}{" "}
+    VND
+  </div>
+
+  <div className="mt-8 flex justify-between">
+    <button
+      onClick={() => setStep(1)}
+      className="bg-gray-400 text-white px-6 py-3 rounded-xl hover:bg-gray-500 transition focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-opacity-50"
+    >
+      ◀ Quay lại
+    </button>
+    <button
+      onClick={handleSubmitOrder}
+      className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-8 py-3 rounded-xl hover:from-orange-600 hover:to-orange-700 active:scale-95 transition focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50 font-semibold"
+    >
+      ✅ Tạo đơn hàng
+    </button>
+  </div>
+</div>
+
+</div>
+
+
         </>
       )}
     </div>

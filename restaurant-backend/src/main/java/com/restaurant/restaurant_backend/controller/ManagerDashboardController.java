@@ -15,6 +15,7 @@ import com.restaurant.restaurant_backend.repository.OrderDetailRepository;
 import com.restaurant.restaurant_backend.repository.OrderRepository;
 import com.restaurant.restaurant_backend.repository.UserRepository;
 import com.restaurant.restaurant_backend.service.DashboardService;
+import com.restaurant.restaurant_backend.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -28,6 +29,7 @@ public class ManagerDashboardController {
     private final UserRepository userRepository;
     private final OrderDetailRepository orderDetailRepository;
     private final DashboardService dashboardService;
+    private final OrderService orderService;
 
 
     @GetMapping("/summary")
@@ -47,9 +49,15 @@ public class ManagerDashboardController {
     }
 
     @GetMapping("/top-ordered-foods")
-public ResponseEntity<?> getTopOrderedFoods() {
-    List<Object[]> results = orderDetailRepository.findFoodOrderCounts();
-    
+public ResponseEntity<?> getTopOrderedFoods(@RequestParam(required = false) Integer categoryId) {
+    List<Object[]> results;
+
+    if (categoryId != null) {
+        results = orderDetailRepository.findFoodOrderCountsByCategory(categoryId);
+    } else {
+        results = orderDetailRepository.findFoodOrderCounts();
+    }
+
     List<Map<String, Object>> response = results.stream().map(row -> {
         Map<String, Object> item = new HashMap<>();
         item.put("foodName", row[0]);
@@ -60,6 +68,7 @@ public ResponseEntity<?> getTopOrderedFoods() {
 
     return ResponseEntity.ok(response);
 }
+
 
 @GetMapping("/order-stats")
 public ResponseEntity<?> getOrderStats(@RequestParam String type) {
@@ -78,10 +87,13 @@ public ResponseEntity<?> getRevenueStats(@RequestParam String type) {
 
 
 
+@GetMapping("/average-value")
+public ResponseEntity<?> getAverageOrderValue() {
+    Double avg = orderService.getAverageOrderValue();
+    return ResponseEntity.ok(avg != null ? avg : 0);
+}
 
 
-
-    
 
 }
 

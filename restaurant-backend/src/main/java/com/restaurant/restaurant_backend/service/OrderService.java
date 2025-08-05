@@ -121,6 +121,8 @@ public List<OrderChartDTO> getOrderCountByYear() {
         return savedOrder;
     }
 
-
+    public Double getAverageOrderValue() {
+        return orderRepository.findAverageOrderValue();
+    }
 
 }

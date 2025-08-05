@@ -96,41 +96,41 @@ const RoleManagement = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-white rounded-2xl shadow-lg">
-  <h2 className="text-3xl font-bold mb-6 border-b pb-3 text-gray-800">Quản Lý Phân Quyền</h2>
+    <div className="max-w-7xl mx-auto p-8 bg-white rounded-2xl shadow-2xl border border-slate-200">
+  <h2 className="text-4xl font-extrabold mb-8 text-indigo-700 border-b-2 border-indigo-200 pb-3">
+    Quản Lý Phân Quyền
+  </h2>
 
-  <div className="flex justify-end mb-4">
+  <div className="flex justify-end mb-6">
     <button
       onClick={openRoleModal}
-      className="bg-purple-600 hover:bg-purple-700 text-white px-5 py-2 rounded-lg shadow transition duration-200"
+      className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2 rounded-lg shadow-md transition duration-200"
     >
       Xem Vai Trò
     </button>
   </div>
 
-  <div className="overflow-x-auto">
-  <table className="min-w-full bg-gray-50 border border-gray-300 rounded-xl shadow">
-
-  <thead className="bg-purple-200 text-gray-700 text-sm uppercase font-semibold">
-
+  <div className="overflow-x-auto rounded-xl border border-gray-300">
+    <table className="min-w-full bg-white">
+      <thead className="bg-indigo-100 text-gray-700 text-sm uppercase font-semibold">
         <tr>
           {["ID", "Tên", "Email", "Vai trò", "Thao tác"].map((head) => (
-            <th key={head} className="py-3 px-6 text-left border-b">{head}</th>
+            <th key={head} className="py-3 px-6 text-left border-b border-slate-300">{head}</th>
           ))}
         </tr>
       </thead>
       <tbody>
         {users.map((u) => (
-          <tr key={u.userId} className="even:bg-gray-200 hover:bg-gray-100 transition">
+          <tr key={u.userId} className="even:bg-slate-100 hover:bg-yellow-50 transition">
             <td className="py-3 px-6">{u.userId}</td>
-            <td className="py-3 px-6 font-medium">{u.username}</td>
+            <td className="py-3 px-6 font-semibold text-slate-700">{u.username}</td>
             <td className="py-3 px-6">{u.email}</td>
             <td className="py-3 px-6">
               {editUserId === u.userId ? (
                 <select
                   value={editRole}
                   onChange={(e) => setEditRole(e.target.value)}
-                  className="w-full bg-white border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="w-full bg-white border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 >
                   {rolesList.map((role) => (
                     <option key={role.id} value={role.name}>
@@ -139,7 +139,7 @@ const RoleManagement = () => {
                   ))}
                 </select>
               ) : (
-                <span className="capitalize">{u.role?.name}</span>
+                <span className="capitalize text-indigo-600 font-medium">{u.role?.name}</span>
               )}
             </td>
             <td className="py-3 px-6 text-center">
@@ -161,7 +161,7 @@ const RoleManagement = () => {
               ) : (
                 <button
                   onClick={() => startEditing(u.userId, u.role.name)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1 rounded-md shadow"
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1 rounded-md shadow"
                 >
                   Sửa
                 </button>
@@ -179,26 +179,29 @@ const RoleManagement = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50"
+        className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50"
       >
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           exit={{ scale: 0.9, opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="bg-white p-6 rounded-xl shadow-lg w-[420px] max-w-full"
+          transition={{ duration: 0.25 }}
+          className="bg-white p-6 rounded-xl shadow-2xl w-[460px] max-w-full border border-slate-300"
         >
-          <h3 className="text-xl font-bold mb-4 text-gray-800">Danh Sách Vai Trò</h3>
+          <h3 className="text-2xl font-bold mb-5 text-indigo-700">Danh Sách Vai Trò</h3>
 
           <ul className="space-y-3 mb-6">
             {rolesList.map((role) => (
-              <li key={role.id} className="flex justify-between items-center bg-gray-100 rounded-md px-4 py-2">
-                <span className="font-medium text-gray-800">{role.name}</span>
+              <li
+                key={role.id}
+                className="flex justify-between items-center bg-indigo-50 border border-indigo-200 rounded-md px-4 py-2"
+              >
+                <span className="font-medium text-gray-800 capitalize">{role.name}</span>
                 <div className="space-x-2">
-                  <button className="text-sm px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
+                  <button className="text-sm px-3 py-1 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 shadow-sm">
                     Sửa
                   </button>
-                  <button className="text-sm px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600">
+                  <button className="text-sm px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600 shadow-sm">
                     Xoá
                   </button>
                 </div>
@@ -216,7 +219,7 @@ const RoleManagement = () => {
             />
             <button
               onClick={handleAddRole}
-              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md"
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow-md"
             >
               Thêm
             </button>
@@ -225,7 +228,7 @@ const RoleManagement = () => {
           <div className="text-right">
             <button
               onClick={() => setShowRoleModal(false)}
-              className="text-gray-600 hover:bg-red-100 px-4 py-2 rounded-md transition"
+              className="text-gray-600 hover:text-red-500 px-4 py-2 rounded-md transition"
             >
               Đóng
             </button>
@@ -235,6 +238,7 @@ const RoleManagement = () => {
     )}
   </AnimatePresence>
 </div>
+
 
     
   );

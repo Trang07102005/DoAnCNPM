@@ -76,7 +76,8 @@ List<Object[]> sumRevenueByMonth();
 List<Object[]> sumRevenueByYear();
 List<Order> findByRestaurantTable_TableIdAndStatusInOrderByOrderTimeDesc(Integer tableId, List<String> status);
 
-
+@Query("SELECT AVG(o.total) FROM Order o WHERE o.total IS NOT NULL")
+Double findAverageOrderValue();
     
 
 }

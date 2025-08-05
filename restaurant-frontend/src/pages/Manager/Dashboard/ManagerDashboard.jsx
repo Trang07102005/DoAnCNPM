@@ -51,7 +51,10 @@ const ManagerDashboard = () => {
   const [orderChartData, setOrderChartData] = useState([]);
   const [topFoods, setTopFoods] = useState([]);
   const [revenueChartData, setRevenueChartData] = useState([]);
-  const [revenueChartType, setrevenueChartType] = useState("daily"); // Thêm state cho loại biểu đồ
+  const [revenueChartType, setrevenueChartType] = useState("daily"); 
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
+  
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -69,6 +72,35 @@ const ManagerDashboard = () => {
       );
   }, [revenueChartType]); 
   
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+  
+    axios
+      .get("http://localhost:8080/api/food-categories", {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setCategories(res.data))
+      .catch((err) =>
+        console.error("Lỗi khi tải danh mục món ăn:", err)
+      );
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+  
+    const url = selectedCategoryId
+      ? `http://localhost:8080/api/manager/dashboard/top-ordered-foods?categoryId=${selectedCategoryId}`
+      : `http://localhost:8080/api/manager/dashboard/top-ordered-foods`;
+  
+    axios
+      .get(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => setTopFoods(res.data))
+      .catch((err) =>
+        console.error("Lỗi khi tải danh sách món ăn theo danh mục:", err)
+      );
+  }, [selectedCategoryId]);
   
 
   useEffect(() => {
@@ -203,86 +235,97 @@ const ManagerDashboard = () => {
      
 
 
-        <div className="grid bg-gradient-to-r from-blue-500 to-green-500 grid-cols-1 md:grid-cols-2 gap-5 rounded-2xl shadow-lg mt-20 p-6">
+        <div className="flex flex-col  gap-5 rounded-2xl  mt-20 p-6">
   {/* DANH SÁCH MÓN ĂN NHIỀU NHẤT */}
-  <div className="bg-gray-50 rounded-xl shadow-md flex-1 ">
-  <div className="bg-[#ff0040] w-full  p-4 mb-6 rounded-t-md">
-
-    <h2 className="text-2xl text-start font-bold   mb-2 text-white">
-      🏆 BEST SELLER
-    </h2>
+  <div className="bg-white rounded-2xl shadow-lg flex-1">
+  <div className="bg-gradient-to-r from-pink-500 to-red-500 p-5 rounded-t-2xl flex items-center justify-between">
+    <h2 className="text-2xl font-bold text-white">🏆 BEST SELLER</h2>
+    <select
+      className="ml-4 px-4 py-2 rounded-lg bg-white text-gray-800 shadow-sm"
+      value={selectedCategoryId}
+      onChange={(e) => setSelectedCategoryId(e.target.value)}
+    >
+      <option value="">Tất cả danh mục</option>
+      {categories.map((cat) => (
+        <option key={cat.categoryId} value={cat.categoryId}>
+          {cat.categoryName}
+        </option>
+      ))}
+    </select>
   </div>
-    <div className="flex px-4 overflow-x-auto space-x-5 pb-3 pr-2 custom-scroll">
+
+  <div className="flex flex-wrap justify-center gap-5 px-5 py-6">
     {topFoods.map((item, index) => (
-  <div
-    key={index}
-    className="min-w-[260px] bg-gradient-to-br from-sky-100 via-indigo-100 to-fuchsia-100 rounded-xl border border-sky-300 shadow-md hover:shadow-lg transition-all duration-300 flex flex-col text-center"
-  >
-    {/* Ảnh nằm trên cùng, full width */}
-    <div className="w-full h-40">
-      <img
-        src={item.imageUrl}
-        alt={item.foodName}
-        className="w-full h-full object-cover rounded-t-md"
-      />
-    </div>
-
-    {/* Nội dung dưới */}
-    <div className="p-6 flex flex-col items-center">
-      <h3 className="text-md font-semibold bg-gradient-to-r from-orange-500 to-pink-500 text-transparent bg-clip-text">
-        🏅 {index + 1}. {item.foodName}
-      </h3>
-
-      <p className="text-base text-black mt-1">
-        Số Orders:{" "}
-        <span className="font-bold bg-gradient-to-r from-red-500 to-yellow-400 text-transparent bg-clip-text">
-          {formatNumber(item.totalOrdered)}
-        </span>
-      </p>
-    </div>
+      <div
+        key={index}
+        className="w-[260px] bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300"
+      >
+        <div className="w-full h-40">
+          <img
+            src={item.imageUrl}
+            alt={item.foodName}
+            className="w-full h-full object-cover rounded-t-xl"
+          />
+        </div>
+        <div className="p-4 text-center">
+          <h3 className="text-lg font-semibold text-gray-800 mb-1">
+            🏅 {index + 1}.{" "}
+            <span className="bg-gradient-to-r from-orange-500 to-pink-500 text-transparent bg-clip-text">
+              {item.foodName}
+            </span>
+          </h3>
+          <p className="text-sm text-gray-600">
+            Số Orders:{" "}
+            <span className="font-bold bg-gradient-to-r from-red-500 to-yellow-400 text-transparent bg-clip-text">
+              {formatNumber(item.totalOrdered)}
+            </span>
+          </p>
+        </div>
+      </div>
+    ))}
   </div>
-))}
-    </div>
-  </div>
+</div>
+
 
   {/* BIỂU ĐỒ PIE CHO MÓN TOP */}
-<div className="bg-gray-50 rounded-xl shadow flex flex-col items-center">
-    {/* Header */}
-    <div className="bg-blue-400 w-full p-4 mb-6 rounded-t-md">
-      <h2 className="text-2xl font-bold mb-2 text-white text-start">
-        🏆 MÓN ĐẶT THEO TỈ LỆ (TOP {topFoods.length})
+  <div className="bg-white rounded-2xl shadow-lg flex flex-col items-center w-full">
+    <div className="bg-gradient-to-r from-blue-500 to-sky-400 w-full p-5 rounded-t-2xl shadow-md">
+      <h2 className="text-2xl font-bold text-white">
+        🥧 MÓN ĐẶT THEO TỈ LỆ (TOP {topFoods.length})
       </h2>
     </div>
 
-    <div className="flex flex-col lg:flex-row items-center justify-center gap-6 px-4 pb-6">
+    <div className="flex flex-col lg:flex-row items-center justify-center gap-8 px-6 py-8 w-full">
       {/* Pie Chart */}
-      <PieChart width={300} height={300}>
-        <Pie
-          data={topFoods}
-          dataKey="totalOrdered"
-          nameKey="foodName"
-          cx="50%"
-          cy="50%"
-          outerRadius={100}
-          fill="#8884d8"
-          label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
-        >
-          {topFoods.map((entry, index) => (
-            <Cell
-              key={`cell-${index}`}
-              fill={CHART_COLORS[index % CHART_COLORS.length]}
-            />
-          ))}
-        </Pie>
-        <Tooltip />
-      </PieChart>
+      <div className="w-full max-w-[340px] flex justify-center">
+        <PieChart width={300} height={300}>
+          <Pie
+            data={topFoods}
+            dataKey="totalOrdered"
+            nameKey="foodName"
+            cx="50%"
+            cy="50%"
+            outerRadius={110}
+            fill="#8884d8"
+            label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+          >
+            {topFoods.map((entry, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={CHART_COLORS[index % CHART_COLORS.length]}
+              />
+            ))}
+          </Pie>
+          <Tooltip />
+        </PieChart>
+      </div>
 
-      {/* Legend (Chú thích) */}
-      <div className="flex flex-col items-start text-sm max-h-[300px] overflow-y-auto pr-2 custom-scrollbar w-60">
+      {/* Legend */}
+      <div className="flex-1 w-full max-w-sm overflow-y-auto max-h-[300px] pr-2 custom-scrollbar">
         {topFoods.map((item, index) => (
           <div
             key={index}
-            className="flex items-center space-x-2 p-1 hover:bg-gray-100 rounded"
+            className="flex items-center space-x-3 p-2 hover:bg-gray-100 rounded transition-all"
           >
             <span
               className="inline-block w-4 h-4 rounded"
@@ -290,7 +333,7 @@ const ManagerDashboard = () => {
                 backgroundColor: CHART_COLORS[index % CHART_COLORS.length],
               }}
             />
-            <span className="text-gray-800 font-medium truncate">
+            <span className="text-gray-800 font-semibold truncate">
               {item.foodName}
             </span>
           </div>
@@ -299,6 +342,7 @@ const ManagerDashboard = () => {
     </div>
   </div>
 </div>
+
 
 
 

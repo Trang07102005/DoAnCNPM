@@ -21,6 +21,7 @@ import InventoryTransactionManager from "../../pages/Manager/Ingredient/Inventor
 import AddRecipe from "../../pages/Manager/Recipe/AddRecipe";
 import ManagerDashboard from "../../pages/Manager/Dashboard/ManagerDashboard";
 import IngredientStockManager from "../../pages/Manager/Ingredient/IngredientStockManager";
+import RevenueReport from "../../pages/Manager/RevenueReport/RevenueReport";
 const ManagerNavbar = ({ onLogout }) => {
   const [expandedMenu, setExpandedMenu] = useState(null);
   const [selectedPage, setSelectedPage] = useState("dashboard");
@@ -74,8 +75,7 @@ const ManagerNavbar = ({ onLogout }) => {
       title: "Báo Cáo Thống Kê",
       icon: <FontAwesomeIcon icon={faChartSimple} />,
       children: [
-        { key: "revenue-expense-report", title: "Báo Cáo Doanh Thu Và Chi Phí" },
-        { key: "profit-report", title: "Báo Cáo Lợi Nhuận" },
+        { key: "revenue-expense-report", title: "Doanh Thu & PnL" },
       ],
     },
   ];
@@ -204,6 +204,10 @@ const ManagerNavbar = ({ onLogout }) => {
 <div className="h-screen flex-1 bg-zinc-100 overflow-hidden flex flex-col">
   {/* Topbar */}
   <div className="w-full h-[8ch] px-12 bg-zinc-50 shadow-md flex items-center justify-between shrink-0">
+  <div className="text-2xl font-bold">
+    <span className="text-orange-300">VIET</span>
+    <span className="text-gray-800">TAURANT</span>
+  </div>
     <div className="w-96 border border-zinc-300 rounded-full h-11 flex items-center justify-center">
       <input
         type="text"
@@ -229,7 +233,7 @@ const ManagerNavbar = ({ onLogout }) => {
 
   {/* Page content */}
   <div className="flex-1 overflow-y-auto px-12 py-6">
-  <h1 className="text-3xl uppercase font-semibold mb-4">
+  <h1 className="text-3xl uppercase font-bold mb-4">
     {
       {
         dashboard: "Trang Dashboard",
@@ -241,8 +245,7 @@ const ManagerNavbar = ({ onLogout }) => {
         "ingredient-info": "Thông Tin Nguyên Liệu",
         "inventory-report": "Xuất Nhập Tồn",
         "stock-tracking": "Theo Dõi Tồn Kho",
-        "time": "Ca Làm Việc",
-      }[selectedPage] || "Trang"
+      }[selectedPage] || "."
     }
   </h1>
 
@@ -256,6 +259,7 @@ const ManagerNavbar = ({ onLogout }) => {
   {selectedPage === "ingredient-info" && <IngredientManager />}
   {selectedPage === "inventory-report" && <InventoryTransactionManager />}
   {selectedPage === "stock-tracking" && <IngredientStockManager />}
+  {selectedPage === "revenue-expense-report" && <RevenueReport />}
 </div>
 
 </div>

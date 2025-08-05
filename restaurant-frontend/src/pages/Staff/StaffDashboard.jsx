@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { faCheckCircle, faClock, faUtensils } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const StaffDashboard = () => {
   const [servingTables, setServingTables] = useState([]);
@@ -14,9 +17,11 @@ const StaffDashboard = () => {
   const [hoveredTableId, setHoveredTableId] = useState(null);
   const [hoveredOrderDetails, setHoveredOrderDetails] = useState([]);
   const [pendingStatuses, setPendingStatuses] = useState([]);
-
+  const [pendingItems, setPendingItems] = useState([]);
   const token = localStorage.getItem("token");
 
+  
+  
   // Hàm lấy trạng thái món ăn
   const fetchPendingStatuses = async () => {
     try {
@@ -152,7 +157,7 @@ const StaffDashboard = () => {
   const addFoodToOrder = async () => {
     if (!selectedOrder) return;
     if (!selectedFoodId || quantityToAdd < 1) {
-      alert("Vui lòng chọn món và số lượng hợp lệ");
+      toast.warning("Vui lòng chọn món và số lượng hợp lệ");
       return;
     }
 
@@ -180,7 +185,7 @@ const StaffDashboard = () => {
       setQuantityToAdd(1);
     } catch (err) {
       console.error("Lỗi khi thêm món:", err);
-      alert("Không thể thêm món: " + (err.response?.data?.message || "Lỗi không xác định"));
+      toast.error(" Không thể thêm món: " + (err.response?.data?.message || "Lỗi không xác định"));
     }
   };
 
@@ -189,12 +194,12 @@ const StaffDashboard = () => {
       // Tìm trạng thái của món dựa trên orderDetailId
       const detail = orderDetails.find((d) => d.orderDetailId === detailId);
       if (!detail) {
-        alert("Không tìm thấy món trong đơn hàng");
+        toast.error("Không tìm thấy món trong đơn hàng");
         return;
       }
       const status = getStatusForDetail(selectedOrder.orderId, detail.foodId);
       if (status === "Đang chế biến" || status === "Đã hoàn thành") {
-        alert("Không thể xóa món đang chế biến hoặc đã hoàn thành!");
+        toast.warning("Không thể xóa món đang chế biến hoặc đã hoàn thành!");
         return;
       }
 
@@ -203,15 +208,17 @@ const StaffDashboard = () => {
       });
       setOrderDetails((prev) => prev.filter((d) => d.orderDetailId !== detailId));
       fetchPendingStatuses();
-      alert("Đã xóa món thành công");
+      toast.success("Đã xóa món thành công");
     } catch (err) {
       console.error("Lỗi khi xóa món:", err);
-      alert("Lỗi khi xóa món: " + (err.response?.data?.message || "Lỗi không xác định"));
+      toast.error(" Lỗi khi xóa món: " + (err.response?.data?.message || "Lỗi không xác định"));
+
     }
   };
 
   return (
     <>
+    <ToastContainer position="top-right" autoClose={3000} />
       <img
         src="https://as1.ftcdn.net/v2/jpg/06/11/73/66/1000_F_611736653_ducpoekHSmk9pdeZ2HxDp4cu1g8aq4np.jpg"
         alt="Banner Danh sách bàn đang phục vụ"
@@ -306,118 +313,177 @@ const StaffDashboard = () => {
         </div>
 
         {isModalOpen && selectedOrder && (
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex justify-center items-center">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto p-8 relative">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="absolute top-4 right-6 text-gray-600 hover:text-black text-3xl font-bold"
+  <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center">
+    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-y-auto p-8 relative">
+      {/* Nút đóng */}
+      <button
+        onClick={() => setIsModalOpen(false)}
+        className="absolute top-4 right-6 text-gray-600 hover:text-black text-3xl font-bold"
+      >
+        &times;
+      </button>
+
+      {/* Tiêu đề */}
+      <h2 className="text-3xl font-bold text-center text-red-700 mb-6">
+        🧾 Đơn hàng - Bàn {selectedOrder.restaurantTable?.tableName}
+      </h2>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* ======== CỘT TRÁI: Danh sách món ăn ======== */}
+        <section className="bg-orange-50 border border-orange-300 rounded-2xl p-5 shadow-inner">
+          <h3 className="text-xl font-bold text-orange-700 mb-4">🍽️ Danh sách món</h3>
+
+          {/* Danh sách món có thể chọn */}
+          <div className="space-y-4 max-h-72 overflow-y-auto pr-2">
+            {menuItems.map((item) => (
+              <div
+                key={item.foodId}
+                className="flex items-center gap-4 bg-white border border-orange-200 p-3 rounded-xl shadow-sm"
               >
-                &times;
-              </button>
+                <img src={item.imageUrl} alt={item.foodName} className="w-16 h-16 rounded-md object-cover" />
+                <div className="flex-1">
+                  <div className="font-semibold text-orange-800">{item.foodName}</div>
+                  <div className="text-sm text-gray-600">{item.price.toLocaleString()} đ</div>
+                </div>
+                <button
+                  onClick={() => {
+                    const exist = pendingItems.find((p) => p.foodId === item.foodId);
+                    if (!exist) {
+                      setPendingItems([...pendingItems, { ...item, quantity: 1 }]);
+                    }
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded-lg text-sm"
+                >
+                  ➕ Thêm
+                </button>
+              </div>
+            ))}
+          </div>
 
-              <h3 className="text-3xl font-bold text-center text-red-800 mb-6">
-                Đơn hàng - Bàn {selectedOrder.restaurantTable?.tableName}
-              </h3>
-
-              <ul className="space-y-4 mb-6 max-h-64 overflow-y-auto pr-2">
-                {orderDetails.map((detail) => (
+          {/* Món chờ xác nhận */}
+          {pendingItems.length > 0 && (
+            <div className="mt-6">
+              <h4 className="text-lg font-semibold text-orange-700 mb-2">🕒 Món chờ xác nhận</h4>
+              <ul className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                {pendingItems.map((item) => (
                   <li
-                    key={detail.orderDetailId}
-                    className="flex items-center justify-between border border-red-500 bg-red-100 font-semibold rounded-xl p-4 shadow"
+                    key={item.foodId}
+                    className="flex items-center justify-between bg-white border border-orange-300 rounded-xl px-3 py-2 shadow-sm"
                   >
-                    <img
-                      src={detail.imageUrl}
-                      alt={detail.foodName}
-                      className="w-20 h-20 object-cover rounded-md"
+                    <div className="flex-1 font-medium text-gray-800">{item.foodName}</div>
+                    <input
+                      type="number"
+                      min={1}
+                      value={item.quantity}
+                      onChange={(e) => {
+                        const qty = parseInt(e.target.value);
+                        setPendingItems((prev) =>
+                          prev.map((p) => (p.foodId === item.foodId ? { ...p, quantity: qty } : p))
+                        );
+                      }}
+                      className="w-16 border rounded px-2 py-1 text-center mr-3"
                     />
-                    <div className="flex-1 px-4">
-                      <div className="font-semibold text-xl text-green-800">{detail.foodName}</div>
-                      <div className="text-sm text-gray-600">
-                        {detail.price.toLocaleString()} đ
-                      </div>
-                      <div
-                        className={`text-sm font-semibold ${
-                          getStatusForDetail(selectedOrder.orderId, detail.foodId) === "Chưa chế biến"
-                            ? "text-yellow-600"
-                            : getStatusForDetail(selectedOrder.orderId, detail.foodId) === "Đang chế biến"
-                            ? "text-blue-600"
-                            : getStatusForDetail(selectedOrder.orderId, detail.foodId) === "Đã hoàn thành"
-                            ? "text-green-600"
-                            : "text-gray-700"
-                        }`}
-                      >
-                        Trạng thái: {getStatusForDetail(selectedOrder.orderId, detail.foodId)}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <input
-                        type="number"
-                        min={1}
-                        defaultValue={detail.quantity}
-                        onBlur={(e) => {
-                          const val = parseInt(e.target.value);
-                          if (val > 0) updateQuantity(detail.orderDetailId, val);
-                        }}
-                        className="w-20 border border-red-300 rounded px-2 py-1 text-center"
-                      />
-                      {getStatusForDetail(selectedOrder.orderId, detail.foodId) === "Chưa chế biến" ? (
-                        <button
-                          onClick={() => deleteDetail(detail.orderDetailId)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Xóa
-                        </button>
-                      ) : (
-                        <span className="text-gray-400">Không thể xóa</span>
-                      )}
-                    </div>
+                    <button
+                      onClick={() =>
+                        setPendingItems((prev) => prev.filter((p) => p.foodId !== item.foodId))
+                      }
+                      className="text-red-500 hover:text-red-700 text-sm"
+                    >
+                      Xoá
+                    </button>
                   </li>
                 ))}
               </ul>
 
-              <div className="text-right font-semibold text-xl text-green-900 mb-6">
-                Tổng tiền:{" "}
-                {orderDetails
-                  .reduce((sum, d) => sum + d.price * d.quantity, 0)
-                  .toLocaleString()}{" "}
-                đ
-              </div>
-
-              <div className="border-t pt-4">
-                <h4 className="text-xl font-semibold text-red-700 mb-3">➕ Gọi thêm món</h4>
-                <div className="flex flex-wrap gap-4">
-                  <select
-                    value={selectedFoodId}
-                    onChange={(e) => setSelectedFoodId(e.target.value)}
-                    className="border border-red-300 rounded-lg px-4 py-2 w-full sm:w-1/2"
-                  >
-                    <option value="">Chọn món</option>
-                    {menuItems.map((item) => (
-                      <option key={item.foodId} value={item.foodId}>
-                        {item.foodName} - {item.price.toLocaleString()} đ
-                      </option>
-                    ))}
-                  </select>
-
-                  <input
-                    type="number"
-                    min={1}
-                    value={quantityToAdd}
-                    onChange={(e) => setQuantityToAdd(Number(e.target.value))}
-                    className="w-24 border border-red-300 rounded px-4 py-2 text-center"
-                  />
-
-                  <button
-                    onClick={addFoodToOrder}
-                    className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg shadow transition"
-                  >
-                    Thêm món
-                  </button>
-                </div>
-              </div>
+              <button
+                onClick={() => {
+                  pendingItems.forEach((item) => {
+                    setSelectedFoodId(item.foodId);
+                    setQuantityToAdd(item.quantity);
+                    addFoodToOrder();
+                  });
+                  setPendingItems([]);
+                }}
+                className="mt-4 w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl font-semibold shadow"
+              >
+                ✅ Xác nhận thêm món
+              </button>
             </div>
+          )}
+        </section>
+
+        {/* ======== CỘT PHẢI: Món đã gọi ======== */}
+        <section className="bg-green-50 border border-green-300 rounded-2xl p-5 shadow-inner">
+          <h3 className="text-xl font-bold text-green-700 mb-4">🧾 Món đã gọi</h3>
+
+          {orderDetails.length === 0 ? (
+            <p className="text-gray-500 italic">Chưa có món nào được gọi.</p>
+          ) : (
+            <ul className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+              {orderDetails.map((detail) => (
+                <li
+                  key={detail.orderDetailId}
+                  className="flex items-center bg-white border border-green-200 p-3 rounded-xl shadow-sm"
+                >
+                  <img
+                    src={detail.imageUrl}
+                    alt={detail.foodName}
+                    className="w-16 h-16 object-cover rounded-md"
+                  />
+                  <div className="flex-1 px-3">
+                    <div className="font-semibold text-green-800">{detail.foodName}</div>
+                    <div className="text-sm text-gray-600">{detail.price.toLocaleString()} đ</div>
+                    <div
+                      className={`text-sm font-semibold ${
+                        getStatusForDetail(selectedOrder.orderId, detail.foodId) === "Chưa chế biến"
+                          ? "text-yellow-600"
+                          : getStatusForDetail(selectedOrder.orderId, detail.foodId) === "Đang chế biến"
+                          ? "text-blue-600"
+                          : "text-green-600"
+                      }`}
+                    >
+                      Trạng thái: {getStatusForDetail(selectedOrder.orderId, detail.foodId)}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <input
+                      type="number"
+                      min={1}
+                      defaultValue={detail.quantity}
+                      onBlur={(e) => {
+                        const val = parseInt(e.target.value);
+                        if (val > 0) updateQuantity(detail.orderDetailId, val);
+                      }}
+                      className="w-20 border border-green-300 rounded px-2 py-1 text-center"
+                    />
+                    {getStatusForDetail(selectedOrder.orderId, detail.foodId) === "Chưa chế biến" ? (
+                      <button
+                        onClick={() => deleteDetail(detail.orderDetailId)}
+                        className="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        Xoá
+                      </button>
+                    ) : (
+                      <span className="text-gray-400 text-sm">Không thể xoá</span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Tổng tiền */}
+          <div className="text-right mt-6 font-bold text-xl text-green-900">
+            Tổng tiền:{" "}
+            {orderDetails.reduce((sum, d) => sum + d.price * d.quantity, 0).toLocaleString()} đ
           </div>
-        )}
+        </section>
+      </div>
+    </div>
+  </div>
+)}
+
+
       </div>
     </>
   );

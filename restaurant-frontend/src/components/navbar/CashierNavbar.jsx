@@ -14,6 +14,9 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ManageBookings from "../../pages/Cashier/Booking/ManageBookings";
 import CashierPayment from "../../pages/Cashier/CashierPayment";
+import CashierDashboard from "../../pages/Cashier/CashierDashboard";
+import CashierRevenueOverview from "../../pages/Cashier/CashierRevenueOverview";
+import CashierTopFoods from "../../pages/Cashier/CashierTopFoods";
 
 
 const CashierNavbar = ({ onLogout }) => {
@@ -44,7 +47,6 @@ const CashierNavbar = ({ onLogout }) => {
       icon: <FontAwesomeIcon icon={faMoneyBill} />,
       children: [
         { key: "revenue-report", title: "Báo Cáo Doanh Thu" },
-        { key: "customer-report", title: "Báo Cáo Số Lượng Khách" },
         { key: "best-seller", title: "Báo Cáo Món Bán Chạy" },
       ],
     },
@@ -182,9 +184,13 @@ const CashierNavbar = ({ onLogout }) => {
       </div>
 
       {/* Main dashboard area */}
-      <div className="h-screen flex-1 bg-zinc-100 space-y-6">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Topbar */}
-        <div className="w-full h-[8ch] px-12 bg-zinc-50 shadow-md flex items-center justify-between">
+        <div className="w-full h-[8ch] px-12 bg-zinc-50 shadow-md flex items-center justify-between flex-shrink-0">
+        <div className="text-2xl font-bold">
+          <span className="text-orange-300">VIET</span>
+          <span className="text-gray-800">TAURANT</span>
+        </div>
           <div className="w-96 border border-zinc-300 rounded-full h-11 flex items-center justify-center">
             <input
               type="text"
@@ -211,27 +217,25 @@ const CashierNavbar = ({ onLogout }) => {
         </div>
 
         {/* Page content */}
-        <div className="w-full px-12">
-  <h1 className="text-xl font-semibold mt-6 mb-2">
-    {
+        <div className="flex-1 overflow-y-auto px-12 py-6 bg-zinc-100">
+    <h1 className="text-xl font-semibold mb-4">
       {
-        dashboard: "Trang Dashboard",
-        "manage-invoices": "Quản Lý Hóa Đơn",
-        "manage-bookings": "Quản Lý Đặt Bàn",
-        "revenue-report": "Báo Cáo Doanh Thu",
-        "customer-report": "Báo Cáo Số Lượng Khách",
-        "best-seller": "Báo Cáo Món Bán Chạy",
-      }[selectedPage] || "Trang"
-    }
-  </h1>
+        {
+          dashboard: "Trang Dashboard",
+          "manage-invoices": "Quản Lý Hóa Đơn",
+          "manage-bookings": "Quản Lý Đặt Bàn",
+          "revenue-report": "Báo Cáo Doanh Thu",
+          "best-seller": "Báo Cáo Món Bán Chạy",
+        }[selectedPage] || "Trang"
+      }
+    </h1>
 
-  {selectedPage === "dashboard" && <div>Trang dashboard nội dung...</div>}
-  {selectedPage === "manage-invoices" && <CashierPayment />}
-  {selectedPage === "manage-bookings" && <ManageBookings/>}
-  {selectedPage === "revenue-report" && <div>Báo cáo doanh thu nội dung...</div>}
-  {selectedPage === "customer-report" && <div>Báo cáo số lượng khách nội dung...</div>}
-  {selectedPage === "best-seller" && <div>Báo cáo món bán chạy nội dung...</div>}
-</div>
+    {selectedPage === "dashboard" && <CashierDashboard />}
+    {selectedPage === "manage-invoices" && <CashierPayment />}
+    {selectedPage === "manage-bookings" && <ManageBookings />}
+    {selectedPage === "revenue-report" && <CashierRevenueOverview />}
+    {selectedPage === "best-seller" && <CashierTopFoods />}
+  </div>
 
       </div>
     </div>

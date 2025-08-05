@@ -63,7 +63,7 @@ const Menu = () => {
       {/* Nút Xem Tất Cả */}
       <div className="w-full flex justify-center mt-12">
         <Link
-          to="/menu"
+          to="/foodmenu"
           className="px-10 py-4 bg-[#E6B15F] text-black font-semibold  hover:bg-yellow-400 transition duration-300"
         >
           Xem Tất Cả Món Ăn
